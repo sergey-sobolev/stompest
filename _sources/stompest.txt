@@ -1,5 +1,17 @@
-Welcome to stompest's documentation!
-====================================
+protocol.parser
+===============
+
+.. automodule:: stompest.protocol.parser
+   :members:
+   
+async.client
+============
 
 .. automodule:: stompest.async.client
+   :members:
+   
+sync.client
+============
+
+.. automodule:: stompest.sync.client
    :members:
