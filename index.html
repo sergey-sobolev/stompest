@@ -64,9 +64,9 @@
 <li>a wire-level STOMP frame parser <tt class="docutils literal"><span class="pre">protocol.StompParser</span></tt> and compiler <tt class="docutils literal"><span class="pre">protocol.StompFrame</span></tt>,</li>
 <li>a faithful implementation of the syntax of the STOMP 1.0 and 1.1 protocols with a simple stateless function API in the <cite>protocol.commands</cite> module,</li>
 <li>a generic implementation of the STOMP 1.0 and 1.1 session state semantics in <cite>protocol.StompSession</cite>, such as protocol version negotiation at connect time, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
-<li>and :protocol.StompFailoverProtocol:, a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>.</li>
+<li>and :protocol.StompFailoverProtocol:, a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in ActiveMQ.</li>
 </ul>
-<p>This module is thoroughly unit tested and production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a>: persistent queueing on ActiveMQ. Other users also use it in serious production environments.</p>
+<p>This module is thoroughly unit tested and production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a>: persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. Other users also use it in serious production environments.</p>
 </div>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
