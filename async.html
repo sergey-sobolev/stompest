@@ -481,7 +481,7 @@
 <li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
 <li><strong>ack</strong> &#8211; Check this option if you wish the client to automatically ack MESSAGE frames when the were handled (successfully or not).</li>
 <li><strong>errorDestination</strong> &#8211; If a frame was not handled successfully, forward a copy of the offending frame to this destination. Example: <tt class="docutils literal"><span class="pre">errorDestination='/queue/back-to-square-one'</span></tt></li>
-<li><strong>onMessageFailed</strong> &#8211; You can specify a custom error handler <tt class="xref py py-obj docutils literal"><span class="pre">f(self,</span> <span class="pre">failure,</span> <span class="pre">frame,</span> <span class="pre">errorDestination)</span></tt>. Note that a non-trivial choice of this error handler overrides the default behavior (forward frame to error destination and ack it).</li>
+<li><strong>onMessageFailed</strong> &#8211; You can specify a custom error handler which must be a callable with signature <tt class="xref py py-obj docutils literal"><span class="pre">f(self,</span> <span class="pre">failure,</span> <span class="pre">frame,</span> <span class="pre">errorDestination)</span></tt>. Note that a non-trivial choice of this error handler overrides the default behavior (forward frame to error destination and ack it).</li>
 </ul>
 </td>
 </tr>

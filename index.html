@@ -86,19 +86,19 @@
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
 <p class="rubric">stomp, stomper, stompest!</p>
-<p><a class="reference external" href="https://github.com/mozes/stompest/">stompest</a> is a full-featured <a class="reference external" href="http://stomp.github.com/">STOMP</a> implementation (versions <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>) for Python 2.6 and higher including both synchronous and <a class="reference external" href="http://twistedmatrix.com/">Twisted</a> clients:</p>
+<p><a class="reference external" href="https://github.com/mozes/stompest/">stompest</a> is a full-featured implementation of the <a class="reference external" href="http://stomp.github.com/">STOMP</a> protocol (versions <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>) for Python 2.6 (and higher) including both synchronous and <a class="reference external" href="http://twistedmatrix.com/">Twisted</a> clients:</p>
 <ul class="simple">
 <li>The <tt class="xref py py-class docutils literal"><span class="pre">sync.Stomp</span></tt> client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.</li>
 <li>The <tt class="xref py py-class docutils literal"><span class="pre">async.Stomp</span></tt> client is based on <a class="reference external" href="http://twistedmatrix.com/">Twisted</a>, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default &#8220;poison pill&#8221; error handling), concurrent message processing, graceful shutdown, and connect, receipt, and disconnect timeouts.</li>
 </ul>
-<p>Both clients make use of a generic set of components in the <cite>protocol</cite> module each of which can be used independently to roll your own STOMP client:</p>
+<p>Both clients make use of a generic set of components in the <tt class="xref py py-mod docutils literal"><span class="pre">protocol</span></tt> module each of which can be used independently to roll your own STOMP client:</p>
 <ul class="simple">
 <li>a wire-level STOMP frame parser <tt class="xref py py-class docutils literal"><span class="pre">protocol.StompParser</span></tt> and compiler <tt class="xref py py-class docutils literal"><span class="pre">protocol.StompFrame</span></tt>,</li>
 <li>a faithful implementation of the syntax of the STOMP 1.0 and 1.1 protocols with a simple stateless function API in the <tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt> module,</li>
 <li>a generic implementation of the STOMP 1.0 and 1.1 session state semantics in <tt class="xref py py-class docutils literal"><span class="pre">protocol.StompSession</span></tt>, such as protocol version negotiation at connect time, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
 <li>and <tt class="xref py py-class docutils literal"><span class="pre">protocol.StompFailoverProtocol</span></tt>, a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in ActiveMQ.</li>
 </ul>
-<p>This module is thoroughly unit tested and production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a>: persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. Other users also use it in serious production environments.</p>
+<p>This module is thoroughly unit tested and production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a> &#8212; persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. Other users also use it in serious production environments.</p>
 </div>
 <div class="section" id="contents">
 <h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
