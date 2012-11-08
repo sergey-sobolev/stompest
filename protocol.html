@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>protocol &mdash; stompest documentation - v2.0a1</title>
+    <title>Protocol Layer &mdash; stompest documentation - v2.0a1</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="stompest documentation - v2.0a1" href="index.html" />
-    <link rel="next" title="error" href="error.html" />
-    <link rel="prev" title="async" href="async.html" /> 
+    <link rel="next" title="Error Codes" href="error.html" />
+    <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="error.html" title="error"
+          <a href="error.html" title="Error Codes"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="async.html" title="async"
+          <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
@@ -52,23 +52,23 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">protocol</span></tt></a><ul>
-<li><a class="reference internal" href="#module-stompest.protocol.commands"><tt class="docutils literal"><span class="pre">protocol.commands</span></tt></a></li>
-<li><a class="reference internal" href="#module-stompest.protocol.failover"><tt class="docutils literal"><span class="pre">protocol.failover</span></tt></a></li>
-<li><a class="reference internal" href="#module-stompest.protocol.frame"><tt class="docutils literal"><span class="pre">protocol.frame</span></tt></a></li>
-<li><a class="reference internal" href="#module-stompest.protocol.parser"><tt class="docutils literal"><span class="pre">protocol.parser</span></tt></a></li>
-<li><a class="reference internal" href="#module-stompest.protocol.session"><tt class="docutils literal"><span class="pre">protocol.session</span></tt></a></li>
-<li><a class="reference internal" href="#module-stompest.protocol.spec"><tt class="docutils literal"><span class="pre">protocol.spec</span></tt></a></li>
+<li><a class="reference internal" href="#">Protocol Layer</a><ul>
+<li><a class="reference internal" href="#module-stompest.protocol.failover">Configuration and Failover URI Scheme</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.session">Session State</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.frame">STOMP Frame Representation</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.commands">Commands</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.spec">STOMP Protocol Specification</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.parser">Wire-Level Parser</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="async.html"
-                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">async</span></tt></a></p>
+                        title="previous chapter">Asynchronous Client</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="error.html"
-                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">error</span></tt></a></p>
+                        title="next chapter">Error Codes</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/protocol.txt"
@@ -95,25 +95,25 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="protocol">
-<h1><tt class="docutils literal"><span class="pre">protocol</span></tt><a class="headerlink" href="#protocol" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-stompest.protocol.commands">
-<span id="protocol-commands"></span><h2><tt class="docutils literal"><span class="pre">protocol.commands</span></tt><a class="headerlink" href="#module-stompest.protocol.commands" title="Permalink to this headline">¶</a></h2>
-</div>
+  <div class="section" id="protocol-layer">
+<h1>Protocol Layer<a class="headerlink" href="#protocol-layer" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-stompest.protocol.failover">
-<span id="protocol-failover"></span><h2><tt class="docutils literal"><span class="pre">protocol.failover</span></tt><a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-stompest.protocol.frame">
-<span id="protocol-frame"></span><h2><tt class="docutils literal"><span class="pre">protocol.frame</span></tt><a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-stompest.protocol.parser">
-<span id="protocol-parser"></span><h2><tt class="docutils literal"><span class="pre">protocol.parser</span></tt><a class="headerlink" href="#module-stompest.protocol.parser" title="Permalink to this headline">¶</a></h2>
+<span id="configuration-and-failover-uri-scheme"></span><h2>Configuration and Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-stompest.protocol.session">
-<span id="protocol-session"></span><h2><tt class="docutils literal"><span class="pre">protocol.session</span></tt><a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
+<span id="session-state"></span><h2>Session State<a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-stompest.protocol.frame">
+<span id="stomp-frame-representation"></span><h2>STOMP Frame Representation<a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-stompest.protocol.commands">
+<span id="commands"></span><h2>Commands<a class="headerlink" href="#module-stompest.protocol.commands" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-stompest.protocol.spec">
-<span id="protocol-spec"></span><h2><tt class="docutils literal"><span class="pre">protocol.spec</span></tt><a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
+<span id="stomp-protocol-specification"></span><h2>STOMP Protocol Specification<a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-stompest.protocol.parser">
+<span id="wire-level-parser"></span><h2>Wire-Level Parser<a class="headerlink" href="#module-stompest.protocol.parser" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -133,10 +133,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="error.html" title="error"
+          <a href="error.html" title="Error Codes"
              >next</a> |</li>
         <li class="right" >
-          <a href="async.html" title="async"
+          <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>

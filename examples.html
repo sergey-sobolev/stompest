@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>examples &mdash; stompest documentation - v2.0a1</title>
+    <title>&lt;no title&gt; &mdash; stompest documentation - v2.0a1</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,9 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a1" href="index.html" />
-    <link rel="next" title="sync" href="sync.html" />
-    <link rel="prev" title="stomp, stomper, stompest!" href="index.html" /> 
+    <link rel="top" title="stompest documentation - v2.0a1" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,41 +37,11 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="sync.html" title="sync"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="stomp, stomper, stompest!"
-             accesskey="P">previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">examples</span></tt></a><ul>
-<li><a class="reference internal" href="#examples-sync"><tt class="docutils literal"><span class="pre">examples.sync</span></tt></a><ul>
-<li><a class="reference internal" href="#producer">Producer</a></li>
-<li><a class="reference internal" href="#consumer">Consumer</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#examples-async"><tt class="docutils literal"><span class="pre">examples.async</span></tt></a><ul>
-<li><a class="reference internal" href="#id1">Producer</a></li>
-<li><a class="reference internal" href="#transformer">Transformer</a></li>
-<li><a class="reference internal" href="#id2">Consumer</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">stomp, stomper, stompest!</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="sync.html"
-                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">sync</span></tt></a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/examples.txt"
@@ -100,178 +68,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="examples">
-<h1><tt class="docutils literal"><span class="pre">examples</span></tt><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="examples-sync">
-<h2><tt class="docutils literal"><span class="pre">examples.sync</span></tt><a class="headerlink" href="#examples-sync" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="producer">
-<h3>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
-
-<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-<span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/test&#39;</span>
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s">&#39;test message 1&#39;</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s">&#39;test message 2&#39;</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="consumer">
-<h3>Consumer<a class="headerlink" href="#consumer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
-
-<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-<span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/test&#39;</span>
-
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client&#39;</span><span class="p">})</span>
-    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-        <span class="n">frame</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
-        <span class="k">print</span> <span class="s">&#39;Got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">ack</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="examples-async">
-<h2><tt class="docutils literal"><span class="pre">examples.async</span></tt><a class="headerlink" href="#examples-async" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="id1">
-<h3>Producer<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">defer</span><span class="p">,</span> <span class="n">reactor</span>
-
-<span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
-<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-
-<span class="k">class</span> <span class="nc">Producer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testIn&#39;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        
-    <span class="nd">@defer.inlineCallbacks</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">stomp</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-            <span class="n">stomp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&#39;count&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">}),</span> <span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
-        <span class="k">yield</span> <span class="n">stomp</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span> <span class="c"># graceful disconnect: waits until all receipts have arrived</span>
-        <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-    
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="n">Producer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-    <span class="n">reactor</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="transformer">
-<h3>Transformer<a class="headerlink" href="#transformer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">reactor</span><span class="p">,</span> <span class="n">defer</span>
-
-<span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
-<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-
-<span class="k">class</span> <span class="nc">IncrementTransformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>    
-    <span class="n">IN_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testIn&#39;</span>
-    <span class="n">OUT_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testOut&#39;</span>
-    <span class="n">ERROR_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testTransformerError&#39;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        
-    <span class="nd">@defer.inlineCallbacks</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">client</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="c"># client-individual mode is necessary for concurrent processing</span>
-            <span class="c"># (requires ActiveMQ &gt;= 5.2)</span>
-            <span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">,</span>
-            <span class="c"># the maximal number of messages the broker will let you work on at the same time</span>
-            <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">,</span> 
-        <span class="p">}</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IN_QUEUE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addOne</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">errorDestination</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ERROR_QUEUE</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">addOne</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        NOTE: you can return a Deferred here</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
-        <span class="n">data</span><span class="p">[</span><span class="s">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OUT_QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="n">IncrementTransformer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-    <span class="n">reactor</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="id2">
-<h3>Consumer<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">reactor</span><span class="p">,</span> <span class="n">defer</span>
-
-<span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
-<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-
-<span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testOut&#39;</span>
-    <span class="n">ERROR_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testConsumerError&#39;</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        
-    <span class="nd">@defer.inlineCallbacks</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">stomp</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="c"># client-individual mode is necessary for concurrent processing</span>
-            <span class="c"># (requires ActiveMQ &gt;= 5.2)</span>
-            <span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">,</span>
-            <span class="c"># the maximal number of messages the broker will let you work on at the same time</span>
-            <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">,</span> 
-        <span class="p">}</span>
-        <span class="n">stomp</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">errorDestination</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ERROR_QUEUE</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        NOTE: you can return a Deferred here</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
-        <span class="k">print</span> <span class="s">&#39;Received frame with count </span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;count&#39;</span><span class="p">]</span>
-    
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="n">Consumer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-    <span class="n">reactor</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-
+  
 
           </div>
         </div>
@@ -287,12 +84,6 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="sync.html" title="sync"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="stomp, stomper, stompest!"
-             >previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
     </div>

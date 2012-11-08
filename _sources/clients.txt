@@ -1,0 +1,14 @@
+Clients
+=======
+
+Synchronous Client
+------------------
+
+.. automodule:: stompest.sync.client
+   :members:
+
+Asynchronous Client
+-------------------
+
+.. automodule:: stompest.async.client
+   :members:
