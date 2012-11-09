@@ -99,6 +99,177 @@
 <h1>Protocol Layer<a class="headerlink" href="#protocol-layer" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-stompest.protocol.failover">
 <span id="configuration-and-failover-uri-scheme"></span><h2>Configuration and Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stompest.protocol.failover.StompConfig">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompConfig</tt><big>(</big><em>uri</em>, <em>login=''</em>, <em>passcode=''</em>, <em>version=None</em>, <em>check=True</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>This configuration object contains those parameters which are common to both clients (sync and async) and are needed to establish a STOMP connection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>uri</strong> &#8211; A failover URI as it is accepted by <a class="reference internal" href="#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></tt></a>.</li>
+<li><strong>login</strong> &#8211; The login for the STOMP brokers.</li>
+<li><strong>passcode</strong> &#8211; The passcode for the STOMP brokers.</li>
+<li><strong>version</strong> &#8211; The highest STOMP protocol version this client may use. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, <strong>version</strong> defaults to <tt class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></tt> (currently <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt>, but this may change in upcoming stompest releases)</li>
+<li><strong>check</strong> &#8211; Decides whether the <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object which is used to represent the STOMP sesion should be strict about the session&#8217;s state: (e.g., whether to allow calling <tt class="xref py py-meth docutils literal"><span class="pre">StompSession.send()</span></tt> when disconnected).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Login and passcode have to be the same for all brokers becuse they are not part of the failover URI scheme.</p>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#stompest.protocol.failover.StompFailoverProtocol" title="stompest.protocol.failover.StompFailoverProtocol"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverProtocol</span></tt></a>, <a class="reference internal" href="#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></tt></a></p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="stompest.protocol.failover.StompFailoverProtocol">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompFailoverProtocol</tt><big>(</big><em>uri</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompFailoverProtocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object is a parser for the failover URI scheme used in stompest. Looping over this object, you can produce a series of tuples (broker, delay in s). When the URI does not allow further failover, a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectTimeout</span></tt> error is raised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> &#8211; A failover URI.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFailoverProtocol</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.error</span> <span class="kn">import</span> <span class="n">StompConnectTimeout</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">failover</span> <span class="o">=</span> <span class="n">StompFailoverProtocol</span><span class="p">(</span><span class="s">&#39;failover:(tcp://remote1:61615,tcp://localhost:61616)?randomize=false,startupMaxReconnectAttempts=3,initialReconnectDelay=7,maxReconnectDelay=8,maxReconnectAttempts=0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span> <span class="ow">in</span> <span class="n">failover</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">print</span> <span class="s">&#39;broker: </span><span class="si">%s</span><span class="s">, delay: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>                                                                       
+<span class="gp">... </span><span class="k">except</span> <span class="n">StompConnectTimeout</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&#39;timeout: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">e</span>
+<span class="gp">... </span>
+<span class="go">broker: {&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, delay: 0.000000</span>
+<span class="go">broker: {&#39;host&#39;: &#39;localhost&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61616}, delay: 0.007000</span>
+<span class="go">broker: {&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, delay: 0.008000</span>
+<span class="go">broker: {&#39;host&#39;: &#39;localhost&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61616}, delay: 0.008000</span>
+<span class="go">timeout: Reconnect timeout: 3 attempts</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span> <span class="ow">in</span> <span class="n">failover</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">print</span> <span class="s">&#39;broker: </span><span class="si">%s</span><span class="s">, delay: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">except</span> <span class="n">StompConnectTimeout</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&#39;timeout: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">e</span>
+<span class="gp">... </span>
+<span class="go">broker: {&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, delay: 0.000000</span>
+<span class="go">timeout: Reconnect timeout: 0 attempts</span>
+</pre></div>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></tt></a></p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="stompest.protocol.failover.StompFailoverUri">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompFailoverUri</tt><big>(</big><em>uri</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompFailoverUri" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object is a parser for the failover URI scheme used in stompest. The parsed parameters are available in the attributes <tt class="xref py py-attr docutils literal"><span class="pre">brokers</span></tt> and <tt class="xref py py-attr docutils literal"><span class="pre">options</span></tt>. The Failover transport syntax is very close to the one used in ActiveMQ. Its basic form is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;failover:(uri1,...,uriN)?transportOptions&#39;</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;failover:uri1,...,uriN&#39;</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> &#8211; A failover URI.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFailoverUri</span>    
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="n">StompFailoverUri</span><span class="p">(</span><span class="s">&#39;failover:(tcp://remote1:61615,tcp://localhost:61616)?randomize=false,startupMaxReconnectAttempts=3,initialReconnectDelay=7,maxReconnectDelay=8,maxReconnectAttempts=0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">uri</span><span class="o">.</span><span class="n">brokers</span>
+<span class="go">[{&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, {&#39;host&#39;: &#39;localhost&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61616}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">uri</span><span class="o">.</span><span class="n">options</span>
+<span class="go">{&#39;initialReconnectDelay&#39;: 7, &#39;maxReconnectDelay&#39;: 8, &#39;backOffMultiplier&#39;: 2.0, &#39;startupMaxReconnectAttempts&#39;: 3, &#39;priorityBackup&#39;: False, &#39;maxReconnectAttempts&#39;: 0, &#39;reconnectDelayJitter&#39;: 0, &#39;useExponentialBackOff&#39;: True, &#39;randomize&#39;: False}</span>
+</pre></div>
+</div>
+<p><strong>Supported Options:</strong></p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="10%" />
+<col width="3%" />
+<col width="5%" />
+<col width="82%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">option</th>
+<th class="head">type</th>
+<th class="head">default</th>
+<th class="head">description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><em>initialReconnectDelay</em></td>
+<td>int</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">10</span></tt></td>
+<td>how long to wait before the first reconnect attempt (in ms)</td>
+</tr>
+<tr class="row-odd"><td><em>maxReconnectDelay</em></td>
+<td>int</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">30000</span></tt></td>
+<td>the maximum amount of time we ever wait between reconnect attempts (in ms)</td>
+</tr>
+<tr class="row-even"><td><em>useExponentialBackOff</em></td>
+<td>bool</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt></td>
+<td>should an exponential backoff be used between reconnect attempts</td>
+</tr>
+<tr class="row-odd"><td><em>backOffMultiplier</em></td>
+<td>float</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">2.0</span></tt></td>
+<td>the exponent used in the exponential backoff attempts</td>
+</tr>
+<tr class="row-even"><td><em>maxReconnectAttempts</em></td>
+<td>int</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">-1</span></tt></td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">-1</span></tt> means retry forever
+<tt class="xref py py-obj docutils literal"><span class="pre">0</span></tt> means don&#8217;t retry (only try connection once but no retry)
+<tt class="xref py py-obj docutils literal"><span class="pre">&gt;</span> <span class="pre">0</span></tt> means the maximum number of reconnect attempts before an error is sent back to the client</td>
+</tr>
+<tr class="row-odd"><td><em>startupMaxReconnectAttempts</em></td>
+<td>int</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">0</span></tt></td>
+<td>if not <tt class="xref py py-obj docutils literal"><span class="pre">0</span></tt>, then this is the maximum number of reconnect attempts before an error is sent back to the client on the first attempt by the client to start a connection, once connected the <em>maxReconnectAttempts</em> option takes precedence</td>
+</tr>
+<tr class="row-even"><td><em>reconnectDelayJitter</em></td>
+<td>int</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">0</span></tt></td>
+<td>jitter in ms by which reconnect delay is blurred in order to avoid stampeding</td>
+</tr>
+<tr class="row-odd"><td><em>randomize</em></td>
+<td>bool</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt></td>
+<td>use a random algorithm to choose the the URI to use for reconnect from the list provided</td>
+</tr>
+<tr class="row-even"><td><em>priorityBackup</em></td>
+<td>bool</td>
+<td><tt class="xref py py-obj docutils literal"><span class="pre">False</span></tt></td>
+<td>if set, prefer local connections to remote connections</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#stompest.protocol.failover.StompFailoverProtocol" title="stompest.protocol.failover.StompFailoverProtocol"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverProtocol</span></tt></a>, <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> of ActiveMQ.</p>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="module-stompest.protocol.session">
 <span id="session-state"></span><h2>Session State<a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
