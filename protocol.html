@@ -273,9 +273,219 @@
 </div>
 <div class="section" id="module-stompest.protocol.session">
 <span id="session-state"></span><h2>Session State<a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stompest.protocol.session.StompSession">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.session.</tt><tt class="descname">StompSession</tt><big>(</big><em>version=None</em>, <em>check=False</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object implements an abstract representation of a STOMP protocol session. It builds upon the low-level commands API in <tt class="xref py py-mod docutils literal"><span class="pre">protocol.command</span></tt>. You can use the stateful API provided by <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> independently of the stompest clients to roll your own STOMP client.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Being stateful implies that the session keeps track of subscriptions, receipts, and transactions, so keep track of them yourself, too! &#8211; Unless you like to be surprised by a spurious <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt> ...</p>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">The commands API in <tt class="xref py py-mod docutils literal"><span class="pre">protocol.command</span></tt> for all API command parameters which are not documented here.</p>
+</div>
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.abort">
+<tt class="descname">abort</tt><big>(</big><em>transaction</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an <em>ABORT</em> frame to abort a STOMP transaction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>transaction</strong> &#8211; See <a class="reference internal" href="#stompest.protocol.session.StompSession.transaction" title="stompest.protocol.session.StompSession.transaction"><tt class="xref py py-meth docutils literal"><span class="pre">transaction()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you try and abort a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.ack">
+<tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.ack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an <em>ACK</em> frame for a received <em>MESSAGE</em> frame.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.begin">
+<tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.begin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <em>BEGIN</em> frame and begin an abstract STOMP transaction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>transaction</strong> &#8211; See <a class="reference internal" href="#stompest.protocol.session.StompSession.transaction" title="stompest.protocol.session.StompSession.transaction"><tt class="xref py py-meth docutils literal"><span class="pre">transaction()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you try and begin a pending transaction twice, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.close">
+<tt class="descname">close</tt><big>(</big><em>flush=True</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean up the session: Set the state to DISCONNECTING, remove all information related to an eventual broker connection, clear all pending transactions and receipts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>flush</strong> &#8211; Clear all active subscriptions. This flag controls whether the next <a class="reference internal" href="#stompest.protocol.session.StompSession.connect" title="stompest.protocol.session.StompSession.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a> will replay the currently active subscriptions or will wipe the slate clean.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.commit">
+<tt class="descname">commit</tt><big>(</big><em>transaction</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.commit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a <em>COMMIT</em> command to commit a STOMP transaction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>transaction</strong> &#8211; See <a class="reference internal" href="#stompest.protocol.session.StompSession.transaction" title="stompest.protocol.session.StompSession.transaction"><tt class="xref py py-meth docutils literal"><span class="pre">transaction()</span></tt></a>.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you try and commit a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.connect">
+<tt class="descname">connect</tt><big>(</big><em>login=None</em>, <em>passcode=None</em>, <em>headers=None</em>, <em>versions=None</em>, <em>host=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <em>CONNECT</em> frame and set the session state to CONNECTING.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.connected">
+<tt class="descname">connected</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle a <em>CONNECTED</em> frame and set the session state to CONENCTED.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.disconnect">
+<tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <em>DISCONNECT</em> frame and set the session state to DISCONNECTING.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.protocol.session.StompSession.id">
+<tt class="descname">id</tt><a class="headerlink" href="#stompest.protocol.session.StompSession.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The session id for the current client-broker connection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.message">
+<tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle a <em>MESSAGE</em> frame. Returns a token which you can use to match this message to its subscription.</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#stompest.protocol.session.StompSession.subscribe" title="stompest.protocol.session.StompSession.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.nack">
+<tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.nack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <em>NACK</em> frame for a received <em>MESSAGE</em> frame.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.receipt">
+<tt class="descname">receipt</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.receipt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle a <em>RECEIPT</em> frame. Returns the receipt id which you can use to match this receipt to the command that requested it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.replay">
+<tt class="descname">replay</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.replay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flush all active subscriptions and return an iterator over the <a class="reference internal" href="#stompest.protocol.session.StompSession.subscribe" title="stompest.protocol.session.StompSession.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> parameters (<em>destinations</em>, <em>header</em>, <em>receipt</em>, <em>context</em>) which you can consume to replay the subscriptions upon the next <a class="reference internal" href="#stompest.protocol.session.StompSession.connect" title="stompest.protocol.session.StompSession.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.send">
+<tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <em>SEND</em> frame.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.protocol.session.StompSession.server">
+<tt class="descname">server</tt><a class="headerlink" href="#stompest.protocol.session.StompSession.server" title="Permalink to this definition">¶</a></dt>
+<dd><p>The server id for the current client-broker connection.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.protocol.session.StompSession.state">
+<tt class="descname">state</tt><a class="headerlink" href="#stompest.protocol.session.StompSession.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>The current session state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.subscribe">
+<tt class="descname">subscribe</tt><big>(</big><em>destination</em>, <em>headers=None</em>, <em>receipt=None</em>, <em>context=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.subscribe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <em>SUBSCRIBE</em> frame and keep track of the subscription assiocated to it. This method returns a token which you have to keep if you wish to match incoming <em>MESSAGE</em> frames to this subscription with <a class="reference internal" href="#stompest.protocol.session.StompSession.message" title="stompest.protocol.session.StompSession.message"><tt class="xref py py-meth docutils literal"><span class="pre">message()</span></tt></a> or to <a class="reference internal" href="#stompest.protocol.session.StompSession.unsubscribe" title="stompest.protocol.session.StompSession.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> &#8211; An arbitrary context object which you can use to store any information related to the subscription at hand.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.transaction">
+<tt class="descname">transaction</tt><big>(</big><em>transaction=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a transaction id which can be used for <a class="reference internal" href="#stompest.protocol.session.StompSession.begin" title="stompest.protocol.session.StompSession.begin"><tt class="xref py py-meth docutils literal"><span class="pre">begin()</span></tt></a>, <a class="reference internal" href="#stompest.protocol.session.StompSession.abort" title="stompest.protocol.session.StompSession.abort"><tt class="xref py py-meth docutils literal"><span class="pre">abort()</span></tt></a>, and <a class="reference internal" href="#stompest.protocol.session.StompSession.commit" title="stompest.protocol.session.StompSession.commit"><tt class="xref py py-meth docutils literal"><span class="pre">commit()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>transaction</strong> &#8211; A valid transaction id, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (automatically generate a unique id).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.unsubscribe">
+<tt class="descname">unsubscribe</tt><big>(</big><em>token</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.unsubscribe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an <em>UNSUBSCRIBE</em> frame and lose track of the subscription assiocated to it.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.protocol.session.StompSession.version">
+<tt class="descname">version</tt><a class="headerlink" href="#stompest.protocol.session.StompSession.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The STOMP protocol version of the current client-broker connection (if any), or the version you created this session with (otherwise).</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-stompest.protocol.frame">
 <span id="stomp-frame-representation"></span><h2>STOMP Frame Representation<a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stompest.protocol.frame.StompFrame">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.frame.</tt><tt class="descname">StompFrame</tt><big>(</big><em>command=''</em>, <em>headers=None</em>, <em>body=''</em><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object represents a STOMP frame which consists of a STOMP <tt class="xref py py-attr docutils literal"><span class="pre">command</span></tt>, <tt class="xref py py-attr docutils literal"><span class="pre">headers</span></tt>, and a message <tt class="xref py py-attr docutils literal"><span class="pre">body</span></tt>. Its string representation (via <tt class="xref py py-meth docutils literal"><span class="pre">__str__()</span></tt>) renders the wire-level STOMP frame.</p>
+<dl class="method">
+<dt id="stompest.protocol.frame.StompFrame.info">
+<tt class="descname">info</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters.)</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-stompest.protocol.commands">
 <span id="commands"></span><h2>Commands<a class="headerlink" href="#module-stompest.protocol.commands" title="Permalink to this headline">¶</a></h2>
@@ -478,7 +688,7 @@
 <dl class="function">
 <dt id="stompest.protocol.commands.subscribe">
 <tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">subscribe</tt><big>(</big><em>destination</em>, <em>headers</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.subscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a pair (frame, token) of a <em>SUBSCRIBE</em> frame and a token which you have to keep if you wish to match incoming <em>MESSAGE</em> frames to this subscription or to <a class="reference internal" href="#stompest.protocol.commands.unsubscribe" title="stompest.protocol.commands.unsubscribe"><tt class="xref py py-func docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
+<dd><p>Create a pair (frame, token) of a <em>SUBSCRIBE</em> frame and a token which you have to keep if you wish to match incoming <em>MESSAGE</em> frames to this subscription  with <a class="reference internal" href="#stompest.protocol.commands.message" title="stompest.protocol.commands.message"><tt class="xref py py-func docutils literal"><span class="pre">message()</span></tt></a> or to <a class="reference internal" href="#stompest.protocol.commands.unsubscribe" title="stompest.protocol.commands.unsubscribe"><tt class="xref py py-func docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -535,9 +745,65 @@
 </div>
 <div class="section" id="module-stompest.protocol.spec">
 <span id="stomp-protocol-specification"></span><h2>STOMP Protocol Specification<a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stompest.protocol.spec.StompSpec">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.spec.</tt><tt class="descname">StompSpec</tt><a class="headerlink" href="#stompest.protocol.spec.StompSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn&#8217;t much to document, but you are invited to take a look at all available constants in the source code.</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">Specification of STOMP protocols <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, your favorite broker&#8217;s documentation for additional STOMP headers.</p>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="module-stompest.protocol.parser">
 <span id="wire-level-parser"></span><h2>Wire-Level Parser<a class="headerlink" href="#module-stompest.protocol.parser" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stompest.protocol.parser.StompParser">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.parser.</tt><tt class="descname">StompParser</tt><big>(</big><em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a parser for a wire-level byte-stream of STOMP frames.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>version</strong> &#8211; A valid STOMP protocol version, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (equivalent to <tt class="xref py py-attr docutils literal"><span class="pre">StompSPEC.DEFAULT_VERSION</span></tt>).</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="stompest.protocol.parser.StompParser.add">
+<tt class="descname">add</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a byte-stream of wire-level data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; An iterable of characters. If any character evaluates to <tt class="xref py py-obj docutils literal"><span class="pre">False</span></tt>, that stream will no longer be consumed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.parser.StompParser.canRead">
+<tt class="descname">canRead</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser.canRead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicates whether there are frames available.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.parser.StompParser.get">
+<tt class="descname">get</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the next frame as a <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt> object (if any), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (otherwise).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.parser.StompParser.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset internal state, including all fully or partially parsed frames.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 

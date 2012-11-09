@@ -249,6 +249,10 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">All API methods which may request a <em>RECEIPT</em> frame from the broker &#8211; which is indicated by the <em>receipt</em> parameter &#8211; will wait for the <em>RECEIPT</em> response until this client&#8217;s <em>receiptTimeout</em>. Here, &#8220;wait&#8221; is to be understood in the asynchronous sense that the method&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> result will only call back then. If <em>receipt</em> is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, no such header is sent, and the callback will be triggered earlier.</p>
+</div>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover.StompConfig</span></tt>, the modules <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> and <tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt> for all API options which are documented here.</p>
@@ -257,14 +261,6 @@
 <dt id="stompest.async.client.Stomp.abort">
 <tt class="descname">abort</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send an <em>ABORT</em> frame to abort a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</td>
-</tr>
-</tbody>
-</table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you try and abort a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
@@ -281,14 +277,6 @@
 <dt id="stompest.async.client.Stomp.begin">
 <tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <em>BEGIN</em> frame to begin a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</td>
-</tr>
-</tbody>
-</table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you try and begin a pending transaction twice, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
@@ -299,14 +287,6 @@
 <dt id="stompest.async.client.Stomp.commit">
 <tt class="descname">commit</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <em>COMMIT</em> frame to commit a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</td>
-</tr>
-</tbody>
-</table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you try and commit a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
@@ -322,7 +302,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>versions</strong> &#8211; The STOMP versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for <tt class="xref py py-func docutils literal"><span class="pre">commands.connect()</span></tt>, but the highest supported version will be the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The version which is valid for the conenction about to be initiated is stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
+<li><strong>versions</strong> &#8211; The STOMP protocol versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for <tt class="xref py py-func docutils literal"><span class="pre">commands.connect()</span></tt>, but the highest supported version will be the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The version which is valid for the connection about to be initiated will be stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
 <li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 <li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <em>CONNECTED</em> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
@@ -441,11 +421,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>token</strong> &#8211; The result of the <a class="reference internal" href="#stompest.async.client.Stomp.subscribe" title="stompest.async.client.Stomp.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> command which initiated the subscription in question.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token</strong> &#8211; The result of the <a class="reference internal" href="#stompest.async.client.Stomp.subscribe" title="stompest.async.client.Stomp.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> command which initiated the subscription in question.</td>
 </tr>
 </tbody>
 </table>
