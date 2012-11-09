@@ -152,66 +152,26 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">The modules <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> and <tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt> for all API options which are not documented here.</p>
+</div>
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.abort">
 <tt class="descname">abort</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">ABORT</span></tt> command to abort a STOMP transaction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and abort a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
+<dd><p>Send a STOMP <em>ABORT</em> command to abort a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.ack">
 <tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.ack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">ACK</span></tt> command for a received STOMP message.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>frame</strong> &#8211; The <tt class="docutils literal"><span class="pre">StompFrame</span></tt> object representing the <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame we wish to ack.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send a STOMP <em>ACK</em> command for a received STOMP message.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.begin">
 <tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">BEGIN</span></tt> command to begin a STOMP transaction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and begin a pending transaction twice, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
+<dd><p>Send a STOMP <em>BEGIN</em> command to begin a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
@@ -228,7 +188,7 @@
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If the wire-level connection is not available, this method will raise a <tt class="docutils literal"><span class="pre">StompConnectionError</span></tt>!</p>
+<p class="last">If the wire-level connection is not available, this method will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></tt>!</p>
 </div>
 </dd></dl>
 
@@ -253,23 +213,7 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.commit">
 <tt class="descname">commit</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">COMMIT</span></tt> command to commit a STOMP transaction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and commit a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
+<dd><p>Send a STOMP <em>COMMIT</em> command to commit a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
@@ -281,11 +225,9 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>headers</strong> &#8211; Additional STOMP headers. Example: <tt class="docutils literal"><span class="pre">headers={'client-id':</span> <span class="pre">'me-myself-and-i'}</span></tt></li>
-<li><strong>versions</strong> &#8211; The STOMP versions we wish to support. The default is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, which means that we will offer the broker to accept any version prior or equal to the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The actual version is stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>). Example: <tt class="docutils literal"><span class="pre">versions=['1.0',</span> <span class="pre">'1.1']</span></tt></li>
-<li><strong>host</strong> &#8211; The <tt class="docutils literal"><span class="pre">host</span></tt> header which gives this client a human readable name on the broker side. Example: <tt class="docutils literal"><span class="pre">host=moon</span></tt></li>
+<li><strong>versions</strong> &#8211; The STOMP versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for <tt class="xref py py-func docutils literal"><span class="pre">commands.connect()</span></tt>, but the highest supported version will be the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The version which is valid for the conenction about to be initiated is stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
 <li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
-<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <tt class="docutils literal"><span class="pre">CONNECTED</span></tt> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <em>CONNECTED</em> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
 </td>
 </tr>
@@ -293,37 +235,29 @@
 </table>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt>, <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt></p>
+<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt>, <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> for the details of subscription replay and failover transport.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">DISCONNECT</span></tt> command and terminate the STOMP connection.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; Send a STOMP <tt class="docutils literal"><span class="pre">receipt</span></tt> header with this id. Example: <tt class="docutils literal"><span class="pre">receipt='tell-me-when-you-got-that-message'</span></tt></td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send a STOMP <em>DISCONNECT</em> command and terminate the STOMP connection.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.close(flush=True)</span></tt>.</p>
+<p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <em>RECEIPT</em> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.close(flush=True)</span></tt>.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.message">
 <tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.message" title="Permalink to this definition">¶</a></dt>
-<dd><p>If you received a <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame, this method will produce a token which allows you to match it against its subscription.</p>
+<dd><p>If you received a <em>MESSAGE</em> frame, this method will produce a token which allows you to match it against its subscription.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; a STOMP <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; a STOMP <em>MESSAGE</em> frame.</td>
 </tr>
 </tbody>
 </table>
@@ -336,34 +270,18 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.nack">
 <tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.nack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">NACK</span></tt> command for a received STOMP message.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>frame</strong> &#8211; The <tt class="docutils literal"><span class="pre">StompFrame</span></tt> object representing the <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame we wish to nack.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This command will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt> if you try and issue it in a STOMP 1.0 session.</p>
-</div>
+<dd><p>Send a STOMP <em>NACK</em> command for a received STOMP message.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.receipt">
 <tt class="descname">receipt</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.receipt" title="Permalink to this definition">¶</a></dt>
-<dd><p>If you received a <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame, this method will extract the receipt id which you employed to request that receipt.</p>
+<dd><p>If you received a <em>RECEIPT</em> frame, this method will extract the receipt id which you employed to request that receipt.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A STOMP <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame (a <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt> object).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A STOMP <em>MESSAGE</em> frame (a <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt> object).</td>
 </tr>
 </tbody>
 </table>
@@ -386,21 +304,7 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.send">
 <tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.send" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">SEND</span></tt> command.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>destination</strong> &#8211; Destination for the frame. Example: <tt class="docutils literal"><span class="pre">destination='/queue/somewhere'</span></tt></li>
-<li><strong>body</strong> &#8211; Message body. Binary content is allowed but must be accompanied by the STOMP header <tt class="docutils literal"><span class="pre">content-length</span></tt> which specifies the number of bytes in the message body.</li>
-<li><strong>headers</strong> &#8211; Additional STOMP headers. Example: <tt class="docutils literal"><span class="pre">headers={'content-length':</span> <span class="pre">'1001'}</span></tt></li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send a STOMP <em>SEND</em> command.</p>
 </dd></dl>
 
 <dl class="method">
@@ -424,60 +328,19 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.subscribe">
 <tt class="descname">subscribe</tt><big>(</big><em>destination</em>, <em>handler</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.subscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">SUBSCRIBE</span></tt> command to subscribe to a STOMP destination. This method returns a token which you must be kept if you wish to match incoming <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frames to this subscription or to <a class="reference internal" href="#stompest.sync.client.Stomp.unsubscribe" title="stompest.sync.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>destination</strong> &#8211; Destination for the subscription. Example: <tt class="docutils literal"><span class="pre">destination='/topic/news'</span></tt></li>
-<li><strong>headers</strong> &#8211; Additional STOMP headers. Example: <tt class="docutils literal"><span class="pre">headers={'activemq.prefetchSize':</span> <span class="pre">'100'}</span></tt></li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send a STOMP <em>SUBSCRIBE</em> command to subscribe to a STOMP destination. This method returns a token which you have to keep if you wish to match incoming <em>MESSAGE</em> frames to this subscription or to <a class="reference internal" href="#stompest.sync.client.Stomp.unsubscribe" title="stompest.sync.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.transaction">
 <tt class="descname">transaction</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.transaction" title="Permalink to this definition">¶</a></dt>
-<dd><p>A context manager for STOMP transactions. Upon entering the <tt class="docutils literal"><span class="pre">with</span></tt> block, a transaction will be begun and upon exiting, that transaction will be committed or (if an error occurred) aborted.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; If this is not <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, it will be used as the <tt class="docutils literal"><span class="pre">receipt</span></tt> header with all STOMP commands (<tt class="docutils literal"><span class="pre">BEGIN</span></tt>, <tt class="docutils literal"><span class="pre">ABORT</span></tt>, <tt class="docutils literal"><span class="pre">COMMMIT</span></tt>) belonging to this transaction (be prepared to handle the broker&#8217;s <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> responses!).</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and commit a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
+<dd><p>A context manager for STOMP transactions. Upon entering the <tt class="xref py py-obj docutils literal"><span class="pre">with</span></tt> block, a transaction will be begun and upon exiting, that transaction will be committed or (if an error occurred) aborted.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.unsubscribe">
 <tt class="descname">unsubscribe</tt><big>(</big><em>token</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.unsubscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">UNSUBSCRIBE</span></tt> command to terminate an existing subscription.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>token</strong> &#8211; The result of the <a class="reference internal" href="#stompest.sync.client.Stomp.subscribe" title="stompest.sync.client.Stomp.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> command which initiated the subscription in question.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.sync.client.Stomp.disconnect" title="stompest.sync.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send a STOMP <em>UNSUBSCRIBE</em> command to terminate an existing subscription.</p>
 </dd></dl>
 
 </dd></dl>

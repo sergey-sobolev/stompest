@@ -243,7 +243,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>config</strong> &#8211; A <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object.</li>
-<li><strong>receiptTimeout</strong> &#8211; When a STOMP frame was sent to the broker and a <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame was requested, this is the time (in seconds) to wait for the <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame to arrive. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>receiptTimeout</strong> &#8211; When a STOMP frame was sent to the broker and a <em>RECEIPT</em> frame was requested, this is the time (in seconds) to wait for the <em>RECEIPT</em> frame to arrive. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
 </td>
 </tr>
@@ -251,21 +251,17 @@
 </table>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover.StompConfig</span></tt></p>
+<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover.StompConfig</span></tt>, the modules <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> and <tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt> for all API options which are documented here.</p>
 </div>
 <dl class="method">
 <dt id="stompest.async.client.Stomp.abort">
 <tt class="descname">abort</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">ABORT</span></tt> command to abort a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
+<dd><p>Send an <em>ABORT</em> frame to abort a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
@@ -278,34 +274,18 @@
 <dl class="method">
 <dt id="stompest.async.client.Stomp.ack">
 <tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.ack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">ACK</span></tt> command for a received STOMP message. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>frame</strong> &#8211; The <tt class="docutils literal"><span class="pre">StompFrame</span></tt> object representing the <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame we wish to ack.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send an <em>ACK</em> frame for a received <em>MESSAGE</em> frame. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.begin">
 <tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">BEGIN</span></tt> command to begin a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
+<dd><p>Send a <em>BEGIN</em> frame to begin a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
@@ -318,16 +298,12 @@
 <dl class="method">
 <dt id="stompest.async.client.Stomp.commit">
 <tt class="descname">commit</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">COMMIT</span></tt> command to commit a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
+<dd><p>Send a <em>COMMIT</em> frame to commit a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transaction</strong> &#8211; The id of the transaction.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</td>
 </tr>
 </tbody>
 </table>
@@ -346,36 +322,33 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>headers</strong> &#8211; Additional STOMP headers. Example: <tt class="docutils literal"><span class="pre">headers={'client-id':</span> <span class="pre">'me-myself-and-i'}</span></tt></li>
-<li><strong>versions</strong> &#8211; The STOMP versions we wish to support. The default is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, which means that we will offer the broker to accept any version prior or equal to the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The negotiated version which is applicable to the established STOMP session is stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>. Example: <tt class="docutils literal"><span class="pre">versions=['1.0',</span> <span class="pre">'1.1']</span></tt></li>
-<li><strong>host</strong> &#8211; The <tt class="docutils literal"><span class="pre">host</span></tt> header which gives this client a human readable name on the broker side. Example: <tt class="docutils literal"><span class="pre">host=moon</span></tt></li>
+<li><strong>versions</strong> &#8211; The STOMP versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for <tt class="xref py py-func docutils literal"><span class="pre">commands.connect()</span></tt>, but the highest supported version will be the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The version which is valid for the conenction about to be initiated is stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
 <li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
-<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <tt class="docutils literal"><span class="pre">CONNECTED</span></tt> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <em>CONNECTED</em> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<div class="admonition-see-also admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt>, <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt></p>
-</div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Only one connect attempt may be pending at a time. Any other attempt will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompAlreadyRunningError</span></tt>.</p>
+</div>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt>, <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> for the details of subscription replay and failover transport.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em>, <em>failure=None</em>, <em>timeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">DISCONNECT</span></tt> command and terminate the STOMP connection. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which calls back with <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.</p>
+<dd><p>Send a <em>DISCONNECT</em> frame and terminate the STOMP connection. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which calls back with <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>receipt</strong> &#8211; Send a STOMP <tt class="docutils literal"><span class="pre">receipt</span></tt> header with this id and wait for the <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> response with this client&#8217;s receipt timeout. Here, &#8220;wait&#8221; is to be understood in the asynchronous sense that the method&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> result will only call back then. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, no such header is sent, and the callback will be triggered earlier. Example: <tt class="docutils literal"><span class="pre">receipt='tell-me-when-you-got-that-message'</span></tt></li>
 <li><strong>failure</strong> &#8211; A disconnect reason (a <tt class="xref py py-class docutils literal"><span class="pre">Exception</span></tt>) to err back. Example: <tt class="docutils literal"><span class="pre">versions=['1.0',</span> <span class="pre">'1.1']</span></tt></li>
 <li><strong>timeout</strong> &#8211; This is the time (in seconds) to wait for a graceful disconnect, thas is, for pending message handlers to complete. If receipt is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
@@ -398,43 +371,13 @@
 <dl class="method">
 <dt id="stompest.async.client.Stomp.nack">
 <tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.nack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">NACK</span></tt> command for a received STOMP message. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>frame</strong> &#8211; The <tt class="docutils literal"><span class="pre">StompFrame</span></tt> object representing the <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frame we wish to nack.</li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">This command will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt> if you try and issue it in a STOMP 1.0 session.</p>
-</div>
+<dd><p>Send a <em>NACK</em> frame for a received <em>MESSAGE</em> frame. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.send">
 <tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.send" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">SEND</span></tt> command. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>destination</strong> &#8211; Destination for the frame. Example: <tt class="docutils literal"><span class="pre">destination='/queue/somewhere'</span></tt></li>
-<li><strong>body</strong> &#8211; Message body. Binary content is allowed but must be accompanied by the STOMP header <tt class="docutils literal"><span class="pre">content-length</span></tt> which specifies the number of bytes in the message body.</li>
-<li><strong>headers</strong> &#8211; Additional STOMP headers. Example: <tt class="docutils literal"><span class="pre">headers={'content-length':</span> <span class="pre">'1001'}</span></tt></li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Send a <em>SEND</em> frame. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 </dd></dl>
 
 <dl class="method">
@@ -450,7 +393,7 @@
 <dl class="method">
 <dt id="stompest.async.client.Stomp.sendToErrorDestination">
 <tt class="descname">sendToErrorDestination</tt><big>(</big><em>failure</em>, <em>frame</em>, <em>errorDestination</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.sendToErrorDestination" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is the default error handler for failed <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> handlers: forward the offending frame to the error destination (if given) and ack the frame. As opposed to earlier versions, It may be used as a building block for custom error handlers.</p>
+<dd><p>This is the default error handler for failed <em>MESSAGE</em> handlers: forward the offending frame to the error destination (if given) and ack the frame. As opposed to earlier versions, It may be used as a building block for custom error handlers.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -469,16 +412,13 @@
 <dl class="method">
 <dt id="stompest.async.client.Stomp.subscribe">
 <tt class="descname">subscribe</tt><big>(</big><em>destination</em>, <em>handler</em>, <em>headers=None</em>, <em>receipt=None</em>, <em>ack=True</em>, <em>errorDestination=None</em>, <em>onMessageFailed=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.subscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">SUBSCRIBE</span></tt> command to subscribe to a STOMP destination. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire with a token when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived. This token is used internally to match incoming <tt class="docutils literal"><span class="pre">MESSAGE</span></tt> frames and must be kept if you wish to <a class="reference internal" href="#stompest.async.client.Stomp.unsubscribe" title="stompest.async.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
+<dd><p>Send a <em>SUBSCRIBE</em> frame to subscribe to a STOMP destination. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire with a token when a possibly requested <em>RECEIPT</em> frame has arrived. This token is used internally to match incoming <em>MESSAGE</em> frames and must be kept if you wish to <a class="reference internal" href="#stompest.async.client.Stomp.unsubscribe" title="stompest.async.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>destination</strong> &#8211; Destination for the subscription. Example: <tt class="docutils literal"><span class="pre">destination='/topic/news'</span></tt></li>
 <li><strong>handler</strong> &#8211; A callable <tt class="xref py py-obj docutils literal"><span class="pre">f(client,</span> <span class="pre">frame)</span></tt> which accepts this client and the received <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt>.</li>
-<li><strong>headers</strong> &#8211; Additional STOMP headers. Example: <tt class="docutils literal"><span class="pre">headers={'activemq.prefetchSize':</span> <span class="pre">'100'}</span></tt></li>
-<li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.async.client.Stomp.disconnect" title="stompest.async.client.Stomp.disconnect"><tt class="xref py py-meth docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
 <li><strong>ack</strong> &#8211; Check this option if you wish the client to automatically ack MESSAGE frames when the were handled (successfully or not).</li>
 <li><strong>errorDestination</strong> &#8211; If a frame was not handled successfully, forward a copy of the offending frame to this destination. Example: <tt class="docutils literal"><span class="pre">errorDestination='/queue/back-to-square-one'</span></tt></li>
 <li><strong>onMessageFailed</strong> &#8211; You can specify a custom error handler which must be a callable with signature <tt class="xref py py-obj docutils literal"><span class="pre">f(self,</span> <span class="pre">failure,</span> <span class="pre">frame,</span> <span class="pre">errorDestination)</span></tt>. Note that a non-trivial choice of this error handler overrides the default behavior (forward frame to error destination and ack it).</li>
@@ -496,7 +436,7 @@
 <dl class="method">
 <dt id="stompest.async.client.Stomp.unsubscribe">
 <tt class="descname">unsubscribe</tt><big>(</big><em>token</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.unsubscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <tt class="docutils literal"><span class="pre">UNSUBSCRIBE</span></tt> command to terminate an existing subscription. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <tt class="docutils literal"><span class="pre">RECEIPT</span></tt> frame has arrived.</p>
+<dd><p>Send an <em>UNSUBSCRIBE</em> frame to terminate an existing subscription. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
