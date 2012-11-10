@@ -97,7 +97,7 @@
           <div class="body">
             
   <div class="section" id="module-stompest.async.client">
-<span id="asynchronous-client"></span><h1>Asynchronous Client<a class="headerlink" href="#module-stompest.async.client" title="Permalink to this headline">¶</a></h1>
+<span id="asynchronous-client"></span><span id="async"></span><h1>Asynchronous Client<a class="headerlink" href="#module-stompest.async.client" title="Permalink to this headline">¶</a></h1>
 <p>The asynchronous client is based on <a class="reference external" href="http://twistedmatrix.com/">Twisted</a>, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default &#8220;poison pill&#8221; error handling), concurrent message processing, graceful shutdown, and connect and disconnect timeouts.</p>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
@@ -242,7 +242,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>config</strong> &#8211; A <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object.</li>
+<li><strong>config</strong> &#8211; A <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompConfig" title="stompest.protocol.failover.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object.</li>
 <li><strong>receiptTimeout</strong> &#8211; When a STOMP frame was sent to the broker and a <em>RECEIPT</em> frame was requested, this is the time (in seconds) to wait for the <em>RECEIPT</em> frame to arrive. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
 </td>
@@ -255,16 +255,12 @@
 </div>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover.StompConfig</span></tt>, the modules <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> and <tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt> for all API options which are documented here.</p>
+<p class="last"><a class="reference internal" href="protocol.html#stompest.protocol.failover.StompConfig" title="stompest.protocol.failover.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> for how to set session configuration options, <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> for session state, <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">stompest.protocol.commands</span></tt></a> for all API options which are documented here.</p>
 </div>
 <dl class="method">
 <dt id="stompest.async.client.Stomp.abort">
 <tt class="descname">abort</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send an <em>ABORT</em> frame to abort a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and abort a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
 </dd></dl>
 
 <dl class="method">
@@ -277,32 +273,24 @@
 <dt id="stompest.async.client.Stomp.begin">
 <tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <em>BEGIN</em> frame to begin a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and begin a pending transaction twice, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.commit">
 <tt class="descname">commit</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <em>COMMIT</em> frame to commit a STOMP transaction. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which will fire when a possibly requested <em>RECEIPT</em> frame has arrived.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">If you try and commit a transaction which is not pending, this will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
-</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.connect">
 <tt class="descname">connect</tt><big>(</big><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Establish a connection to a STOMP broker. If a network connect fails, attempt a failover according to the settings in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. If there are active subscriptions in the session, replay them when the STOMP session is established. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which calls back with <tt class="xref py py-obj docutils literal"><span class="pre">self</span></tt> when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.</p>
+<dd><p>Establish a connection to a STOMP broker. If a network connect fails, attempt a failover according to the settings in the client&#8217;s <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompConfig" title="stompest.protocol.failover.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. If there are active subscriptions in the session, replay them when the STOMP session is established. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which calls back with <tt class="xref py py-obj docutils literal"><span class="pre">self</span></tt> when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>versions</strong> &#8211; The STOMP protocol versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for <tt class="xref py py-func docutils literal"><span class="pre">commands.connect()</span></tt>, but the highest supported version will be the one you specified in the <tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt> object. The version which is valid for the connection about to be initiated will be stored in the client&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
+<li><strong>versions</strong> &#8211; The STOMP protocol versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for the <a class="reference internal" href="protocol.html#stompest.protocol.commands.connect" title="stompest.protocol.commands.connect"><tt class="xref py py-func docutils literal"><span class="pre">connect()</span></tt></a> function of the commands API, but the highest supported version will be the one you specified in the <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompConfig" title="stompest.protocol.failover.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. The version which is valid for the connection about to be initiated will be stored in the client&#8217;s :class`~.session.StompSession` object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
 <li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 <li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <em>CONNECTED</em> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
@@ -316,7 +304,7 @@
 </div>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt>, <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> for the details of subscription replay and failover transport.</p>
+<p class="last"><a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><tt class="xref py py-mod docutils literal"><span class="pre">stompest.protocol.failover</span></tt></a>, <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><tt class="xref py py-mod docutils literal"><span class="pre">stompest.protocol.session</span></tt></a> for the details of subscription replay and failover transport.</p>
 </div>
 </dd></dl>
 
@@ -338,7 +326,7 @@
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The session&#8217;s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.session.close()</span></tt>. Only one disconnect attempt may be pending at a time. Any other attempt will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompAlreadyRunningError</span></tt>. The result of any (user-requested or not) disconnect event is available via the <a class="reference internal" href="#stompest.async.client.Stomp.disconnected" title="stompest.async.client.Stomp.disconnected"><tt class="xref py py-attr docutils literal"><span class="pre">disconnected</span></tt></a> property.</p>
+<p class="last">The session&#8217;s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession.close" title="stompest.protocol.session.StompSession.close"><tt class="xref py py-meth docutils literal"><span class="pre">close()</span></tt></a> method of the <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt> attribute. Only one disconnect attempt may be pending at a time. Any other attempt will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompAlreadyRunningError</span></tt>. The result of any (user-requested or not) disconnect event is available via the <a class="reference internal" href="#stompest.async.client.Stomp.disconnected" title="stompest.async.client.Stomp.disconnected"><tt class="xref py py-attr docutils literal"><span class="pre">disconnected</span></tt></a> property.</p>
 </div>
 </dd></dl>
 
@@ -398,7 +386,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>handler</strong> &#8211; A callable <tt class="xref py py-obj docutils literal"><span class="pre">f(client,</span> <span class="pre">frame)</span></tt> which accepts this client and the received <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt>.</li>
+<li><strong>handler</strong> &#8211; A callable <tt class="xref py py-obj docutils literal"><span class="pre">f(client,</span> <span class="pre">frame)</span></tt> which accepts this client and the received <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a>.</li>
 <li><strong>ack</strong> &#8211; Check this option if you wish the client to automatically ack MESSAGE frames when the were handled (successfully or not).</li>
 <li><strong>errorDestination</strong> &#8211; If a frame was not handled successfully, forward a copy of the offending frame to this destination. Example: <tt class="docutils literal"><span class="pre">errorDestination='/queue/back-to-square-one'</span></tt></li>
 <li><strong>onMessageFailed</strong> &#8211; You can specify a custom error handler which must be a callable with signature <tt class="xref py py-obj docutils literal"><span class="pre">f(self,</span> <span class="pre">failure,</span> <span class="pre">frame,</span> <span class="pre">errorDestination)</span></tt>. Note that a non-trivial choice of this error handler overrides the default behavior (forward frame to error destination and ack it).</li>

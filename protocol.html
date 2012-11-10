@@ -56,7 +56,7 @@
 <li><a class="reference internal" href="#module-stompest.protocol.failover">Configuration and Failover URI Scheme</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.session">Session State</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.frame">STOMP Frame Representation</a></li>
-<li><a class="reference internal" href="#module-stompest.protocol.commands">Commands</a></li>
+<li><a class="reference internal" href="#commands">Commands</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.spec">STOMP Protocol Specification</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.parser">Wire-Level Parser</a></li>
 </ul>
@@ -96,9 +96,9 @@
           <div class="body">
             
   <div class="section" id="protocol-layer">
-<h1>Protocol Layer<a class="headerlink" href="#protocol-layer" title="Permalink to this headline">¶</a></h1>
+<span id="protocol"></span><h1>Protocol Layer<a class="headerlink" href="#protocol-layer" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-stompest.protocol.failover">
-<span id="configuration-and-failover-uri-scheme"></span><h2>Configuration and Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
+<span id="configuration-and-failover-uri-scheme"></span><span id="config"></span><h2>Configuration and Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.failover.StompConfig">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompConfig</tt><big>(</big><em>uri</em>, <em>login=''</em>, <em>passcode=''</em>, <em>version=None</em>, <em>check=True</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompConfig" title="Permalink to this definition">¶</a></dt>
@@ -272,7 +272,7 @@
 
 </div>
 <div class="section" id="module-stompest.protocol.session">
-<span id="session-state"></span><h2>Session State<a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
+<span id="session-state"></span><span id="session"></span><h2>Session State<a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.session.StompSession">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.session.</tt><tt class="descname">StompSession</tt><big>(</big><em>version=None</em>, <em>check=False</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession" title="Permalink to this definition">¶</a></dt>
@@ -473,7 +473,7 @@
 
 </div>
 <div class="section" id="module-stompest.protocol.frame">
-<span id="stomp-frame-representation"></span><h2>STOMP Frame Representation<a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
+<span id="stomp-frame-representation"></span><span id="frame"></span><h2>STOMP Frame Representation<a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.frame.StompFrame">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.frame.</tt><tt class="descname">StompFrame</tt><big>(</big><em>command=''</em>, <em>headers=None</em>, <em>body=''</em><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
@@ -487,9 +487,9 @@
 </dd></dl>
 
 </div>
-<div class="section" id="module-stompest.protocol.commands">
-<span id="commands"></span><h2>Commands<a class="headerlink" href="#module-stompest.protocol.commands" title="Permalink to this headline">¶</a></h2>
-<p>This module implements a low-level and stateless API for all commands of the STOMP protocol version supported by stompest. All STOMP command frames are represented as <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt> objects. It forms the basis for <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> which represents the full state of an abstract STOMP protocol session and (via <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt>) of both high-level STOMP clients. You can use the commands API independently of other stompest modules to roll your own STOMP related functionality.</p>
+<div class="section" id="commands">
+<span id="id1"></span><h2>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-stompest.protocol.commands"></span><p>This module implements a low-level and stateless API for all commands of the STOMP protocol version supported by stompest. All STOMP command frames are represented as <tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt> objects. It forms the basis for <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> which represents the full state of an abstract STOMP protocol session and (via <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt>) of both high-level STOMP clients. You can use the commands API independently of other stompest modules to roll your own STOMP related functionality.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Whenever you have to pass a <em>version</em> parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of <tt class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></tt>, which is currently <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> but may change in upcoming versions of stompest (and by you, if you wish to override it). Any command which does not conform to the STOMP protocol version in question will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
@@ -744,7 +744,7 @@
 
 </div>
 <div class="section" id="module-stompest.protocol.spec">
-<span id="stomp-protocol-specification"></span><h2>STOMP Protocol Specification<a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
+<span id="stomp-protocol-specification"></span><span id="spec"></span><h2>STOMP Protocol Specification<a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.spec.StompSpec">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.spec.</tt><tt class="descname">StompSpec</tt><a class="headerlink" href="#stompest.protocol.spec.StompSpec" title="Permalink to this definition">¶</a></dt>
@@ -757,7 +757,7 @@
 
 </div>
 <div class="section" id="module-stompest.protocol.parser">
-<span id="wire-level-parser"></span><h2>Wire-Level Parser<a class="headerlink" href="#module-stompest.protocol.parser" title="Permalink to this headline">¶</a></h2>
+<span id="wire-level-parser"></span><span id="parser"></span><h2>Wire-Level Parser<a class="headerlink" href="#module-stompest.protocol.parser" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.parser.StompParser">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.parser.</tt><tt class="descname">StompParser</tt><big>(</big><em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser" title="Permalink to this definition">¶</a></dt>
