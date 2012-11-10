@@ -100,6 +100,9 @@
 <p>The synchronous client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.</p>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>If you use ActiveMQ to run these examples, make sure you enable the STOMP connector in the config file, activemq.xml (see <a class="reference external" href="http://activemq.apache.org/stomp.html">here</a> for details):</p>
+<blockquote>
+<div><tt class="docutils literal"><span class="pre">&lt;transportConnector</span> <span class="pre">name=&quot;stomp&quot;</span>&nbsp; <span class="pre">uri=&quot;stomp://0.0.0.0:61613&quot;/&gt;</span></tt></div></blockquote>
 <div class="section" id="producer">
 <h3>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompConfig</span>
@@ -154,24 +157,24 @@
 </table>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><tt class="xref py py-mod docutils literal"><span class="pre">failover</span></tt></a>, <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><tt class="xref py py-mod docutils literal"><span class="pre">session</span></tt></a> for the details of subscription replay and failover transport.</p>
+<p class="last"><a class="reference internal" href="protocol.html#stompest.protocol.failover.StompConfig" title="stompest.protocol.failover.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> for how to set session configuration options, <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> for session state, <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">commands</span></tt></a> for all API options which are documented here.</p>
 </div>
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.abort">
 <tt class="descname">abort</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send an <em>ABORT</em> frame to abort a STOMP transaction.</p>
+<dd><p>Send an <strong>ABORT</strong> frame to abort a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.ack">
 <tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.ack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send an <em>ACK</em> frame for a received <em>MESSAGE</em> frame.</p>
+<dd><p>Send an <strong>ACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.begin">
 <tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a <em>BEGIN</em> frame to begin a STOMP transaction.</p>
+<dd><p>Send a <strong>BEGIN</strong> frame to begin a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
@@ -213,7 +216,7 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.commit">
 <tt class="descname">commit</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a <em>COMMIT</em> frame to commit a STOMP transaction.</p>
+<dd><p>Send a <strong>COMMIT</strong> frame to commit a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
@@ -227,7 +230,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>versions</strong> &#8211; The STOMP protocol versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for the <a class="reference internal" href="protocol.html#stompest.protocol.commands.connect" title="stompest.protocol.commands.connect"><tt class="xref py py-func docutils literal"><span class="pre">connect()</span></tt></a> function of the commands API, but the highest supported version will be the one you specified in the <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompConfig" title="stompest.protocol.failover.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. The version which is valid for the connection about to be initiated will be stored in the client&#8217;s <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> object (attribute <tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt>).</li>
 <li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
-<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <em>CONNECTED</em> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <strong>CONNECTED</strong> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
 </td>
 </tr>
@@ -235,29 +238,29 @@
 </table>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt>, <tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt> for the details of subscription replay and failover transport.</p>
+<p class="last">The <a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><tt class="xref py py-mod docutils literal"><span class="pre">failover</span></tt></a> and <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><tt class="xref py py-mod docutils literal"><span class="pre">session</span></tt></a> modules for the details of subscription replay and failover transport.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a STOMP <em>DISCONNECT</em> command and terminate the STOMP connection.</p>
+<dd><p>Send a STOMP <strong>DISCONNECT</strong> command and terminate the STOMP connection.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <em>RECEIPT</em> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.close(flush=True)</span></tt>.</p>
+<p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <strong>RECEIPT</strong> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.close(flush=True)</span></tt>.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.message">
 <tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.message" title="Permalink to this definition">¶</a></dt>
-<dd><p>If you received a <em>MESSAGE</em> frame, this method will produce a token which allows you to match it against its subscription.</p>
+<dd><p>If you received a <strong>MESSAGE</strong> frame, this method will produce a token which allows you to match it against its subscription.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; a <em>MESSAGE</em> frame.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; a <strong>MESSAGE</strong> frame.</td>
 </tr>
 </tbody>
 </table>
@@ -270,18 +273,18 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.nack">
 <tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.nack" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a <em>NACK</em> frame for a received <em>MESSAGE</em> frame.</p>
+<dd><p>Send a <strong>NACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.receipt">
 <tt class="descname">receipt</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.receipt" title="Permalink to this definition">¶</a></dt>
-<dd><p>If you received a <em>RECEIPT</em> frame, this method will extract the receipt id which you employed to request that receipt.</p>
+<dd><p>If you received a <strong>RECEIPT</strong> frame, this method will extract the receipt id which you employed to request that receipt.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A <em>MESSAGE</em> frame (a <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> object).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A <strong>MESSAGE</strong> frame (a <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> object).</td>
 </tr>
 </tbody>
 </table>
@@ -304,7 +307,7 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.send">
 <tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.send" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a <em>SEND</em> frame.</p>
+<dd><p>Send a <strong>SEND</strong> frame.</p>
 </dd></dl>
 
 <dl class="method">
@@ -328,7 +331,7 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.subscribe">
 <tt class="descname">subscribe</tt><big>(</big><em>destination</em>, <em>handler</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.subscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a <em>SUBSCRIBE</em> frame to subscribe to a STOMP destination. This method returns a token which you have to keep if you wish to match incoming <em>MESSAGE</em> frames to this subscription or to <a class="reference internal" href="#stompest.sync.client.Stomp.unsubscribe" title="stompest.sync.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
+<dd><p>Send a <strong>SUBSCRIBE</strong> frame to subscribe to a STOMP destination. This method returns a token which you have to keep if you wish to match incoming <strong>MESSAGE</strong> frames to this subscription or to <a class="reference internal" href="#stompest.sync.client.Stomp.unsubscribe" title="stompest.sync.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
 </dd></dl>
 
 <dl class="method">
@@ -340,7 +343,7 @@
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.unsubscribe">
 <tt class="descname">unsubscribe</tt><big>(</big><em>token</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.unsubscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send an <em>UNSUBSCRIBE</em> frame to terminate an existing subscription.</p>
+<dd><p>Send an <strong>UNSUBSCRIBE</strong> frame to terminate an existing subscription.</p>
 </dd></dl>
 
 </dd></dl>
