@@ -273,18 +273,50 @@
 </div>
 <div class="section" id="module-stompest.protocol.session">
 <span id="session-state"></span><span id="session"></span><h2>Session State<a class="headerlink" href="#module-stompest.protocol.session" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="stompest.protocol.session.StompSession">
-<em class="property">class </em><tt class="descclassname">stompest.protocol.session.</tt><tt class="descname">StompSession</tt><big>(</big><em>version=None</em>, <em>check=False</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession" title="Permalink to this definition">¶</a></dt>
-<dd><p>This object implements an abstract representation of a STOMP protocol session. It builds upon the low-level commands API in <tt class="xref py py-mod docutils literal"><span class="pre">protocol.command</span></tt>. You can use the stateful API provided by <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> independently of the stompest clients to roll your own STOMP client.</p>
+<p>The <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> object implements an abstract STOMP protocol session, where &#8220;abstract&#8221; means that it is entirely client or transport agnostic. The session API builds upon the low-level and stateless API of the <a class="reference internal" href="#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">commands</span></tt></a> module, but it also keeps track of the session state (e.g., STOMP protocol version negotiation, active subscriptions). You can use the API provided by <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> independently of the stompest clients to roll your own STOMP client.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Being stateful implies that the session keeps track of subscriptions, receipts, and transactions, so keep track of them yourself, too! &#8211; Unless you like to be surprised by a spurious <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt> ...</p>
 </div>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last">The commands API in <tt class="xref py py-mod docutils literal"><span class="pre">protocol.command</span></tt> for all API command parameters which are not documented here.</p>
+<p class="last">The stateless API in the module <a class="reference internal" href="#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">commands</span></tt></a> for all API command parameters which are not documented here.</p>
 </div>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSession</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">StompSession</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">login</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">passcode</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+<span class="go">StompFrame(command=&#39;CONNECT&#39;, headers={&#39;passcode&#39;: &#39;&#39;, &#39;login&#39;: &#39;&#39;, &#39;host&#39;: &#39;macbook-jan.fritz.box&#39;, &#39;accept-version&#39;: &#39;1.0,1.1&#39;}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
+<span class="go">1.1 connecting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connected</span><span class="p">(</span><span class="n">StompFrame</span><span class="p">(</span><span class="s">&#39;CONNECTED&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;session&#39;</span><span class="p">:</span> <span class="s">&#39;tete-a-tete&#39;</span><span class="p">}))</span> <span class="c"># The broker only understands STOMP 1.0.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
+<span class="go">1.0 connected</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+<span class="go">StompFrame(command=&#39;DISCONNECT&#39;, headers={}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
+<span class="go">1.0 disconnecting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
+<span class="go">1.1 disconnected</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="stompest.protocol.session.StompSession">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.session.</tt><tt class="descname">StompSession</tt><big>(</big><em>version=None</em>, <em>check=True</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object implements an abstract STOMP protocol session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>version</strong> &#8211; The highest (and at the same time default) STOMP protocol version.</li>
+<li><strong>check</strong> &#8211; This flag decides whether the session should accept commands only in the proper session states (<tt class="xref py py-obj docutils literal"><span class="pre">True</span></tt>) or in any session state (<tt class="xref py py-obj docutils literal"><span class="pre">False</span></tt>).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="stompest.protocol.session.StompSession.abort">
 <tt class="descname">abort</tt><big>(</big><em>transaction</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.abort" title="Permalink to this definition">¶</a></dt>
@@ -389,7 +421,7 @@
 <dd><p>Handle a <em>MESSAGE</em> frame. Returns a token which you can use to match this message to its subscription.</p>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="#stompest.protocol.session.StompSession.subscribe" title="stompest.protocol.session.StompSession.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a>.</p>
+<p class="last">The <a class="reference internal" href="#stompest.protocol.session.StompSession.subscribe" title="stompest.protocol.session.StompSession.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> method.</p>
 </div>
 </dd></dl>
 
@@ -493,6 +525,29 @@
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Whenever you have to pass a <em>version</em> parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of <tt class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></tt>, which is currently <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> but may change in upcoming versions of stompest (and by you, if you wish to override it). Any command which does not conform to the STOMP protocol version in question will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
+</div>
+<p>Examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">commands</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">versions</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">versions</span>
+<span class="go">[&#39;1.0&#39;, &#39;1.1&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">versions</span><span class="o">=</span><span class="n">versions</span><span class="p">))</span>
+<span class="go">StompFrame(command=&#39;CONNECT&#39;, headers={&#39;host&#39;: &#39;earth.solar-system&#39;, &#39;accept-version&#39;: &#39;1.0,1.1&#39;}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="p">,</span> <span class="n">token</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">,</span> <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">StompFrame(command=&#39;SUBSCRIBE&#39;, headers={&#39;ack&#39;: &#39;client-individual&#39;, &#39;destination&#39;: &#39;/queue/test&#39;, &#39;activemq.prefetchSize&#39;: &#39;100&#39;}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="s">&#39;MESSAGE&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;destination&#39;</span><span class="p">:</span> <span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="s">&#39;message-id&#39;</span><span class="p">:</span> <span class="s">&#39;007&#39;</span><span class="p">},</span> <span class="s">&#39;¿qué tal estás?&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">StompFrame(command=&#39;MESSAGE&#39;, headers={&#39;destination&#39;: &#39;/queue/test&#39;, &#39;message-id&#39;: &#39;007&#39;}, body=&#39;\xc2\xbfqu\xc3\xa9 tal est\xc3\xa1s?&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.0&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">token</span> <span class="c"># This message matches your subscription.</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={&#39;destination&#39;: &#39;/queue/test&#39;, &#39;message-id&#39;</span>: <span class="n">&#39;007&#39;}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-12345&#39;</span><span class="p">))</span>
+<span class="go">StompFrame(command=&#39;DISCONNECT&#39;, headers={&#39;receipt&#39;: &#39;message-12345&#39;}, body=&#39;&#39;)</span>
+</pre></div>
 </div>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
@@ -770,6 +825,28 @@
 </tr>
 </tbody>
 </table>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompParser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;RECEIPT</span><span class="se">\n</span><span class="s">receipt-id:message-12345</span><span class="se">\n\n\x00</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;NACK</span><span class="se">\n</span><span class="s">subscription:0</span><span class="se">\n</span><span class="s">message-id:007</span><span class="se">\n\n\x00</span><span class="s">&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">StompParser</span><span class="p">(</span><span class="s">&#39;1.0&#39;</span><span class="p">)</span> <span class="c"># STOMP 1.0 does not support the NACK command.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">parser</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+<span class="gp">... </span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">2</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">stompest.error.StompFrameError: Invalid command</span>: <span class="n">&#39;NACK&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+<span class="go">StompFrame(command=&#39;RECEIPT&#39;, headers={&#39;receipt-id&#39;: &#39;message-12345&#39;}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">parser</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="go">None</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">StompParser</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+<span class="go">StompFrame(command=&#39;NACK&#39;, headers={&#39;message-id&#39;: &#39;007&#39;, &#39;subscription&#39;: &#39;0&#39;}, body=&#39;&#39;)</span>
+</pre></div>
+</div>
 <dl class="method">
 <dt id="stompest.protocol.parser.StompParser.add">
 <tt class="descname">add</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#stompest.protocol.parser.StompParser.add" title="Permalink to this definition">¶</a></dt>
