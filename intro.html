@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>stomp, stomper, stompest! &mdash; stompest documentation - v2.0a1</title>
+    <title>&lt;no title&gt; &mdash; stompest documentation - v2.0b1</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a1',
+        VERSION:     '2.0b1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,8 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a1" href="#" />
-    <link rel="next" title="Synchronous Client" href="sync.html" /> 
+    <link rel="top" title="stompest documentation - v2.0b1" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,28 +37,14 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="sync.html" title="Synchronous Client"
-             accesskey="N">next</a> |</li>
-        <li><a href="#">stompest documentation - v2.0a1</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0b1</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">stomp, stomper, stompest!</a></li>
-<li><a class="reference internal" href="#contents">Contents</a><ul>
-</ul>
-</li>
-</ul>
-
-  <h4>Next topic</h4>
-  <p class="topless"><a href="sync.html"
-                        title="next chapter">Synchronous Client</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
+    <li><a href="_sources/intro.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -83,8 +68,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="stomp-stomper-stompest">
-<h1>stomp, stomper, stompest!<a class="headerlink" href="#stomp-stomper-stompest" title="Permalink to this headline">¶</a></h1>
+  <p class="rubric">stomp, stomper, stompest!</p>
 <p><a class="reference external" href="https://github.com/mozes/stompest/">stompest</a> is a full-featured implementation of the <a class="reference external" href="http://stomp.github.com/">STOMP</a> protocol (versions <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>) for Python 2.6 (and higher) including both synchronous and <a class="reference external" href="http://twistedmatrix.com/">Twisted</a> clients:</p>
 <ul class="simple">
 <li>The synchronous <a class="reference internal" href="sync.html#stompest.sync.client.Stomp" title="stompest.sync.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.</li>
@@ -97,42 +81,7 @@
 <li>a generic implementation of the STOMP 1.0 and 1.1 session state semantics in <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a>, such as protocol version negotiation at connect time, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
 <li>and <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompFailoverProtocol" title="stompest.protocol.failover.StompFailoverProtocol"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverProtocol</span></tt></a>, a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in ActiveMQ.</li>
 </ul>
-<p>This module is thoroughly unit tested and production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a> &#8212; persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. Others also deploy stompest in serious production environments. The substantial redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API.</p>
-<p>A few words about history: When stompest was brought into being, there were already several STOMP related modules around, but none of them did address the main requirements: a simple access to the STOMP protocol which stays out of your way (the synchronous <a class="reference internal" href="sync.html#stompest.sync.client.Stomp" title="stompest.sync.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client) features and an event-driven implementation which leverages the power of the <a class="reference external" href="http://twistedmatrix.com/">Twisted</a> framework (the asynchronous <a class="reference internal" href="async.html#stompest.async.client.Stomp" title="stompest.async.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client). The <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a> package provided an abstract implementation of the STOMP protocol which stompest 1 took advantage of: stomp. stomper, stompest! During the redesign which lead to stompest 2, the <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a> package turned out to suffer from being out-of-maintenance, so the appealing feature of an abstract STOMP API was insourced. Kudos to Oisin Mulvihill, the developer of <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a>!</p>
-</div>
-<div class="section" id="contents">
-<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronous Client</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#examples">Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#producer">Producer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#consumer">Consumer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#api">API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="async.html">Asynchronous Client</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="async.html#examples">Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="async.html#producer">Producer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="async.html#transformer">Transformer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="async.html#consumer">Consumer</a></li>
-<li class="toctree-l2"><a class="reference internal" href="async.html#api">API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol Layer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.failover">Failover URI Scheme</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.session">Session State</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.frame">STOMP Frame Representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#commands">Commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.spec">STOMP Protocol Specification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.parser">Wire-Level Parser</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="error.html">Error Codes</a></li>
-</ul>
-</div>
-</div>
+<p>This module is thoroughly unit tested and production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a> &#8212; persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. Others also deploy stompest in serious production environments.</p>
 
 
           </div>
@@ -149,10 +98,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="sync.html" title="Synchronous Client"
-             >next</a> |</li>
-        <li><a href="#">stompest documentation - v2.0a1</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0b1</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

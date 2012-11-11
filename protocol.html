@@ -27,7 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="stompest documentation - v2.0a1" href="index.html" />
     <link rel="next" title="Error Codes" href="error.html" />
-    <link rel="prev" title="Asynchronous Client" href="async.html" /> 
+    <link rel="prev" title="Configuration" href="config.html" /> 
   </head>
   <body>
     <div class="related">
@@ -43,7 +43,7 @@
           <a href="error.html" title="Error Codes"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="async.html" title="Asynchronous Client"
+          <a href="config.html" title="Configuration"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
@@ -53,7 +53,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Protocol Layer</a><ul>
-<li><a class="reference internal" href="#module-stompest.protocol.failover">Configuration and Failover URI Scheme</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.failover">Failover URI Scheme</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.session">Session State</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.frame">STOMP Frame Representation</a></li>
 <li><a class="reference internal" href="#commands">Commands</a></li>
@@ -64,8 +64,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="async.html"
-                        title="previous chapter">Asynchronous Client</a></p>
+  <p class="topless"><a href="config.html"
+                        title="previous chapter">Configuration</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="error.html"
                         title="next chapter">Error Codes</a></p>
@@ -97,42 +97,13 @@
             
   <div class="section" id="module-stompest.protocol">
 <span id="protocol-layer"></span><span id="protocol"></span><h1>Protocol Layer<a class="headerlink" href="#module-stompest.protocol" title="Permalink to this headline">¶</a></h1>
-<p>This package is a collection of generic components each of which you can use independently for your own STOMP related functionality:</p>
+<p>The <a class="reference internal" href="#module-stompest.protocol" title="stompest.protocol"><tt class="xref py py-mod docutils literal"><span class="pre">protocol</span></tt></a> package is a collection of generic components each of which you can use independently for your own STOMP related functionality.</p>
 <div class="section" id="module-stompest.protocol.failover">
-<span id="configuration-and-failover-uri-scheme"></span><span id="config"></span><h2>Configuration and Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="stompest.protocol.failover.StompConfig">
-<em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompConfig</tt><big>(</big><em>uri</em>, <em>login=''</em>, <em>passcode=''</em>, <em>version=None</em>, <em>check=True</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompConfig" title="Permalink to this definition">¶</a></dt>
-<dd><p>This configuration object contains those parameters which are common to both clients (sync and async) and are needed to establish a STOMP connection. All parameters are available as attributes with the same name of this object.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>uri</strong> &#8211; A failover URI as it is accepted by <a class="reference internal" href="#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></tt></a>.</li>
-<li><strong>login</strong> &#8211; The login for the STOMP brokers.</li>
-<li><strong>passcode</strong> &#8211; The passcode for the STOMP brokers.</li>
-<li><strong>version</strong> &#8211; The highest STOMP protocol version this client may use. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, <strong>version</strong> defaults to <tt class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></tt> (currently <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt>, but this may change in upcoming stompest releases)</li>
-<li><strong>check</strong> &#8211; Decides whether the <tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt> object which is used to represent the STOMP sesion should be strict about the session&#8217;s state: (e.g., whether to allow calling <tt class="xref py py-meth docutils literal"><span class="pre">StompSession.send()</span></tt> when disconnected).</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Login and passcode have to be the same for all brokers because they are not part of the failover URI scheme.</p>
-</div>
-<div class="admonition-see-also admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last">The <a class="reference internal" href="#stompest.protocol.failover.StompFailoverProtocol" title="stompest.protocol.failover.StompFailoverProtocol"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverProtocol</span></tt></a> class which tells you which broker to use and how long you should wait to connect to it, the <a class="reference internal" href="#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></tt></a> which parses failover transport URIs.</p>
-</div>
-</dd></dl>
-
+<span id="failover-uri-scheme"></span><h2>Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.failover.StompFailoverProtocol">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompFailoverProtocol</tt><big>(</big><em>uri</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompFailoverProtocol" title="Permalink to this definition">¶</a></dt>
-<dd><p>This object is a parser for the failover URI scheme used in stompest. Looping over this object, you can produce a series of tuples (broker, delay in s). When the URI does not allow further failover, a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectTimeout</span></tt> error is raised.</p>
+<dd><p>Looping over this object, you can produce a series of tuples (broker, delay in s). When the failover scheme does not allow further failover, a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectTimeout</span></tt> error is raised.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -175,7 +146,12 @@
 <dl class="class">
 <dt id="stompest.protocol.failover.StompFailoverUri">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompFailoverUri</tt><big>(</big><em>uri</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompFailoverUri" title="Permalink to this definition">¶</a></dt>
-<dd><p>This object is a parser for the failover URI scheme used in stompest. The parsed parameters are available in the attributes <tt class="xref py py-attr docutils literal"><span class="pre">brokers</span></tt> and <tt class="xref py py-attr docutils literal"><span class="pre">options</span></tt>. The Failover transport syntax is very close to the one used in ActiveMQ. Its basic form is:</p>
+<dd><p>This is a parser for the failover URI scheme used in stompest. The parsed parameters are available in the attributes <tt class="xref py py-attr docutils literal"><span class="pre">brokers</span></tt> and <tt class="xref py py-attr docutils literal"><span class="pre">options</span></tt>. The Failover transport syntax is very close to the one used in ActiveMQ.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> &#8211; <p>A failover URI. Its basic form is:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;failover:(uri1,...,uriN)?transportOptions&#39;</span>
 </pre></div>
 </div>
@@ -183,11 +159,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="s">&#39;failover:uri1,...,uriN&#39;</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> &#8211; A failover URI.</td>
+</td>
 </tr>
 </tbody>
 </table>
@@ -287,7 +259,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSession</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">StompSession</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">login</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">passcode</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
-<span class="go">StompFrame(command=&#39;CONNECT&#39;, headers={&#39;passcode&#39;: &#39;&#39;, &#39;login&#39;: &#39;&#39;, &#39;host&#39;: &#39;macbook-jan.fritz.box&#39;, &#39;accept-version&#39;: &#39;1.0,1.1&#39;}, body=&#39;&#39;)</span>
+<span class="go">StompFrame(command=&#39;CONNECT&#39;, headers={&#39;passcode&#39;: &#39;&#39;, &#39;login&#39;: &#39;&#39;, &#39;host&#39;: &#39;earth.solar-system&#39;, &#39;accept-version&#39;: &#39;1.0,1.1&#39;}, body=&#39;&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
 <span class="go">1.1 connecting</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connected</span><span class="p">(</span><span class="n">StompFrame</span><span class="p">(</span><span class="s">&#39;CONNECTED&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;session&#39;</span><span class="p">:</span> <span class="s">&#39;tete-a-tete&#39;</span><span class="p">}))</span> <span class="c"># The broker only understands STOMP 1.0.</span>
@@ -804,7 +776,7 @@
 <dl class="class">
 <dt id="stompest.protocol.spec.StompSpec">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.spec.</tt><tt class="descname">StompSpec</tt><a class="headerlink" href="#stompest.protocol.spec.StompSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn&#8217;t much to document, but you are invited to take a look at all available constants in the source code.</p>
+<dd><p>This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn&#8217;t much to document, but you are invited to take a look at all available constants in the source code. Wait a minute ... one attribute is particularly noteworthy, name <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> &#8212; which currently is <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> (but this may change in upcoming stompest releases, so you&#8217;re advised to always explicitly define which STOMP protocol version you are going to use).</p>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">Specification of STOMP protocols <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, your favorite broker&#8217;s documentation for additional STOMP headers.</p>
@@ -822,7 +794,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>version</strong> &#8211; A valid STOMP protocol version, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (equivalent to <tt class="xref py py-attr docutils literal"><span class="pre">StompSPEC.DEFAULT_VERSION</span></tt>).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>version</strong> &#8211; A valid STOMP protocol version, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (equivalent to the <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> attribute of the <a class="reference internal" href="#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><tt class="xref py py-class docutils literal"><span class="pre">StompSpec</span></tt></a> class).</td>
 </tr>
 </tbody>
 </table>
@@ -904,7 +876,7 @@
           <a href="error.html" title="Error Codes"
              >next</a> |</li>
         <li class="right" >
-          <a href="async.html" title="Asynchronous Client"
+          <a href="config.html" title="Configuration"
              >previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
