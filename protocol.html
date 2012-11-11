@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="stompest documentation - v2.0a1" href="index.html" />
-    <link rel="next" title="Error Codes" href="error.html" />
-    <link rel="prev" title="Configuration" href="config.html" /> 
+    <link rel="next" title="Configuration" href="config.html" />
+    <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,10 +40,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="error.html" title="Error Codes"
+          <a href="config.html" title="Configuration"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="config.html" title="Configuration"
+          <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
@@ -53,7 +53,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Protocol Layer</a><ul>
-<li><a class="reference internal" href="#module-stompest.protocol.failover">Failover URI Scheme</a></li>
+<li><a class="reference internal" href="#module-stompest.protocol.failover">Failover Transport</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.session">Session State</a></li>
 <li><a class="reference internal" href="#module-stompest.protocol.frame">STOMP Frame Representation</a></li>
 <li><a class="reference internal" href="#commands">Commands</a></li>
@@ -64,11 +64,11 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="config.html"
-                        title="previous chapter">Configuration</a></p>
+  <p class="topless"><a href="async.html"
+                        title="previous chapter">Asynchronous Client</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="error.html"
-                        title="next chapter">Error Codes</a></p>
+  <p class="topless"><a href="config.html"
+                        title="next chapter">Configuration</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/protocol.txt"
@@ -98,11 +98,15 @@
   <div class="section" id="module-stompest.protocol">
 <span id="protocol-layer"></span><span id="protocol"></span><h1>Protocol Layer<a class="headerlink" href="#module-stompest.protocol" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="#module-stompest.protocol" title="stompest.protocol"><tt class="xref py py-mod docutils literal"><span class="pre">protocol</span></tt></a> package is a collection of generic components each of which you can use independently for your own STOMP related functionality.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please restrict your imports to the main package <a class="reference internal" href="#module-stompest.protocol" title="stompest.protocol"><tt class="xref py py-mod docutils literal"><span class="pre">stompest.protocol</span></tt></a>. The subpackage structure is potentially unstable.</p>
+</div>
 <div class="section" id="module-stompest.protocol.failover">
-<span id="failover-uri-scheme"></span><h2>Failover URI Scheme<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
+<span id="failover-transport"></span><h2>Failover Transport<a class="headerlink" href="#module-stompest.protocol.failover" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="stompest.protocol.failover.StompFailoverProtocol">
-<em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompFailoverProtocol</tt><big>(</big><em>uri</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompFailoverProtocol" title="Permalink to this definition">¶</a></dt>
+<dt id="stompest.protocol.failover.StompFailoverTransport">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.failover.</tt><tt class="descname">StompFailoverTransport</tt><big>(</big><em>uri</em><big>)</big><a class="headerlink" href="#stompest.protocol.failover.StompFailoverTransport" title="Permalink to this definition">¶</a></dt>
 <dd><p>Looping over this object, you can produce a series of tuples (broker, delay in s). When the failover scheme does not allow further failover, a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectTimeout</span></tt> error is raised.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -113,9 +117,9 @@
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFailoverProtocol</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFailoverTransport</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.error</span> <span class="kn">import</span> <span class="n">StompConnectTimeout</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">failover</span> <span class="o">=</span> <span class="n">StompFailoverProtocol</span><span class="p">(</span><span class="s">&#39;failover:(tcp://remote1:61615,tcp://localhost:61616)?randomize=false,startupMaxReconnectAttempts=3,initialReconnectDelay=7,maxReconnectDelay=8,maxReconnectAttempts=0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">failover</span> <span class="o">=</span> <span class="n">StompFailoverTransport</span><span class="p">(</span><span class="s">&#39;failover:(tcp://remote1:61615,tcp://localhost:61616)?randomize=false,startupMaxReconnectAttempts=3,initialReconnectDelay=7,maxReconnectDelay=8,maxReconnectAttempts=0&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span> <span class="ow">in</span> <span class="n">failover</span><span class="p">:</span>
 <span class="gp">... </span>        <span class="k">print</span> <span class="s">&#39;broker: </span><span class="si">%s</span><span class="s">, delay: </span><span class="si">%f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>                                                                       
@@ -239,7 +243,7 @@
 </table>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="#stompest.protocol.failover.StompFailoverProtocol" title="stompest.protocol.failover.StompFailoverProtocol"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverProtocol</span></tt></a>, <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> of ActiveMQ.</p>
+<p class="last"><a class="reference internal" href="#stompest.protocol.failover.StompFailoverTransport" title="stompest.protocol.failover.StompFailoverTransport"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverTransport</span></tt></a>, <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> of ActiveMQ.</p>
 </div>
 </dd></dl>
 
@@ -493,7 +497,7 @@
 
 </div>
 <div class="section" id="commands">
-<span id="id1"></span><h2>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-stompest.protocol.commands"></span><p>This module implements a low-level and stateless API for all commands of the STOMP protocol version supported by stompest. All STOMP command frames are represented as <a class="reference internal" href="#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> objects. It forms the basis for <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> which represents the full state of an abstract STOMP protocol session and (via <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a>) of both high-level STOMP clients. You can use the commands API independently of other stompest modules to roll your own STOMP related functionality.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -873,10 +877,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="error.html" title="Error Codes"
+          <a href="config.html" title="Configuration"
              >next</a> |</li>
         <li class="right" >
-          <a href="config.html" title="Configuration"
+          <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
         <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
       </ul>
