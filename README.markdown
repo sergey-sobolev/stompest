@@ -16,7 +16,9 @@ Both clients make use of a generic set of components in the `protocol` module ea
 
 * and `protocol.StompFailoverTransport`, a [failover transport](http://activemq.apache.org/failover-transport-reference.html) URI scheme akin to the one used in ActiveMQ.
 
-This module is thoroughly unit tested and production hardened for the functionality used by [Mozes](http://www.mozes.com/): persistent queueing on ActiveMQ. Other users also use it in serious production environments. Minor enhancements may be required to use this STOMP adapter with other brokers.
+This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
+
+The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API. 
 
 Documentation & Code Examples
 =============================
@@ -68,11 +70,15 @@ Clients
     * Custom hook: you can override the default behavior with any customized error handling scheme.
 * Separately configurable timeouts for wire-level connection, the broker's `CONNECTED` reply frame, and graceful disconnect (in-flight handlers that do not finish in time).
 
+Acknowledgements
+================
+* Version 1.x of stompest was written by [Roger Hoover (@theduderog)](http://github.com/theduderog) at [Mozes](http://www.mozes.com/) and deployed in their production environment.
+* Kudos to [Oisin Mulvihill](https://github.com/oisinmulvihill), the developer of [stomper] (http://code.google.com/p/stomper/)! His idea of an abstract representation of the STOMP protocol lives on in stompest.
+
 Caveats
 =======
-* Requires Python 2.6 or higher
-* Tested with ActiveMQ versions 5.5 and 5.6. Mileage may vary with other STOMP implementations.
-* stompest 2 is fully documented and probably even better tested than stompest 1: it is about to be used in production by one of the authors. In the thorough redesign, stompest has gained heavily on functionality, and the authors valued consistency, simplicity and symmetry over full backward compatibility to stompest 1. It is planned to add more features in the near future. Thus, the API should not be considered stable, which is why stompest 2 is still marked as (mature) alpha software.
+* Requires Python 2.6 or higher. Not yet tested with Python 3.x.
+* This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). It is also planned to make the integration tests pass against [RabbitMQ](http://www.rabbitmq.com/) and [Apollo](http://activemq.apache.org/apollo/). Minor enhancements may be required to use this STOMP adapter with other brokers. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API.
 
 To Do
 =====

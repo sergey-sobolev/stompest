@@ -16,4 +16,11 @@ Both clients make use of a generic set of components in the each of which can be
 
 * and a `failover transport <http://activemq.apache.org/failover-transport-reference.html>`_ URI scheme akin to the one used in ActiveMQ.
 
-stompest 2 is fully documented and probably even better tested than stompest 1: it is about to be used in production by one of the authors. In the thorough redesign, stompest has gained heavily on functionality, and the authors valued consistency, simplicity and symmetry over full backward compatibility to stompest 1. It is planned to add more features in the near future. Thus, the API should not be considered stable, which is why stompest 2 is still marked as (mature) alpha software.
+This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is also planned to make the integration tests pass against `RabbitMQ <http://www.rabbitmq.com/>`_ and `Apollo <http://activemq.apache.org/apollo/>`_. Minor enhancements may be required to use this STOMP adapter with other brokers. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API.
+
+The module is tested with Python 2.6 and 2.7, Twisted 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests are not guaranteed to pass on other brokers, but work is under way (testing against RabbitMQ and Apollo) to cure this. So far, only configuration issues arose, no code had to be changed.
+
+Acknowledgements
+================
+* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog>`_ at `Mozes <http://www.mozes.com/>`_ and deployed in their production environment.
+* Kudos to `Oisin Mulvihill <https://github.com/oisinmulvihill>`_, the developer of `stomper <http://code.google.com/p/stomper/>`_! The idea of an abstract representation of the STOMP protocol lives on in stompest.
