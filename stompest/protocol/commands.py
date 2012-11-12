@@ -146,6 +146,7 @@ def ack(frame, transactions=None, receipt=None, version=None):
     """Create an **ACK** frame for a received **MESSAGE** frame.
     
     :param frame: The :class:`~.frame.StompFrame` object representing the **MESSAGE** frame we wish to ack.
+    :param transactions: The ids of currently active transactions --- only if the **frame** is part of one of these transactions, the **transaction** header is included in the ACK frame.
     :param receipt: See :func:`disconnect`.
     """
     frame = StompFrame(StompSpec.ACK, _ackHeaders(frame, transactions, version))
@@ -156,6 +157,7 @@ def nack(frame, transactions=None, receipt=None, version=None):
     """Create a **NACK** frame for a received **MESSAGE** frame.
     
     :param frame: The :class:`~.frame.StompFrame` object representing the **MESSAGE** frame we wish to nack.
+    :param transactions: The ids of currently active transactions --- only if the **frame** is part of one of these transactions, the **transaction** header is included in the NACK frame.
     :param receipt: See :func:`disconnect`.
     """
     version = _version(version)
