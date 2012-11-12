@@ -386,7 +386,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
     def test_transaction_commit(self):
         config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
         client = async.Stomp(config)
-        yield client.connect()
+        yield client.connect(host='/')
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
         
         transaction = '4711'
@@ -407,7 +407,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
     def test_transaction_abort(self):
         config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
         client = async.Stomp(config)
-        yield client.connect()
+        yield client.connect(host='/')
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
         
         transaction = '4711'
