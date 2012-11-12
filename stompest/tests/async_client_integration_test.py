@@ -105,7 +105,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
     frame1 = 'choke on this'
     msg1Hdrs = {'food': 'barf', 'persistent': 'true'}
     frame2 = 'follow up message'
-    queue = '/queue/asyncFailoverHandlerExceptionWithErrorQueueUnitTest'
+    queue = '/queue/asyncHandlerExceptionWithErrorQueueUnitTest'
     errorQueue = '/queue/zzz.error.asyncStompestHandlerExceptionWithErrorQueueUnitTest'
 
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_0(self):
@@ -247,7 +247,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
     numMsgs = 5
     msgCount = 0
     frame = 'test'
-    queue = '/queue/asyncFailoverGracefulDisconnectUnitTest'
+    queue = '/queue/asyncGracefulDisconnectUnitTest'
 
     @defer.inlineCallbacks
     def test_onDisconnect_waitForOutstandingMessagesToFinish(self):
@@ -290,7 +290,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
 
 class SubscribeTestCase(AsyncClientBaseTestCase):
     frame = 'test'
-    queue = '/queue/asyncFailoverSubscribeTestCase'
+    queue = '/queue/asyncSubscribeTestCase'
 
     @defer.inlineCallbacks
     def test_unsubscribe(self):
@@ -347,7 +347,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
 
 class NackTestCase(AsyncClientBaseTestCase):
     frame = 'test'
-    queue = '/queue/asyncFailoverSubscribeTestCase'
+    queue = '/queue/asyncNackTestCase'
 
     @defer.inlineCallbacks
     def test_nack(self):
@@ -378,6 +378,50 @@ class NackTestCase(AsyncClientBaseTestCase):
 
         yield client.disconnect()
 
+class TransactionTestCase(AsyncClientBaseTestCase):
+    frame = 'test'
+    queue = '/queue/asyncTransactionTestCase'
+    
+    @defer.inlineCallbacks
+    def test_transaction_commit(self):
+        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
+        client = async.Stomp(config)
+        yield client.connect()
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
+        
+        transaction = '4711'
+        yield client.begin(transaction, receipt='%s-begin' % transaction)
+        client.send(self.queue, 'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
+        yield task.deferLater(reactor, 0.1, lambda: None)
+        client.send(self.queue, 'test message without transaction')
+        while self.framesHandled != 1:
+            yield task.deferLater(reactor, 0.01, lambda: None)
+        self.assertEquals(self.consumedFrame.body, 'test message without transaction')
+        yield client.commit(transaction, receipt='%s-commit' % transaction)
+        while self.framesHandled != 2:
+            yield task.deferLater(reactor, 0.01, lambda: None)
+        self.assertEquals(self.consumedFrame.body, 'test message with transaction')
+        yield client.disconnect()
+        
+    @defer.inlineCallbacks
+    def test_transaction_abort(self):
+        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
+        client = async.Stomp(config)
+        yield client.connect()
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
+        
+        transaction = '4711'
+        yield client.begin(transaction, receipt='%s-begin' % transaction)
+        client.send(self.queue, 'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
+        yield task.deferLater(reactor, 0.1, lambda: None)
+        client.send(self.queue, 'test message without transaction')
+        while self.framesHandled != 1:
+            yield task.deferLater(reactor, 0.01, lambda: None)
+        self.assertEquals(self.consumedFrame.body, 'test message without transaction')
+        yield client.abort(transaction, receipt='%s-commit' % transaction)
+        yield client.disconnect(receipt='bye')
+        self.assertEquals(self.framesHandled, 1)
+        
 if __name__ == '__main__':
     import sys
     from twisted.scripts import trial

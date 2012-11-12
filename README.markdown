@@ -78,7 +78,7 @@ Acknowledgements
 Caveats
 =======
 * Requires Python 2.6 or higher. Not yet tested with Python 3.x.
-* This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). The integration tests also pass against [RabbitMQ](http://www.rabbitmq.com/) 2.8.7. It is planned to include also [Apollo](http://activemq.apache.org/apollo/) into the group of tested brokers. Minor enhancements may be required to use this STOMP adapter with other brokers. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API.
+* This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API.
 
 To Do
 =====

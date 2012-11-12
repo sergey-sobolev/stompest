@@ -254,10 +254,9 @@ class Stomp(object):
 
         Send a **BEGIN** frame to begin a STOMP transaction.
         """
-        frame, token = self.session.begin(transaction, receipt)
+        frame = self.session.begin(transaction, receipt)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
-        defer.returnValue(token)
 
     @connected
     @defer.inlineCallbacks
@@ -266,10 +265,9 @@ class Stomp(object):
 
         Send an **ABORT** frame to abort a STOMP transaction.
         """
-        frame, token = self.session.abort(transaction, receipt)
+        frame = self.session.abort(transaction, receipt)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
-        defer.returnValue(token)
 
     @connected
     @defer.inlineCallbacks
@@ -278,10 +276,9 @@ class Stomp(object):
 
         Send a **COMMIT** frame to commit a STOMP transaction.
         """
-        frame, token = self.session.commit(transaction, receipt)
+        frame = self.session.commit(transaction, receipt)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
-        defer.returnValue(token)
 
     @connected
     @defer.inlineCallbacks
