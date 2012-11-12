@@ -550,7 +550,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.ack">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.ack" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>transactions=None</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an <strong>ACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -558,6 +558,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>frame</strong> &#8211; The <a class="reference internal" href="#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> object representing the <strong>MESSAGE</strong> frame we wish to ack.</li>
+<li><strong>transactions</strong> &#8211; The ids of currently active transactions &#8212; only if the <strong>frame</strong> is part of one of these transactions, the <strong>transaction</strong> header is included in the ACK frame.</li>
 <li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.protocol.commands.disconnect" title="stompest.protocol.commands.disconnect"><tt class="xref py py-func docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
 </ul>
 </td>
@@ -611,8 +612,8 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>login</strong> &#8211; The <strong>login</strong> header.</li>
-<li><strong>passcode</strong> &#8211; The <strong>passcode</strong> header.</li>
+<li><strong>login</strong> &#8211; The <strong>login</strong> header. The default is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, which means that no such header will be added.</li>
+<li><strong>passcode</strong> &#8211; The <strong>passcode</strong> header. The default is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, which means that no such header will be added.</li>
 <li><strong>headers</strong> &#8211; Additional STOMP headers.</li>
 <li><strong>versions</strong> &#8211; A list of the STOMP versions we wish to support. The default is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, which means that we will offer the broker to accept any version prior or equal to the default STOMP protocol version.</li>
 <li><strong>host</strong> &#8211; The <strong>host</strong> header which gives this client a human readable name on the broker side.</li>
@@ -669,7 +670,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.nack">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.nack" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>transactions=None</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.nack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <strong>NACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -677,6 +678,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>frame</strong> &#8211; The <a class="reference internal" href="#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> object representing the <strong>MESSAGE</strong> frame we wish to nack.</li>
+<li><strong>transactions</strong> &#8211; The ids of currently active transactions &#8212; only if the <strong>frame</strong> is part of one of these transactions, the <strong>transaction</strong> header is included in the NACK frame.</li>
 <li><strong>receipt</strong> &#8211; See <a class="reference internal" href="#stompest.protocol.commands.disconnect" title="stompest.protocol.commands.disconnect"><tt class="xref py py-func docutils literal"><span class="pre">disconnect()</span></tt></a>.</li>
 </ul>
 </td>
