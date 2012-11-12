@@ -72,10 +72,10 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertEquals(frame.body, 'test message')
         client.ack(frame)
 
-        with client.transaction(4711, receipt='4712') as transaction:
-            self.assertEquals(transaction, '4711')
-            client.send(self.DESTINATION, 'test message', {StompSpec.TRANSACTION_HEADER: transaction})
+        with client.transaction(4713, receipt='4712') as transaction:
+            self.assertEquals(transaction, '4713')
             self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4712-begin'}))
+            client.send(self.DESTINATION, 'test message', {StompSpec.TRANSACTION_HEADER: transaction})
             client.send(self.DESTINATION, 'test message without transaction')
             self.assertTrue(client.canRead(self.TIMEOUT))
             frame = client.receiveFrame()
@@ -88,8 +88,8 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.ack(frame)
 
         try:
-            with client.transaction(4711) as transaction:
-                self.assertEquals(transaction, '4711')
+            with client.transaction(4714) as transaction:
+                self.assertEquals(transaction, '4714')
                 client.send(self.DESTINATION, 'test message', {StompSpec.TRANSACTION_HEADER: transaction})
                 raise RuntimeError('poof')
         except RuntimeError as e:
@@ -136,7 +136,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
 
     def test_4_integration_stomp_1_1(self):
         client = Stomp(StompConfig(uri='tcp://localhost:61613', version='1.1'))
-        client.connect()
+        client.connect(host='/') # RabbitMQ friendly
         if client.session.version == '1.0':
             print 'Broker localhost:61613 does not support STOMP protocol version 1.1'
             client.disconnect()
@@ -163,7 +163,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4712'}))
         self.assertTrue(client.canRead(self.TIMEOUT))
         self.assertRaises(StompConnectionError, client.receiveFrame)
-        client.connect()
+        client.connect(host='/')
         client.disconnect(receipt='4711')
         self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4711'}))
         self.assertTrue(client.canRead(self.TIMEOUT))

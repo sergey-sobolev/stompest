@@ -155,14 +155,14 @@ class StompSession(object):
     def ack(self, frame, receipt=None):
         """Create an **ACK** frame for a received **MESSAGE** frame."""
         self.__check('ack', [self.CONNECTED])
-        frame = commands.ack(frame, receipt, self.version)
+        frame = commands.ack(frame, self._transactions, receipt, self.version)
         self._receipt(receipt)
         return frame
     
     def nack(self, frame, receipt=None):
         """Create a **NACK** frame for a received **MESSAGE** frame."""
         self.__check('nack', [self.CONNECTED])
-        frame = commands.nack(frame, receipt, self.version)
+        frame = commands.nack(frame, self._transactions, receipt, self.version)
         self._receipt(receipt)
         return frame
     

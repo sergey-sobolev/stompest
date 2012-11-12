@@ -242,7 +242,6 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         #Verify that message was retried
         self.assertEquals(self.frame1, self.unhandledFrame.body)
         self.assertEquals(self.frame1, self.consumedFrame.body)
-        self.assertEquals(self.unhandledFrame.headers['message-id'], self.consumedFrame.headers['message-id'])
 
 class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
     numMsgs = 5

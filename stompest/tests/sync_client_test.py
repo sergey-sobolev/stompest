@@ -135,7 +135,7 @@ class SimpleStompTest(unittest.TestCase):
         stomp.nack(frame, receipt='123')
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(commands.nack(frame, '123', '1.1'), sentFrame)
+        self.assertEquals(commands.nack(frame, receipt='123', version='1.1'), sentFrame)
 
     def test_ack_writes_correct_frame(self):
         id_ = '12345'

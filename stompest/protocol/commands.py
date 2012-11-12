@@ -142,17 +142,17 @@ def unsubscribe(token, receipt=None, version=None):
         _checkHeader(frame, StompSpec.DESTINATION_HEADER)
     return frame
 
-def ack(frame, receipt=None, version=None):
+def ack(frame, transactions=None, receipt=None, version=None):
     """Create an **ACK** frame for a received **MESSAGE** frame.
     
     :param frame: The :class:`~.frame.StompFrame` object representing the **MESSAGE** frame we wish to ack.
     :param receipt: See :func:`disconnect`.
     """
-    frame = StompFrame(StompSpec.ACK, _ackHeaders(frame, version))
+    frame = StompFrame(StompSpec.ACK, _ackHeaders(frame, transactions, version))
     _addReceiptHeader(frame, receipt)
     return frame
 
-def nack(frame, receipt=None, version=None):
+def nack(frame, transactions=None, receipt=None, version=None):
     """Create a **NACK** frame for a received **MESSAGE** frame.
     
     :param frame: The :class:`~.frame.StompFrame` object representing the **MESSAGE** frame we wish to nack.
@@ -161,7 +161,7 @@ def nack(frame, receipt=None, version=None):
     version = _version(version)
     if version == StompSpec.VERSION_1_0:
         raise StompProtocolError('%s not supported (version %s)' % (StompSpec.NACK, version))
-    frame = StompFrame(StompSpec.NACK, _ackHeaders(frame, version))
+    frame = StompFrame(StompSpec.NACK, _ackHeaders(frame, transactions, version))
     _addReceiptHeader(frame, receipt)
     return frame
 
@@ -283,13 +283,21 @@ _versions = versions
 
 # private helper methods
 
-def _ackHeaders(frame, version):
+def _ackHeaders(frame, transactions, version):
     version = _version(version)
     _checkCommand(frame, [StompSpec.MESSAGE])
     _checkHeader(frame, StompSpec.MESSAGE_ID_HEADER, version)
     if version != StompSpec.VERSION_1_0:
         _checkHeader(frame, StompSpec.SUBSCRIPTION_HEADER, version)
-    return dict((key, value) for (key, value) in frame.headers.iteritems() if key in (StompSpec.SUBSCRIPTION_HEADER, StompSpec.MESSAGE_ID_HEADER, StompSpec.TRANSACTION_HEADER))
+    keys = [StompSpec.SUBSCRIPTION_HEADER, StompSpec.MESSAGE_ID_HEADER]
+    try:
+        transaction = frame.headers[StompSpec.TRANSACTION_HEADER]
+    except KeyError:
+        pass
+    else:
+        if transaction in set(transactions or []):
+            keys.append(StompSpec.TRANSACTION_HEADER)
+    return dict((key, value) for (key, value) in frame.headers.iteritems() if key in keys)
 
 def _addReceiptHeader(frame, receipt):
     if not receipt:
