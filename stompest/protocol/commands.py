@@ -63,26 +63,23 @@ def stomp(versions, host, login=None, passcode=None, headers=None):
 def connect(login=None, passcode=None, headers=None, versions=None, host=None):
     """Create a **CONNECT** frame.
     
-    :param login: The **login** header.
-    :param passcode: The **passcode** header.
+    :param login: The **login** header. The default is :obj:`None`, which means that no such header will be added.
+    :param passcode: The **passcode** header. The default is :obj:`None`, which means that no such header will be added.
     :param headers: Additional STOMP headers.
     :param versions: A list of the STOMP versions we wish to support. The default is :obj:`None`, which means that we will offer the broker to accept any version prior or equal to the default STOMP protocol version.
     :param host: The **host** header which gives this client a human readable name on the broker side.
     """
     headers = dict(headers or [])
-    versions = [StompSpec.VERSION_1_0] if (versions is None) else list(sorted(_version(v) for v in versions))
-    if list(versions) == [StompSpec.VERSION_1_0]:
-        if (login is None) or (passcode is None):
-            raise StompProtocolError('Incomplete credentials [login=%s, passcode=%s]' % (login, passcode))
-    else:
-        headers[StompSpec.ACCEPT_VERSION_HEADER] = ','.join(_version(version) for version in versions)
-        if host is None:
-            host = socket.gethostbyaddr(socket.gethostname())[0]
-        headers[StompSpec.HOST_HEADER] = host
     if login is not None:
         headers[StompSpec.LOGIN_HEADER] = login
     if passcode is not None:
         headers[StompSpec.PASSCODE_HEADER] = passcode
+    versions = [StompSpec.VERSION_1_0] if (versions is None) else list(sorted(_version(v) for v in versions))
+    if versions != [StompSpec.VERSION_1_0]:
+        headers[StompSpec.ACCEPT_VERSION_HEADER] = ','.join(_version(version) for version in versions)
+        if host is None:
+            host = socket.gethostbyaddr(socket.gethostname())[0]
+        headers[StompSpec.HOST_HEADER] = host
     return StompFrame(StompSpec.CONNECT, headers)
 
 def disconnect(receipt=None):

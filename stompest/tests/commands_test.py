@@ -21,14 +21,13 @@ from stompest.protocol import commands, StompSpec, StompFrame
    
 class CommandsTest(unittest.TestCase):
     def test_connect(self):
-        self.assertRaises(StompProtocolError, commands.connect)
-        self.assertRaises(StompProtocolError, commands.connect, login='hi')
-        self.assertRaises(StompProtocolError, commands.connect, passcode='there')
+        self.assertEquals(commands.connect(), StompFrame(StompSpec.CONNECT))
+        self.assertEquals(commands.connect(login='hi'), StompFrame(StompSpec.CONNECT, headers={StompSpec.LOGIN_HEADER: 'hi'}))
+        self.assertEquals(commands.connect(passcode='there'), StompFrame(StompSpec.CONNECT, headers={StompSpec.PASSCODE_HEADER: 'there'}))
         self.assertEquals(commands.connect('hi', 'there'), StompFrame(StompSpec.CONNECT, headers={StompSpec.LOGIN_HEADER: 'hi', StompSpec.PASSCODE_HEADER: 'there'}))
         self.assertEquals(commands.connect('hi', 'there', {'4711': '0815'}), StompFrame(StompSpec.CONNECT, headers={StompSpec.LOGIN_HEADER: 'hi', StompSpec.PASSCODE_HEADER: 'there', '4711': '0815'}))
         
         self.assertEquals(commands.connect('hi', 'there', versions=[StompSpec.VERSION_1_0]), StompFrame(StompSpec.CONNECT, headers={StompSpec.LOGIN_HEADER: 'hi', StompSpec.PASSCODE_HEADER: 'there'}))
-        self.assertRaises(StompProtocolError, commands.connect, versions=[StompSpec.VERSION_1_0])
         
         frame = commands.connect(versions=[StompSpec.VERSION_1_0, StompSpec.VERSION_1_1])
         frame.headers.pop(StompSpec.HOST_HEADER)
