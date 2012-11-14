@@ -19,21 +19,26 @@ import unittest
 
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError
-from stompest.protocol.frame import StompFrame, StompSpec
+from stompest.protocol import commands, StompFrame, StompSpec
 from stompest.sync import Stomp
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
+
+from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST
 
 class SimpleStompIntegrationTest(unittest.TestCase):
     DESTINATION = '/queue/stompUnitTest'
     TIMEOUT = 0.1
     log = logging.getLogger(LOG_CATEGORY)
 
+    def getConfig(self, version):
+        return StompConfig('tcp://%s:%s' % (HOST, PORT), login=LOGIN, passcode=PASSCODE, version=version)
+
     def setUp(self):
-        config = StompConfig(uri='tcp://localhost:61613')
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = Stomp(config)
-        client.connect()
+        client.connect(host=VIRTUALHOST)
         client.subscribe(self.DESTINATION, {StompSpec.ACK_HEADER: 'auto'})
         client.subscribe(self.DESTINATION, {StompSpec.ID_HEADER: 'bla', StompSpec.ACK_HEADER: 'auto'})
         while client.canRead(self.TIMEOUT):
@@ -42,9 +47,9 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.disconnect()
 
     def test_1_integration(self):
-        config = StompConfig(uri='tcp://localhost:61613')
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = Stomp(config)
-        client.connect()
+        client.connect(host=VIRTUALHOST)
 
         client.send(self.DESTINATION, 'test message 1')
         client.send(self.DESTINATION, 'test message 2')
@@ -57,9 +62,9 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertFalse(client.canRead(self.TIMEOUT))
 
     def test_2_transaction(self):
-        config = StompConfig(uri='tcp://localhost:61613')
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = Stomp(config)
-        client.connect()
+        client.connect(host=VIRTUALHOST)
         client.subscribe(self.DESTINATION, {StompSpec.ACK_HEADER: 'client-individual'})
         self.assertFalse(client.canRead(self.TIMEOUT))
 
@@ -82,10 +87,13 @@ class SimpleStompIntegrationTest(unittest.TestCase):
             self.assertEquals(frame.body, 'test message without transaction')
             client.ack(frame)
             self.assertFalse(client.canRead(0))
-        self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4712-commit'}))
-        frame = client.receiveFrame()
-        self.assertEquals(frame.body, 'test message')
+        frames = [client.receiveFrame() for _ in xrange(2)]
+        frames = list(sorted(frames, key=lambda f: f.command))
+        frame = frames[0]
         client.ack(frame)
+        self.assertEquals(frame.body, 'test message')
+        frame = frames[1]
+        self.assertEquals(frame, StompFrame(StompSpec.RECEIPT, {'receipt-id': '4712-commit'}))
 
         try:
             with client.transaction(4714) as transaction:
@@ -102,24 +110,24 @@ class SimpleStompIntegrationTest(unittest.TestCase):
 
     def test_3_timeout(self):
         timeout = 0.2
-        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61614,tcp://localhost:61613)?startupMaxReconnectAttempts=1,randomize=false'))
-        client.connect(connectTimeout=timeout)
+        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61613)?startupMaxReconnectAttempts=1,randomize=false', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0))
+        client.connect(host=VIRTUALHOST, connectTimeout=timeout)
         client.disconnect()
 
-        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61614,tcp://localhost:61615)?startupMaxReconnectAttempts=1,backOffMultiplier=3'))
-        self.assertRaises(StompConnectionError, client.connect, connectTimeout=timeout)
+        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61611)?startupMaxReconnectAttempts=1,backOffMultiplier=3', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0))
+        self.assertRaises(StompConnectionError, client.connect, host=VIRTUALHOST, connectTimeout=timeout)
 
-        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61614,tcp://localhost:61613)?randomize=false')) # default is startupMaxReconnectAttempts = 0
-        self.assertRaises(StompConnectionError, client.connect, connectTimeout=timeout)
+        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61613)?randomize=false', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0)) # default is startupMaxReconnectAttempts = 0
+        self.assertRaises(StompConnectionError, client.connect, host=VIRTUALHOST, connectTimeout=timeout)
 
     def test_3_socket_failure_and_replay(self):
-        client = Stomp(StompConfig(uri='tcp://localhost:61613', version='1.0'))
-        client.connect()
+        client = Stomp(self.getConfig(StompSpec.VERSION_1_0))
+        client.connect(host=VIRTUALHOST)
         headers = {StompSpec.ACK_HEADER: 'client-individual'}
         token = client.subscribe(self.DESTINATION, headers)
         client.sendFrame(StompFrame('DISCONNECT')) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
-        client.connect()
+        client.connect(host=VIRTUALHOST)
         client.send(self.DESTINATION, 'test message 1')
         client.ack(client.receiveFrame())
         client.unsubscribe(token)
@@ -128,19 +136,20 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         headers[StompSpec.DESTINATION_HEADER] = self.DESTINATION
         client.sendFrame(StompFrame('DISCONNECT')) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
-        client.connect()
+        client.connect(host=VIRTUALHOST)
         client.send(self.DESTINATION, 'test message 2')
         client.ack(client.receiveFrame())
         client.unsubscribe(('id', 'bla'))
         client.disconnect()
 
     def test_4_integration_stomp_1_1(self):
-        client = Stomp(StompConfig(uri='tcp://localhost:61613', version='1.1'))
-        client.connect(host='/') # RabbitMQ friendly
-        if client.session.version == '1.0':
-            print 'Broker localhost:61613 does not support STOMP protocol version 1.1'
-            client.disconnect()
+        if StompSpec.VERSION_1_1 not in commands.versions(VERSION):
+            print 'This broker does not support STOMP protocol version 1.1'
             return
+            
+        client = Stomp(self.getConfig(StompSpec.VERSION_1_1))
+        client.connect(host=VIRTUALHOST)
+        
         client.send(self.DESTINATION, 'test message 1')
         client.send(self.DESTINATION, 'test message 2')
         self.assertFalse(client.canRead(self.TIMEOUT))
@@ -161,14 +170,12 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertFalse(client.canRead(self.TIMEOUT))
         client.disconnect(receipt='4712')
         self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4712'}))
-        self.assertTrue(client.canRead(self.TIMEOUT))
         self.assertRaises(StompConnectionError, client.receiveFrame)
-        client.connect(host='/')
+        client.connect(host=VIRTUALHOST)
         client.disconnect(receipt='4711')
         self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4711'}))
-        self.assertTrue(client.canRead(self.TIMEOUT))
         client.close()
-        self.assertRaises(StompConnectionError, client.canRead, self.TIMEOUT)
+        self.assertRaises(StompConnectionError, client.canRead, 0)
 
 if __name__ == '__main__':
     unittest.main()

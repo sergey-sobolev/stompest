@@ -23,15 +23,12 @@ from stompest import async, sync
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
-from stompest.protocol import StompSpec
+from stompest.protocol import StompSpec, commands
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-HOST = 'localhost'
-PORT = 61613
-
-CONFIG = StompConfig('tcp://%s:%s' % (HOST, PORT))
+from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST
 
 class StompestTestError(Exception):
     pass
@@ -40,20 +37,24 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     queue = None
     errorQueue = None
     log = logging.getLogger(LOG_CATEGORY)
+    headers = {StompSpec.ID_HEADER: '4711'}
 
     TIMEOUT = 0.1
+
+    def getConfig(self, version):
+        return StompConfig('tcp://%s:%s' % (HOST, PORT), login=LOGIN, passcode=PASSCODE, version=version)
 
     def cleanQueues(self):
         self.cleanQueue(self.queue)
         self.cleanQueue(self.errorQueue)
 
-    def cleanQueue(self, queue):
-        if not queue:
+    def cleanQueue(self, destination, headers=None):
+        if not destination:
             return
-
-        client = sync.Stomp(CONFIG)
-        client.connect()
-        client.subscribe(queue, {StompSpec.ACK_HEADER: 'auto'})
+        
+        client = sync.Stomp(self.getConfig(StompSpec.VERSION_1_0))
+        client.connect(host=VIRTUALHOST)
+        client.subscribe(destination, headers)
         while client.canRead(0.2):
             frame = client.receiveFrame()
             self.log.debug('Dequeued old %s' % frame.info())
@@ -107,20 +108,26 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
     frame2 = 'follow up message'
     queue = '/queue/asyncHandlerExceptionWithErrorQueueUnitTest'
     errorQueue = '/queue/zzz.error.asyncStompestHandlerExceptionWithErrorQueueUnitTest'
-
+    
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_0(self):
+        self.cleanQueue(self.queue)
         return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.0')
 
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_1(self):
+        self.cleanQueue(self.queue, self.headers)
         return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.1')
 
     @defer.inlineCallbacks
     def _test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(self, version):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version=version)
+        if version not in commands.versions(VERSION):
+            print 'This broker does not support STOMP protocol version 1.1'
+            return
+        
+        config = self.getConfig(StompSpec.VERSION_1_1)
         client = async.Stomp(config)
 
         try:
-            client = yield client.connect()
+            client = yield client.connect(host=VIRTUALHOST)
             if client.session.version == '1.0':
                 yield client.disconnect()
                 raise StompProtocolError('Broker chose STOMP protocol 1.0')
@@ -138,9 +145,9 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client.send(self.queue, self.frame1, self.msg1Hdrs)
         client.send(self.queue, self.frame2)
 
-        defaultHeaders = {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': 1}
+        defaultHeaders = {StompSpec.ACK_HEADER: 'client-individual'}
         if version != '1.0':
-            defaultHeaders[StompSpec.ID_HEADER] = '4711'
+            defaultHeaders.update(self.headers)
 
         #Barf on first message so it will get put in error queue
         #Use selector to guarantee message order.  AMQ doesn't guarantee order by default
@@ -159,7 +166,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
 
         #Reconnect and subscribe again - consuming second message then disconnecting
-        client = yield client.connect()
+        client = yield client.connect(host=VIRTUALHOST)
         headers.pop('selector')
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, headers, errorDestination=self.errorQueue)
 
@@ -167,7 +174,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         yield client.disconnected
 
         #Reconnect and subscribe to error queue
-        client = yield client.connect()
+        client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, defaultHeaders)
 
         #Wait for disconnect
@@ -183,7 +190,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
     @defer.inlineCallbacks
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_no_disconnect(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT))
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
 
         #Connect
@@ -194,14 +201,14 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client.send(self.queue, self.frame2)
 
         #Barf on first frame, disconnect on second frame
-        client.subscribe(self.queue, self._barfOneEatOneAndDisonnect, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': 1}, errorDestination=self.errorQueue)
+        client.subscribe(self.queue, self._barfOneEatOneAndDisonnect, {StompSpec.ACK_HEADER: 'client-individual'}, errorDestination=self.errorQueue)
 
         #Client disconnects without error
         yield client.disconnected
 
         #Reconnect and subscribe to error queue
         client = yield client.connect()
-        client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': 1})
+        client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
         #Wait for disconnect
         yield client.disconnected
@@ -212,7 +219,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
     @defer.inlineCallbacks
     def test_onhandlerException_disconnect(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT))
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
 
         client = yield client.connect()
@@ -221,7 +228,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client.send(self.queue, self.frame1, self.msg1Hdrs)
 
         #Barf on first frame (implicit disconnect)
-        client.subscribe(self.queue, self._saveFrameAndBarf, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': 1}, ack=False, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
+        client.subscribe(self.queue, self._saveFrameAndBarf, {StompSpec.ACK_HEADER: 'client-individual'}, ack=False, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
 
         #Client disconnected and returned error
         try:
@@ -234,7 +241,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         #Reconnect and subscribe again - consuming retried message and disconnecting
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
         client = yield client.connect()
-        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': 1})
+        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
         #Client disconnects without error
         yield client.disconnected
@@ -251,13 +258,13 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
 
     @defer.inlineCallbacks
     def test_onDisconnect_waitForOutstandingMessagesToFinish(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT))
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config, receiptTimeout=1.0)
 
         #Connect
         client = yield client.connect()
         yield task.cooperate(iter([client.send(self.queue, self.frame, receipt='message-%d' % j) for j in xrange(self.numMsgs)])).whenDone()
-        client.subscribe(self.queue, self._frameHandler, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': self.numMsgs})
+        client.subscribe(self.queue, self._frameHandler, {StompSpec.ACK_HEADER: 'client-individual'})
 
         #Wait for disconnect
         yield client.disconnected
@@ -266,7 +273,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         client = yield client.connect()
         self.timeExpired = False
         self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client) #@UndefinedVariable
-        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': self.numMsgs})
+        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
         #Wait for disconnect
         yield client.disconnected
@@ -294,12 +301,12 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
 
     @defer.inlineCallbacks
     def test_unsubscribe(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT))
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
 
         client = yield client.connect()
 
-        token = yield client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1'})
+        token = yield client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual'})
         client.send(self.queue, self.frame)
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -309,17 +316,18 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         yield task.deferLater(reactor, 0.2, lambda: None)
         self.assertEquals(self.framesHandled, 1)
 
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1'})
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual'})
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
         yield client.disconnect()
 
     @defer.inlineCallbacks
     def test_replay(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT))
+        config = self.getConfig(StompSpec.VERSION_1_0)
+        
         client = async.Stomp(config)
         client = yield client.connect()
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1'})
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual'})
         client.send(self.queue, self.frame)
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -348,7 +356,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
 class NackTestCase(AsyncClientBaseTestCase):
     frame = 'test'
     queue = '/queue/asyncNackTestCase'
-
+    
     @defer.inlineCallbacks
     def test_nack(self):
         config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
@@ -363,7 +371,7 @@ class NackTestCase(AsyncClientBaseTestCase):
             print 'Broker does not support STOMP protocol 1.1. Skipping this test case. [%s]' % e
             defer.returnValue(None)
 
-        client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=False)
+        client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=False)
         client.send(self.queue, self.frame)
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -371,7 +379,7 @@ class NackTestCase(AsyncClientBaseTestCase):
         yield client.disconnect()
 
         client = yield client.connect()
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
         client.send(self.queue, self.frame)
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -384,10 +392,10 @@ class TransactionTestCase(AsyncClientBaseTestCase):
     
     @defer.inlineCallbacks
     def test_transaction_commit(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
         yield client.connect(host='/')
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
         
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
@@ -405,10 +413,10 @@ class TransactionTestCase(AsyncClientBaseTestCase):
         
     @defer.inlineCallbacks
     def test_transaction_abort(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
+        config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
         yield client.connect(host='/')
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '1', 'id': '4711'}, ack=True)
+        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
         
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
