@@ -155,8 +155,8 @@ class Stomp(object):
         self.sendFrame(commands.send(destination, body, headers, receipt))
         
     @connected
-    def subscribe(self, destination, headers, receipt=None):
-        """subscribe(destination, handler, headers=None, receipt=None)
+    def subscribe(self, destination, headers=None, receipt=None):
+        """subscribe(destination, headers=None, receipt=None)
         
         Send a **SUBSCRIBE** frame to subscribe to a STOMP destination. This method returns a token which you have to keep if you wish to match incoming **MESSAGE** frames to this subscription or to :meth:`~.sync.client.Stomp.unsubscribe` later.
         """
