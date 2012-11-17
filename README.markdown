@@ -20,6 +20,12 @@ This module is thoroughly unit tested and (in version 1.x) production hardened f
 
 The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API. 
 
+Installation
+============
+
+* If you do not wish to use the asynchronous client (which depends on Twisted), stompest is fully self-contained.
+* You can find all stompest releases on the [Python Package Index](http://pypi.python.org/pypi/stompest/). Just use the method you like most: `easy_install stompest`, `pip install stompest`, or `python setup.py install`.
+
 Documentation & Code Examples
 =============================
 The stompest API is fully documented [here](http://nikipore.github.com/stompest/).

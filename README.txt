@@ -20,6 +20,12 @@ This module is thoroughly unit tested and (in version 1.x) production hardened f
 
 The module is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 2.8.7 and `Apollo <http://activemq.apache.org/apollo/>`_ 1.5. All of these brokers were tested with STOMP protocols 1.0 and 1.1. Minor enhancements may be required to use this STOMP adapter with other brokers.
 
+Installation
+============
+
+* If you do not wish to use the asynchronous client (which depends on Twisted), stompest is fully self-contained.
+* Just use the method you like most: ``easy_install stompest``, ``pip install stompest``, or ``python setup.py install``.
+
 Documentation & Code Examples
 =============================
 The stompest API is fully documented `here <http://nikipore.github.com/stompest/>`_.
