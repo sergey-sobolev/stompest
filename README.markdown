@@ -24,6 +24,10 @@ Documentation & Code Examples
 =============================
 The stompest API is fully documented [here](http://nikipore.github.com/stompest/).
 
+Questions or Suggestions?
+=========================
+Feel free to open an issue [here](https://github.com/nikipore/stompest/issues/) or post a question on the [forum](http://groups.google.com/group/stompest/).
+
 Features
 ========
 

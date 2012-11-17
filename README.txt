@@ -20,7 +20,15 @@ This module is thoroughly unit tested and (in version 1.x) production hardened f
 
 The module is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 2.8.7 and `Apollo <http://activemq.apache.org/apollo/>`_ 1.5. All of these brokers were tested with STOMP protocols 1.0 and 1.1. Minor enhancements may be required to use this STOMP adapter with other brokers.
 
+Documentation & Code Examples
+=============================
+The stompest API is fully documented `here <http://nikipore.github.com/stompest/>`_.
+
+Questions or Suggestions?
+=========================
+Feel free to open an issue `here <https://github.com/nikipore/stompest/issues/>`_ or post a question on the `forum <http://groups.google.com/group/stompest/>`_.
+
 Acknowledgements
 ================
-* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog>`_ at `Mozes <http://www.mozes.com/>`_ and deployed in their production environment.
-* Kudos to `Oisin Mulvihill <https://github.com/oisinmulvihill>`_, the developer of `stomper <http://code.google.com/p/stomper/>`_! The idea of an abstract representation of the STOMP protocol lives on in stompest.
+* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog/>`_ at `Mozes <http://www.mozes.com/>`_ and deployed in their production environment.
+* Kudos to `Oisin Mulvihill <https://github.com/oisinmulvihill/>`_, the developer of `stomper <http://code.google.com/p/stomper/>`_! The idea of an abstract representation of the STOMP protocol lives on in stompest.
