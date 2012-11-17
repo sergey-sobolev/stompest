@@ -34,5 +34,9 @@ A few words about history: When stompest was brought into being, there were alre
 
 Acknowledgements
 ================
-* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog>`_ at `Mozes <http://www.mozes.com/>`_ and deployed in their production environment.
-* Kudos to `Oisin Mulvihill <https://github.com/oisinmulvihill>`_, the developer of `stomper <http://code.google.com/p/stomper/>`_! The idea of an abstract representation of the STOMP protocol lives on in stompest.
+* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog/>`_ at `Mozes <http://www.mozes.com/>`_ and deployed in their production environment.
+* Kudos to `Oisin Mulvihill <https://github.com/oisinmulvihill/>`_, the developer of `stomper <http://code.google.com/p/stomper/>`_! The idea of an abstract representation of the STOMP protocol lives on in stompest.
+
+Questions or Suggestions?
+=========================
+Feel free to open an issue `here <https://github.com/nikipore/stompest/issues/>`_ or post a question on the `forum <http://groups.google.com/group/stompest/>`_.
