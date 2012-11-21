@@ -190,31 +190,33 @@ class SimpleStompIntegrationTest(unittest.TestCase):
 
         heartBeatPeriod = 1000
         client.connect(host=VIRTUALHOST, heartBeats=(heartBeatPeriod, heartBeatPeriod))
+        self.assertTrue((time.time() - client.lastReceived) < 0.1)
         if not (client.serverHeartBeat and client.clientHeartBeat):
             print 'broker does not support heart-beating. disconnecting ...'
             client.disconnect()
             client.close()
             return
 
-        self.assertEquals(client.serverHeartBeat, heartBeatPeriod)
-        self.assertEquals(client.clientHeartBeat, heartBeatPeriod)
-        self.assertTrue(abs(client.lastReceived - time.time()) < 0.5 * heartBeatPeriod / 1000.0)
-        t = time.time()
-        while (time.time() - t) < 3 * heartBeatPeriod / 1000.0:
-            time.sleep(0.5 * heartBeatPeriod / 1000.0)
-            client.canRead(0)
-            self.assertTrue(abs(client.lastReceived - time.time()) < 1.5 * heartBeatPeriod / 1000.0)
-            client.beat()
-            self.assertTrue(abs(client.lastSent - time.time()) < 0.5 * heartBeatPeriod / 1000.0)
+        serverHeartBeatInSeconds = client.serverHeartBeat / 1000.0
+        clientHeartBeatInSeconds = client.clientHeartBeat / 1000.0
 
-        t = time.time()
+        start = time.time()
+        while (time.time() - start) < (2.5 * max(serverHeartBeatInSeconds, clientHeartBeatInSeconds)):
+            time.sleep(0.5 * min(serverHeartBeatInSeconds, clientHeartBeatInSeconds))
+            client.canRead(0)
+            self.assertTrue((time.time() - client.lastReceived) < (1.5 * serverHeartBeatInSeconds))
+            if (time.time() - client.lastSent) > (0.5 * clientHeartBeatInSeconds):
+                client.beat()
+                self.assertTrue((time.time() - client.lastSent) < 0.1)
+
+        start = time.time()
         try:
-            while not client.canRead(0.5 * heartBeatPeriod / 1000.0):
+            while not client.canRead(0.5 * clientHeartBeatInSeconds):
                 pass
         except StompConnectionError:
-            self.assertTrue((time.time() - t) < 3 * heartBeatPeriod / 1000.0)
-            self.assertTrue(abs(client.lastReceived - time.time()) < 1.5 * heartBeatPeriod / 1000.0)
-            self.assertTrue(abs(client.lastSent - time.time()) > heartBeatPeriod / 1000.0)
+            self.assertTrue((time.time() - start) < (2.5 * clientHeartBeatInSeconds))
+            self.assertTrue((time.time() - client.lastReceived) < (1.5 * serverHeartBeatInSeconds))
+            self.assertTrue((time.time() - client.lastSent) > clientHeartBeatInSeconds)
         else:
             raise
         client.close()
