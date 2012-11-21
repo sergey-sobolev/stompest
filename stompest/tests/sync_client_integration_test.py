@@ -188,7 +188,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertEquals(client.lastReceived, None)
         self.assertEquals(client.lastSent, None)
 
-        heartBeatPeriod = 1000
+        heartBeatPeriod = 100
         client.connect(host=VIRTUALHOST, heartBeats=(heartBeatPeriod, heartBeatPeriod))
         self.assertTrue((time.time() - client.lastReceived) < 0.1)
         if not (client.serverHeartBeat and client.clientHeartBeat):

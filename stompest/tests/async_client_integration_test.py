@@ -28,7 +28,7 @@ from stompest.protocol import StompSpec, commands
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST
+from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST, BROKER
 
 class StompestTestError(Exception):
     pass
@@ -51,7 +51,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     def cleanQueue(self, destination, headers=None):
         if not destination:
             return
-        
+
         client = sync.Stomp(self.getConfig(StompSpec.VERSION_1_0))
         client.connect(host=VIRTUALHOST)
         client.subscribe(destination, headers)
@@ -108,7 +108,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
     frame2 = 'follow up message'
     queue = '/queue/asyncHandlerExceptionWithErrorQueueUnitTest'
     errorQueue = '/queue/zzz.error.asyncStompestHandlerExceptionWithErrorQueueUnitTest'
-    
+
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_0(self):
         self.cleanQueue(self.queue)
         return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.0')
@@ -122,7 +122,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         if version not in commands.versions(VERSION):
             print 'This broker does not support STOMP protocol version 1.1'
             return
-        
+
         config = self.getConfig(StompSpec.VERSION_1_1)
         client = async.Stomp(config)
 
@@ -324,7 +324,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
     @defer.inlineCallbacks
     def test_replay(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
-        
+
         client = async.Stomp(config)
         client = yield client.connect()
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual'})
@@ -356,7 +356,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
 class NackTestCase(AsyncClientBaseTestCase):
     frame = 'test'
     queue = '/queue/asyncNackTestCase'
-    
+
     @defer.inlineCallbacks
     def test_nack(self):
         config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
@@ -389,14 +389,14 @@ class NackTestCase(AsyncClientBaseTestCase):
 class TransactionTestCase(AsyncClientBaseTestCase):
     frame = 'test'
     queue = '/queue/asyncTransactionTestCase'
-    
+
     @defer.inlineCallbacks
     def test_transaction_commit(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
-        yield client.connect(host='/')
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
-        
+
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
         client.send(self.queue, 'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
@@ -410,14 +410,14 @@ class TransactionTestCase(AsyncClientBaseTestCase):
             yield task.deferLater(reactor, 0.01, lambda: None)
         self.assertEquals(self.consumedFrame.body, 'test message with transaction')
         yield client.disconnect()
-        
+
     @defer.inlineCallbacks
     def test_transaction_abort(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
-        yield client.connect(host='/')
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
-        
+
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
         client.send(self.queue, 'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
@@ -429,7 +429,21 @@ class TransactionTestCase(AsyncClientBaseTestCase):
         yield client.abort(transaction, receipt='%s-commit' % transaction)
         yield client.disconnect(receipt='bye')
         self.assertEquals(self.framesHandled, 1)
-        
+
+class HeartBeatTestCase(AsyncClientBaseTestCase):
+    frame = 'test'
+    queue = '/queue/asyncHeartBeatTestCase'
+
+    @defer.inlineCallbacks
+    def test_heart_beat(self):
+        port = 61612 if (BROKER == 'activemq') else PORT
+        config = StompConfig(uri='tcp://%s:%d' % (HOST, port), version='1.1')
+        client = async.Stomp(config)
+        yield client.connect(host=VIRTUALHOST, heartBeats=(250, 250))
+
+        yield task.deferLater(reactor, 1.0, lambda: None)
+        yield client.disconnect()
+
 if __name__ == '__main__':
     import sys
     from twisted.scripts import trial

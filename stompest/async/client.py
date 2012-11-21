@@ -45,8 +45,9 @@ Copyright 2011, 2012 Mozes, Inc.
 """
 import functools
 import logging
+import time
 
-from twisted.internet import defer, task
+from twisted.internet import defer, task, reactor
 
 from stompest.error import StompCancelledError, StompConnectionError, StompFrameError, StompProtocolError
 from stompest.protocol import StompSession, StompSpec
@@ -75,10 +76,12 @@ class Stomp(object):
 
     DEFAULT_ACK_MODE = 'client-individual'
     MESSAGE_FAILED_HEADER = 'message-failed'
+    DEFAULT_HEART_BEAT_THRESHOLDS = {'client': 0.8, 'server': 2.0}
 
-    def __init__(self, config, receiptTimeout=None):
+    def __init__(self, config, receiptTimeout=None, heartBeatThresholds=None):
         self._config = config
         self._receiptTimeout = receiptTimeout
+        self._heartBeatThresholds = heartBeatThresholds or self.DEFAULT_HEART_BEAT_THRESHOLDS
 
         self._session = StompSession(self._config.version, self._config.check)
         self._protocol = None
@@ -101,6 +104,8 @@ class Stomp(object):
         }
         self._subscriptions = {}
 
+        self._heartBeats = {}
+
     @property
     def disconnected(self):
         """This :class:`twisted.internet.defer.Deferred` calls back when the connection to the broker was lost. It will err back when the connection loss was unexpected or caused by another error.
@@ -119,13 +124,14 @@ class Stomp(object):
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.async.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
         self._protocol.send(frame)
+        self.session.sent()
 
     #
     # STOMP commands
     #
     @exclusive
     @defer.inlineCallbacks
-    def connect(self, headers=None, versions=None, host=None, connectTimeout=None, connectedTimeout=None):
+    def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None):
         """connect(headers=None, versions=None, host=None, connectTimeout=None, connectedTimeout=None)
 
         Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.async.client.Stomp.session`, replay them when the STOMP connection is established. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`self` when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.
@@ -138,7 +144,7 @@ class Stomp(object):
 
         .. seealso :: The :mod:`.protocol.failover` and :mod:`~.protocol.session` modules for the details of subscription replay and failover transport.
         """
-        frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host)
+        frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host, heartBeats)
 
         try:
             self._protocol
@@ -148,7 +154,7 @@ class Stomp(object):
             raise StompConnectionError('Already connected')
 
         try:
-            self._protocol = yield self._protocolCreator.connect(connectTimeout, self._onFrame, self._onConnectionLost)
+            self._protocol = yield self._protocolCreator.connect(connectTimeout, self.session.version, self._onFrame, self._onConnectionLost)
         except Exception as e:
             self.log.error('Endpoint connect failed')
             raise
@@ -325,6 +331,9 @@ class Stomp(object):
     # callbacks for received STOMP frames
     #
     def _onFrame(self, frame):
+        self.session.received()
+        if not frame:
+            return
         try:
             handler = self._handlers[frame.command]
         except KeyError:
@@ -335,6 +344,7 @@ class Stomp(object):
         self.session.connected(frame)
         self.log.info('Connected to stomp broker [session=%s]' % self.session.id)
         self._connecting[None].callback(None)
+        self._beats()
 
     def _onError(self, frame):
         if self._connecting:
@@ -436,6 +446,36 @@ class Stomp(object):
     #
     # private helpers
     #
+
+    def _beat(self, which):
+        try:
+            self._heartBeats.pop(which).cancel()
+        except:
+            pass
+        remaining = self._beatRemaining(which)
+        if remaining < 0:
+            return
+        if not remaining:
+            if which == 'client':
+                self.sendFrame(self.session.beat())
+                remaining = self._beatRemaining(which)
+            else:
+                self.disconnect(failure=StompConnectionError('Server heart-beat timeout'))
+                return
+        self._heartBeats[which] = reactor.callLater(remaining, self._beat, which) #@UndefinedVariable
+
+    def _beatRemaining(self, which):
+        heartBeat = {'client': self.session.clientHeartBeat, 'server': self.session.serverHeartBeat}[which]
+        if not heartBeat:
+            return -1
+        last = {'client': self.session.lastSent, 'server': self.session.lastReceived}[which]
+        elapsed = time.time() - last
+        return max((self._heartBeatThresholds[which] * heartBeat / 1000.0) - elapsed, 0)
+
+    def _beats(self):
+        for which in ('client', 'server'):
+            self._beat(which)
+
     def _createHandler(self, handler):
         @functools.wraps(handler)
         def _handler(_, result):
@@ -448,6 +488,7 @@ class Stomp(object):
         if not self.disconnect.running:
             self._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
         self.session.close(flush=not self._disconnectReason)
+        self._beats()
         for operations in (self._connecting, self._messages, self._receipts):
             for waiting in operations.values():
                 if not waiting.called:
