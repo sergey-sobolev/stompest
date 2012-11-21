@@ -79,6 +79,7 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -140,6 +141,22 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="protocol.html#stompest.protocol.commands.beat">beat() (in module stompest.protocol.commands)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.beat">(stompest.protocol.session.StompSession method)</a>
+  </dt>
+
+        
+  <dt><a href="sync.html#stompest.sync.client.Stomp.beat">(stompest.sync.client.Stomp method)</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
   <dt><a href="protocol.html#stompest.protocol.commands.begin">begin() (in module stompest.protocol.commands)</a>
   </dt>
 
@@ -174,6 +191,16 @@
 
       </dl></dd>
       
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.clientHeartBeat">clientHeartBeat (stompest.protocol.session.StompSession attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="sync.html#stompest.sync.client.Stomp.clientHeartBeat">(stompest.sync.client.Stomp attribute)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="protocol.html#stompest.protocol.session.StompSession.close">close() (stompest.protocol.session.StompSession method)</a>
   </dt>
 
@@ -183,6 +210,8 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#stompest.protocol.commands.commit">commit() (in module stompest.protocol.commands)</a>
   </dt>
@@ -201,8 +230,6 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#stompest.protocol.commands.connect">connect() (in module stompest.protocol.commands)</a>
   </dt>
@@ -300,6 +327,34 @@
   </dl></td>
 </tr></table>
 
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.lastReceived">lastReceived (stompest.protocol.session.StompSession attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="sync.html#stompest.sync.client.Stomp.lastReceived">(stompest.sync.client.Stomp attribute)</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.lastSent">lastSent (stompest.protocol.session.StompSession attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="sync.html#stompest.sync.client.Stomp.lastSent">(stompest.sync.client.Stomp attribute)</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
+</tr></table>
+
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
@@ -362,6 +417,10 @@
 
       </dl></dd>
       
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.received">received() (stompest.protocol.session.StompSession method)</a>
+  </dt>
+
+      
   <dt><a href="sync.html#stompest.sync.client.Stomp.receiveFrame">receiveFrame() (stompest.sync.client.Stomp method)</a>
   </dt>
 
@@ -414,9 +473,23 @@
   </dt>
 
       
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.sent">sent() (stompest.protocol.session.StompSession method)</a>
+  </dt>
+
+      
   <dt><a href="protocol.html#stompest.protocol.session.StompSession.server">server (stompest.protocol.session.StompSession attribute)</a>
   </dt>
 
+      
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.serverHeartBeat">serverHeartBeat (stompest.protocol.session.StompSession attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="sync.html#stompest.sync.client.Stomp.serverHeartBeat">(stompest.sync.client.Stomp attribute)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="async.html#stompest.async.client.Stomp.session">session (stompest.async.client.Stomp attribute)</a>
   </dt>
@@ -485,12 +558,12 @@
   <dt><a href="sync.html#module-stompest.examples">stompest.examples (module)</a>, <a href="async.html#module-stompest.examples">[1]</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#module-stompest.protocol">stompest.protocol (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#module-stompest.protocol.commands">stompest.protocol.commands (module)</a>
   </dt>
@@ -537,6 +610,10 @@
 
       
   <dt><a href="error.html#stompest.error.StompFrameError">StompFrameError</a>
+  </dt>
+
+      
+  <dt><a href="protocol.html#stompest.protocol.frame.StompHeartBeat">StompHeartBeat (class in stompest.protocol.frame)</a>
   </dt>
 
       

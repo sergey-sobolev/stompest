@@ -180,6 +180,12 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="stompest.sync.client.Stomp.beat">
+<tt class="descname">beat</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.beat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a STOMP heartbeat.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="stompest.sync.client.Stomp.begin">
 <tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>BEGIN</strong> frame to begin a STOMP transaction.</p>
@@ -201,6 +207,12 @@
 <p class="first admonition-title">Note</p>
 <p class="last">If the wire-level connection is not available, this method will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></tt>!</p>
 </div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.sync.client.Stomp.clientHeartBeat">
+<tt class="descname">clientHeartBeat</tt><a class="headerlink" href="#stompest.sync.client.Stomp.clientHeartBeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>The negotiated client heart-beat period in ms.</p>
 </dd></dl>
 
 <dl class="method">
@@ -273,6 +285,18 @@
 <p class="first admonition-title">Note</p>
 <p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <strong>RECEIPT</strong> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.close(flush=True)</span></tt>.</p>
 </div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.sync.client.Stomp.lastReceived">
+<tt class="descname">lastReceived</tt><a class="headerlink" href="#stompest.sync.client.Stomp.lastReceived" title="Permalink to this definition">¶</a></dt>
+<dd><p>The last time when data was received.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.sync.client.Stomp.lastSent">
+<tt class="descname">lastSent</tt><a class="headerlink" href="#stompest.sync.client.Stomp.lastSent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The last time when data was sent.</p>
 </dd></dl>
 
 <dl class="method">
@@ -349,6 +373,12 @@
 <p class="first admonition-title">Note</p>
 <p class="last">If we are not connected, this method, and all other API commands for sending STOMP frames except <a class="reference internal" href="#stompest.sync.client.Stomp.connect" title="stompest.sync.client.Stomp.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a>, will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></tt>. Use this command only if you have to bypass the <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> logic and you know what you&#8217;re doing!</p>
 </div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="stompest.sync.client.Stomp.serverHeartBeat">
+<tt class="descname">serverHeartBeat</tt><a class="headerlink" href="#stompest.sync.client.Stomp.serverHeartBeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>The negotiated server heart-beat period in ms.</p>
 </dd></dl>
 
 <dl class="attribute">
