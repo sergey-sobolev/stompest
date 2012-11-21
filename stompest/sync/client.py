@@ -19,8 +19,6 @@ Consumer
 API
 ---
 """
-from stompest.protocol.frame import StompFrame, StompHeartBeat
-import collections
 """
 Copyright 2012 Mozes, Inc.
 
@@ -36,6 +34,7 @@ Copyright 2012 Mozes, Inc.
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+import collections
 import contextlib
 import logging
 import time
@@ -289,8 +288,11 @@ class Stomp(object):
         finally:
             self._transport = None
 
+    @connected
     def canRead(self, timeout=None):
-        """Tell whether there is an incoming STOMP frame available for us to read.
+        """canRead(timeout=None)
+        
+        Tell whether there is an incoming STOMP frame available for us to read.
 
         :param timeout: This is the time (in seconds) to wait for a frame to become available. If :obj:`None`, we will wait indefinitely.
         
@@ -320,8 +322,8 @@ class Stomp(object):
         """
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Sending %s' % frame.info())
-        self.session.sent()
         self._transport.send(frame)
+        self.session.sent()
 
     def receiveFrame(self):
         """Fetch the next available frame.
@@ -340,7 +342,6 @@ class Stomp(object):
     @property
     def _transport(self):
         transport = self.__transport
-        self._messages = collections.deque()
         if not transport:
             raise StompConnectionError('Not connected')
         try:
@@ -353,11 +354,15 @@ class Stomp(object):
     @_transport.setter
     def _transport(self, transport):
         self.__transport = transport
+        self._messages = collections.deque()
 
     # heart-beating
 
+    @connected
     def beat(self):
-        """Create a STOMP heartbeat.
+        """beat()
+        
+        Create a STOMP heartbeat.
         """
         self.sendFrame(self.session.beat())
 
