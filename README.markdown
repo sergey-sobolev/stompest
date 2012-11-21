@@ -18,7 +18,7 @@ Both clients make use of a generic set of components in the `protocol` module ea
 
 This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
 
-The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API. 
+The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular async heart-beating and STOMP 1.2) may still require minor changes of the API. 
 
 Installation
 ============
@@ -49,7 +49,7 @@ Session layer
 * Manages the state of a connection.
 * Replays subscriptions upon reconnect.
 * Not yet fully client agnostic (currently only works on top of the simple client; support for the Twisted client is planned).
-* Heartbeat handling (not yet implemented).
+* Heart-beat handling.
 
 Failover layer
 --------------
@@ -88,11 +88,11 @@ Acknowledgements
 Caveats
 =======
 * Requires Python 2.6 or higher. Not yet tested with Python 3.x.
-* This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heartbeating and STOMP 1.2) may still require minor changes of the API.
+* This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular heart-beating and STOMP 1.2) may still require minor changes of the API.
 
 To Do
 =====
-* `async` client only: heartbeating.
+* `async` client only: heart-beating.
 * The URI scheme supports only TCP, no SSL (the authors don't need it because the client is run in "safe" production environments). For the `async` client, however, it should be straightforward to enhance the URI scheme by means of the [Endpoint API](http://twistedmatrix.com/documents/current/api/twisted.internet.endpoints.html). Contributions are welcome!
 * [STOMP 1.2 protocol](http://stomp.github.com/stomp-specification-1.2.html) (not before there is a reference broker implementation available).
 
@@ -101,4 +101,4 @@ Changes
 * 1.0.4 - Bug fix thanks to [Njal Karevoll](https://github.com/nkvoll).  No longer relies on newline after the null-byte frame separator.  Library is now compatible with RabbitMQ stomp adapter.
 * 1.1.1 - Thanks to [nikipore](https://github.com/nikipore) for adding support for binary messages.
 * 1.1.2 - Fixed issue with stomper adding a space in ACK message-id header. ActiveMQ 5.6.0 no longer tolerates this.
-* 2.0a1 - Complete redesign: feature-complete implementation of STOMP 1.0 and 1.1 (except heartbeating). Broker failover. Decoupled from [stomper](http://code.google.com/p/stomper/).
+* 2.0a1 - Complete redesign: feature-complete implementation of STOMP 1.0 and 1.1 (except async heart-beating). Broker failover. Decoupled from [stomper](http://code.google.com/p/stomper/).
