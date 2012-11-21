@@ -19,6 +19,8 @@ Consumer
 API
 ---
 """
+from stompest.protocol.frame import StompFrame, StompHeartBeat
+import collections
 """
 Copyright 2012 Mozes, Inc.
 
@@ -58,15 +60,15 @@ class Stomp(object):
     """
     _failoverFactory = StompFailoverTransport
     _transportFactory = StompFrameTransport
-    
+
     def __init__(self, config):
         self.log = logging.getLogger(LOG_CATEGORY)
         self._config = config
         self._session = StompSession(self._config.version, self._config.check)
         self._failover = self._failoverFactory(config.uri)
         self._transport = None
-    
-    def connect(self, headers=None, versions=None, host=None, connectTimeout=None, connectedTimeout=None):
+
+    def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None):
         """connect(headers=None, versions=None, host=None, connectTimeout=None, connectedTimeout=None)
         
         Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.sync.client.Stomp.session`, replay them when the STOMP connection is established.
@@ -98,7 +100,7 @@ class Stomp(object):
             pass
         else:
             raise StompConnectionError('Already connected to %s' % self._transport)
-        
+
         try:
             for (broker, connectDelay) in self._failover:
                 transport = self._transportFactory(broker['host'], broker['port'], self.session.version)
@@ -113,14 +115,14 @@ class Stomp(object):
                 else:
                     self.log.info('Connection established')
                     self._transport = transport
-                    self._connect(headers, versions, host, connectedTimeout)
+                    self._connect(headers, versions, host, heartBeats, connectedTimeout)
                     break
         except StompConnectionError as e:
             self.log.error('Reconnect failed [%s]' % e)
             raise
-        
-    def _connect(self, headers=None, versions=None, host=None, timeout=None):
-        frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host)
+
+    def _connect(self, headers, versions, host, heartBeats, timeout):
+        frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host, heartBeats)
         self.sendFrame(frame)
         if not self.canRead(timeout):
             self.session.disconnect()
@@ -131,7 +133,7 @@ class Stomp(object):
         for (destination, headers, receipt, _) in self.session.replay():
             self.log.info('Replaying subscription %s' % headers)
             self.subscribe(destination, headers, receipt)
-    
+
     @connected
     def disconnect(self, receipt=None):
         """disconnect(receipt=None)
@@ -143,7 +145,7 @@ class Stomp(object):
         self.sendFrame(self.session.disconnect(receipt))
         if not receipt:
             self.close()
-    
+
     # STOMP frames
 
     @connected
@@ -153,7 +155,7 @@ class Stomp(object):
         Send a **SEND** frame.
         """
         self.sendFrame(commands.send(destination, body, headers, receipt))
-        
+
     @connected
     def subscribe(self, destination, headers=None, receipt=None):
         """subscribe(destination, headers=None, receipt=None)
@@ -163,7 +165,7 @@ class Stomp(object):
         frame, token = self.session.subscribe(destination, headers, receipt)
         self.sendFrame(frame)
         return token
-    
+
     @connected
     def unsubscribe(self, token, receipt=None):
         """unsubscribe(token, receipt=None)
@@ -171,7 +173,7 @@ class Stomp(object):
         Send an **UNSUBSCRIBE** frame to terminate an existing subscription.
         """
         self.sendFrame(self.session.unsubscribe(token, receipt))
-        
+
     @connected
     def ack(self, frame, receipt=None):
         """ack(frame, receipt=None)
@@ -179,7 +181,7 @@ class Stomp(object):
         Send an **ACK** frame for a received **MESSAGE** frame.
         """
         self.sendFrame(self.session.ack(frame, receipt))
-    
+
     @connected
     def nack(self, headers, receipt=None):
         """nack(frame, receipt=None)
@@ -187,7 +189,7 @@ class Stomp(object):
         Send a **NACK** frame for a received **MESSAGE** frame.
         """
         self.sendFrame(self.session.nack(headers, receipt))
-    
+
     @connected
     def begin(self, transaction, receipt=None):
         """begin(transaction=None, receipt=None)
@@ -195,7 +197,7 @@ class Stomp(object):
         Send a **BEGIN** frame to begin a STOMP transaction.
         """
         self.sendFrame(self.session.begin(transaction, receipt))
-        
+
     @connected
     def abort(self, transaction, receipt=None):
         """abort(transaction=None, receipt=None)
@@ -203,7 +205,7 @@ class Stomp(object):
         Send an **ABORT** frame to abort a STOMP transaction.
         """
         self.sendFrame(self.session.abort(transaction, receipt))
-        
+
     @connected
     def commit(self, transaction, receipt=None):
         """commit(transaction=None, receipt=None)
@@ -211,7 +213,7 @@ class Stomp(object):
         Send a **COMMIT** frame to commit a STOMP transaction.
         """
         self.sendFrame(self.session.commit(transaction, receipt))
-    
+
     @contextlib.contextmanager
     @connected
     def transaction(self, transaction=None, receipt=None):
@@ -255,7 +257,7 @@ class Stomp(object):
         except:
             self.abort(transaction, receipt and ('%s-abort' % receipt))
             raise
-    
+
     def message(self, frame):
         """If you received a **MESSAGE** frame, this method will produce a token which allows you to match it against its subscription.
         
@@ -264,7 +266,7 @@ class Stomp(object):
         .. note :: If the client is not aware of the subscription, or if we are not connected, this method will raise a :class:`~.StompProtocolError`.
         """
         return self.session.message(frame)
-    
+
     def receipt(self, frame):
         """If you received a **RECEIPT** frame, this method will extract the receipt id which you employed to request that receipt.
         
@@ -273,9 +275,9 @@ class Stomp(object):
         .. note :: If the client is not aware of the outstanding receipt, this method will raise a :class:`~.StompProtocolError`.
         """
         return self.session.receipt(frame)
-    
+
     # frame transport
-    
+
     def close(self, flush=True):
         """Close both the client's :attr:`~.sync.client.Stomp.session` and transport (that is, the wire-level connection with the broker).
         
@@ -288,7 +290,7 @@ class Stomp(object):
             self.__transport and self.__transport.disconnect()
         finally:
             self._transport = None
-    
+
     def canRead(self, timeout=None):
         """Tell whether there is an incoming STOMP frame available for us to read.
 
@@ -296,8 +298,21 @@ class Stomp(object):
         
         .. note :: If the wire-level connection is not available, this method will raise a :class:`~.StompConnectionError`!
         """
-        return self._transport.canRead(timeout)
-        
+        if self._messages:
+            return True
+        deadline = None if (timeout is None) else (time.time() + timeout)
+        while True:
+            timeout = deadline and max(0, deadline - time.time())
+            if not self._transport.canRead(timeout):
+                return False
+            frame = self._transport.receive()
+            self.session.received()
+            if self.log.isEnabledFor(logging.DEBUG):
+                self.log.debug('Received %s' % frame.info())
+            if frame: # there's a real STOMP frame on the wire, not a heart-beat
+                self._messages.append(frame)
+                return True
+
     def sendFrame(self, frame):
         """Send a raw STOMP frame.
         
@@ -307,27 +322,27 @@ class Stomp(object):
         """
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Sending %s' % frame.info())
+        self.session.sent()
         self._transport.send(frame)
-            
+
     def receiveFrame(self):
         """Fetch the next available frame.
         
         .. note :: If we are not connected, this method will raise a :class:`~.StompConnectionError`. Keep in mind that this method will block forever if there are no frames incoming on the wire. Be sure to use peek with ``self.canRead(timeout)`` before!
         """
-        frame = self._transport.receive()
-        if frame and self.log.isEnabledFor(logging.DEBUG):
-            self.log.debug('Received %s' % frame.info())
-        return frame
-    
+        if self.canRead():
+            return self._messages.popleft()
+
     @property
     def session(self):
         """The :class:`~.StompSession` associated to this client.
         """
         return self._session
-    
+
     @property
     def _transport(self):
         transport = self.__transport
+        self._messages = collections.deque()
         if not transport:
             raise StompConnectionError('Not connected')
         try:
@@ -336,8 +351,39 @@ class Stomp(object):
             self.close(flush=False)
             raise e
         return transport
-    
+
     @_transport.setter
     def _transport(self, transport):
         self.__transport = transport
-        
+
+    # heart-beating
+
+    def beat(self):
+        """Create a STOMP heartbeat.
+        """
+        self.sendFrame(self.session.beat())
+
+    @property
+    def lastSent(self):
+        """The last time when data was sent.
+        """
+        return self.session.lastSent
+
+    @property
+    def lastReceived(self):
+        """The last time when data was received.
+        """
+        return self.session.lastReceived
+
+    @property
+    def clientHeartBeat(self):
+        """The negotiated client heart-beat period in ms.
+        """
+        return self.session.clientHeartBeat
+
+    @property
+    def serverHeartBeat(self):
+        """The negotiated server heart-beat period in ms.
+        """
+        return self.session.serverHeartBeat
+

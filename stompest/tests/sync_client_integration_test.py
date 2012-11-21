@@ -21,19 +21,20 @@ from stompest.config import StompConfig
 from stompest.error import StompConnectionError
 from stompest.protocol import commands, StompFrame, StompSpec
 from stompest.sync import Stomp
+import time
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST
+from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST, BROKER
 
 class SimpleStompIntegrationTest(unittest.TestCase):
     DESTINATION = '/queue/stompUnitTest'
     TIMEOUT = 0.1
     log = logging.getLogger(LOG_CATEGORY)
 
-    def getConfig(self, version):
-        return StompConfig('tcp://%s:%s' % (HOST, PORT), login=LOGIN, passcode=PASSCODE, version=version)
+    def getConfig(self, version, port=PORT):
+        return StompConfig('tcp://%s:%s' % (HOST, port), login=LOGIN, passcode=PASSCODE, version=version)
 
     def setUp(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
@@ -146,10 +147,10 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         if StompSpec.VERSION_1_1 not in commands.versions(VERSION):
             print 'This broker does not support STOMP protocol version 1.1'
             return
-            
+
         client = Stomp(self.getConfig(StompSpec.VERSION_1_1))
         client.connect(host=VIRTUALHOST)
-        
+
         client.send(self.DESTINATION, 'test message 1')
         client.send(self.DESTINATION, 'test message 2')
         self.assertFalse(client.canRead(self.TIMEOUT))
@@ -176,6 +177,47 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertEquals(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {'receipt-id': '4711'}))
         client.close()
         self.assertRaises(StompConnectionError, client.canRead, 0)
+
+    def test_5_integration_stomp_1_1_heartbeat(self):
+        if StompSpec.VERSION_1_1 not in commands.versions(VERSION):
+            print 'This broker does not support STOMP protocol version 1.1'
+            return
+
+        port = 61612 if (BROKER == 'activemq') else PORT # stomp+nio on 61613 does not work properly, so use stomp on 61612
+        client = Stomp(self.getConfig(StompSpec.VERSION_1_1, port))
+        self.assertEquals(client.lastReceived, None)
+        self.assertEquals(client.lastSent, None)
+
+        heartBeatPeriod = 1000
+        client.connect(host=VIRTUALHOST, heartBeats=(heartBeatPeriod, heartBeatPeriod))
+        if not (client.serverHeartBeat and client.clientHeartBeat):
+            print 'broker does not support heart-beating. disconnecting ...'
+            client.disconnect()
+            client.close()
+            return
+
+        self.assertEquals(client.serverHeartBeat, heartBeatPeriod)
+        self.assertEquals(client.clientHeartBeat, heartBeatPeriod)
+        self.assertTrue(abs(client.lastReceived - time.time()) < 0.5 * heartBeatPeriod / 1000.0)
+        t = time.time()
+        while (time.time() - t) < 3 * heartBeatPeriod / 1000.0:
+            time.sleep(0.5 * heartBeatPeriod / 1000.0)
+            client.canRead(0)
+            self.assertTrue(abs(client.lastReceived - time.time()) < 1.5 * heartBeatPeriod / 1000.0)
+            client.beat()
+            self.assertTrue(abs(client.lastSent - time.time()) < 0.5 * heartBeatPeriod / 1000.0)
+
+        t = time.time()
+        try:
+            while not client.canRead(0.5 * heartBeatPeriod / 1000.0):
+                pass
+        except StompConnectionError:
+            self.assertTrue((time.time() - t) < 3 * heartBeatPeriod / 1000.0)
+            self.assertTrue(abs(client.lastReceived - time.time()) < 1.5 * heartBeatPeriod / 1000.0)
+            self.assertTrue(abs(client.lastSent - time.time()) > heartBeatPeriod / 1000.0)
+        else:
+            raise
+        client.close()
 
 if __name__ == '__main__':
     unittest.main()

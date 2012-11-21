@@ -20,7 +20,7 @@ import cStringIO
 
 from stompest.error import StompFrameError
 
-from .frame import StompFrame
+from .frame import StompFrame, StompHeartBeat
 from .spec import StompSpec
 
 class StompParser(object):
@@ -54,9 +54,10 @@ class StompParser(object):
     def __init__(self, version=None):
         self.version = version or StompSpec.DEFAULT_VERSION
         self._parsers = {
+            'heart-beat': self._parseHeartBeat,
             'command': self._parseCommand,
             'headers': self._parseHeader,
-            'body': self._parseBody,
+            'body': self._parseBody
         }
         self.reset()
     
@@ -94,13 +95,21 @@ class StompParser(object):
         self._frame = StompFrame()
         self._length = -1
         self._read = 0
-        self._transition('command')
-        self._flush()
-    
+        self._transition('heart-beat')
+            
     def _transition(self, state):
         self._flush()
         self.parse = self._parsers[state]
+    
+    def _parseHeartBeat(self, character):
+        if character != StompSpec.LINE_DELIMITER:
+            self._transition('command')
+            self.parse(character)
+            return
         
+        if self.version != StompSpec.VERSION_1_0:
+            self._frames.append(StompHeartBeat())
+            
     def _parseCommand(self, character):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)

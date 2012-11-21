@@ -19,7 +19,7 @@ import unittest
 
 from stompest.error import StompFrameError
 from stompest.protocol import commands
-from stompest.protocol.frame import StompFrame
+from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.parser import StompParser
 from stompest.protocol.spec import StompSpec
 
@@ -66,10 +66,27 @@ class StompParserTest(unittest.TestCase):
 
     def test_frames_with_optional_newlines_succeeds(self):
         parser = StompParser()
-        frame = '\n%s\n' % commands.disconnect()
+        disconnect = commands.disconnect()
+        frame = '\n%s\n' % disconnect
         parser.add(2 * frame)
         for _ in xrange(2):
-            self.assertEqual(parser.get(), commands.disconnect())
+            self.assertEqual(parser.get(), disconnect)
+        self.assertEqual(parser.get(), None)
+
+    def test_frames_with_heart_beats_succeeds(self):
+        parser = StompParser(version=StompSpec.VERSION_1_1)
+        disconnect = commands.disconnect()
+        frame = '\n%s\n' % disconnect
+        parser.add(2 * frame)
+        frames = []
+        while parser.canRead():
+            frames.append(parser.get())
+        self.assertEquals(frames, [StompHeartBeat(), disconnect, StompHeartBeat(),StompHeartBeat(), disconnect, StompHeartBeat()])
+ 
+        #self.assert frames   
+        #StompFrame(command='DISCONNECT', headers={}, body=''), StompFrame(command='DISCONNECT', headers={}, body='')]
+
+        #self.assertEqual(parser.get(), commands.disconnect())
         self.assertEqual(parser.get(), None)
 
     def test_getMessage_returns_None_if_not_done(self):

@@ -47,20 +47,20 @@ import socket
 
 from stompest.error import StompProtocolError
 
-from .frame import StompFrame
+from .frame import StompFrame, StompHeartBeat
 from .spec import StompSpec
 
 # outgoing frames
 
-def stomp(versions, host, login=None, passcode=None, headers=None):
+def stomp(login=None, passcode=None, headers=None, versions=None, host=None, heartBeats=None):
     """Create a **STOMP** frame. Not supported in STOMP protocol 1.0, synonymous to :func:`connect` for STOMP protocol 1.1 and higher.
     """
     if (versions is None) or (list(versions) == [StompSpec.VERSION_1_0]):
         raise StompProtocolError('Unsupported command (version %s): %s' % (StompSpec.VERSION_1_0, StompSpec.NACK))
-    frame = connect(login=login, passcode=passcode, headers=headers, versions=versions, host=host)
-    return StompFrame(StompSpec.STOMP, frame.headers)
+    frame = connect(login=login, passcode=passcode, headers=headers, versions=versions, host=host, heartBeats=heartBeats)
+    return StompFrame(StompSpec.STOMP, frame.headers, frame.body)
 
-def connect(login=None, passcode=None, headers=None, versions=None, host=None):
+def connect(login=None, passcode=None, headers=None, versions=None, host=None, heartBeats=None):
     """Create a **CONNECT** frame.
     
     :param login: The **login** header. The default is :obj:`None`, which means that no such header will be added.
@@ -68,6 +68,7 @@ def connect(login=None, passcode=None, headers=None, versions=None, host=None):
     :param headers: Additional STOMP headers.
     :param versions: A list of the STOMP versions we wish to support. The default is :obj:`None`, which means that we will offer the broker to accept any version prior or equal to the default STOMP protocol version.
     :param host: The **host** header which gives this client a human readable name on the broker side.
+    :param heartBeats: A pair (client, server) of integer heart-beat intervals in ms. Both intervals must be non-negative (0 means no heart-beats will be sent by the client or expected from the server).
     """
     headers = dict(headers or [])
     if login is not None:
@@ -80,6 +81,18 @@ def connect(login=None, passcode=None, headers=None, versions=None, host=None):
         if host is None:
             host = socket.gethostbyaddr(socket.gethostname())[0]
         headers[StompSpec.HOST_HEADER] = host
+    if heartBeats:
+        if versions == [StompSpec.VERSION_1_0]:
+            raise StompProtocolError('Heart-beating not supported (version %s)' % StompSpec.VERSION_1_0)
+        try:
+            heartBeats = tuple(int(t) for t in heartBeats)
+            if not all(t >= 0 for t in heartBeats):
+                raise
+            heartBeats = '%d,%d' % heartBeats
+        except:
+            raise StompProtocolError('Invalid heart-beats (two non-negative integers required): %s' % str(heartBeats))
+        headers[StompSpec.HEART_BEAT_HEADER] = heartBeats
+
     return StompFrame(StompSpec.CONNECT, headers)
 
 def disconnect(receipt=None):
@@ -104,7 +117,7 @@ def send(destination, body='', headers=None, receipt=None):
     frame.headers[StompSpec.DESTINATION_HEADER] = destination
     _addReceiptHeader(frame, receipt)
     return frame
-    
+
 def subscribe(destination, headers, receipt=None, version=None):
     """Create a pair (frame, token) of a **SUBSCRIBE** frame and a token which you have to keep if you wish to match incoming **MESSAGE** frames to this subscription  with :func:`message` or to :func:`unsubscribe` later.
     
@@ -122,7 +135,7 @@ def subscribe(destination, headers, receipt=None, version=None):
     except StompProtocolError:
         if (version != StompSpec.VERSION_1_0):
             raise
-    token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription) 
+    token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
     return frame, token
 
 def unsubscribe(token, receipt=None, version=None):
@@ -197,6 +210,15 @@ def commit(transaction, receipt=None):
     _addReceiptHeader(frame, receipt)
     return frame
 
+def beat(version=None):
+    """Create a STOMP heartbeat.
+    """
+    version = _version(version)
+    if version == StompSpec.VERSION_1_0:
+        raise StompProtocolError('Heatbeat not supported (version %s)' % version)
+
+    return StompHeartBeat()
+
 # incoming frames
 
 def connected(frame, versions=None):
@@ -215,17 +237,26 @@ def connected(frame, versions=None):
                 raise StompProtocolError('')
     except StompProtocolError:
         raise StompProtocolError('Server version incompatible with accepted versions %s [headers=%s]' % (versions, headers))
-    
+
     server = None if (version == StompSpec.VERSION_1_0) else headers.get(StompSpec.SERVER_HEADER)
-    
+
+    heartBeats = (0, 0)
+    if (version != StompSpec.VERSION_1_0) and (StompSpec.HEART_BEAT_HEADER in headers):
+        try:
+            heartBeats = tuple(int(t) for t in headers[StompSpec.HEART_BEAT_HEADER].split(StompSpec.HEART_BEAT_SEPARATOR))
+            if (len(heartBeats) != 2) or any((t < 0) for t in heartBeats):
+                raise ValueError('')
+        except:
+            raise StompProtocolError('Invalid %s header (two comma-separated and non-negative integers required): %s' % (StompSpec.HEART_BEAT_HEADER, heartBeats))
+
     try:
         id_ = headers[StompSpec.SESSION_HEADER]
     except KeyError:
         if version == StompSpec.VERSION_1_0:
             raise StompProtocolError('Invalid %s frame (%s header is missing) [headers=%s]' % (StompSpec.CONNECTED, StompSpec.SESSION_HEADER, headers))
         id_ = None
-        
-    return version, server, id_
+
+    return version, server, id_, heartBeats
 
 def message(frame, version):
     """Handle a **MESSAGE** frame. Returns a token which you can use to match this message to its subscription.
