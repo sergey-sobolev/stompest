@@ -241,7 +241,7 @@
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.connect">
-<tt class="descname">connect</tt><big>(</big><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect</tt><big>(</big><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>heartBeats=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client&#8217;s <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. If there are active subscriptions in the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt></a>, replay them when the STOMP connection is established.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
