@@ -177,8 +177,11 @@ class Stomp(object):
 
         defer.returnValue(self)
 
+    @connected
     def disconnect(self, receipt=None, failure=None, timeout=None):
-        """Send a **DISCONNECT** frame and terminate the STOMP connection. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`None` when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.
+        """disconnect(self, receipt=None, failure=None, timeout=None)
+        
+        Send a **DISCONNECT** frame and terminate the STOMP connection. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`None` when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.
 
         :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
         :param timeout: This is the time (in seconds) to wait for a graceful disconnect, thas is, for pending message handlers to complete. If receipt is :obj:`None`, we will wait indefinitely.
@@ -191,7 +194,6 @@ class Stomp(object):
         self._disconnect(receipt, failure, timeout)
         return self.disconnected
 
-    @exclusive
     @defer.inlineCallbacks
     def _disconnect(self, receipt, failure, timeout):
         if failure:
@@ -499,11 +501,11 @@ class Stomp(object):
         if self._disconnectReason:
             self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
             self._disconnected.errback(self._disconnectReason)
-            self._disconnectReason = None
         else:
             #self.log.debug('Calling disconnected deferred callback')
             self._disconnected.callback(None)
         self._disconnecting = False
+        self._disconnectReason = None
         self._disconnected = None
 
     def _replay(self):
