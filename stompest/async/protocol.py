@@ -37,15 +37,14 @@ class StompProtocol(Protocol):
             Protocol.connectionLost(self, reason)
 
     def dataReceived(self, data):
+        #self.log.debug('Received data: %s' % repr(data))
         self._parser.add(data)
-
         while True:
             frame = self._parser.get()
             if frame is None:
                 break
             if self.log.isEnabledFor(logging.DEBUG):
                 self.log.debug('Received %s' % frame.info())
-
             try:
                 self._onFrame(frame)
             except Exception as e:
