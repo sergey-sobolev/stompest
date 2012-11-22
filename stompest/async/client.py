@@ -49,7 +49,8 @@ import time
 
 from twisted.internet import defer, task, reactor
 
-from stompest.error import StompCancelledError, StompConnectionError, StompFrameError, StompProtocolError
+from stompest.error import StompCancelledError, StompConnectionError, StompFrameError, StompProtocolError, \
+    StompAlreadyRunningError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr, cloneFrame
 
@@ -92,6 +93,7 @@ class Stomp(object):
 
         # wait for CONNECTED frame
         self._connecting = InFlightOperations('STOMP session negotiation')
+        self._disconnecting = False
 
         # keep track of active handlers for graceful disconnect
         self._messages = InFlightOperations('Handler for message')
@@ -175,25 +177,28 @@ class Stomp(object):
 
         defer.returnValue(self)
 
-    @exclusive
-    @connected
-    @defer.inlineCallbacks
     def disconnect(self, receipt=None, failure=None, timeout=None):
-        """disconnect(receipt=None, failure=None, timeout=None)
-
-        Send a **DISCONNECT** frame and terminate the STOMP connection. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`None` when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.
+        """Send a **DISCONNECT** frame and terminate the STOMP connection. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`None` when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.
 
         :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
         :param timeout: This is the time (in seconds) to wait for a graceful disconnect, thas is, for pending message handlers to complete. If receipt is :obj:`None`, we will wait indefinitely.
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. Only one disconnect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
+        if self._disconnecting:
+            raise StompAlreadyRunningError('Already disconnecting')
+        self._disconnecting = True
+        self._disconnect(receipt, failure, timeout)
+        return self.disconnected
+
+    @exclusive
+    @defer.inlineCallbacks
+    def _disconnect(self, receipt, failure, timeout):
         if failure:
             self._disconnectReason = failure
 
         self.log.info('Disconnecting ...%s' % ('' if (not failure) else  ('[reason=%s]' % failure)))
         protocol = self._protocol
-        disconnected = self.disconnected
         try:
             # notify that we are ready to disconnect after outstanding messages are ack'ed
             if self._messages:
@@ -218,11 +223,9 @@ class Stomp(object):
                     self._disconnectReason = StompCancelledError('Receipt for disconnect command did not arrive on time.')
 
             protocol.loseConnection()
-            yield disconnected
 
         except Exception as e:
-            self.log.error(e)
-            raise
+            self._disconnectReason = e
 
     @connected
     @defer.inlineCallbacks
@@ -363,7 +366,7 @@ class Stomp(object):
         headers = frame.headers
         messageId = headers[StompSpec.MESSAGE_ID_HEADER]
 
-        if self.disconnect.running:
+        if self._disconnecting:
             self.log.info('[%s] Ignoring message (disconnecting)' % messageId)
             try:
                 self.nack(frame)
@@ -378,18 +381,16 @@ class Stomp(object):
             self.log.error('[%s] Ignoring message (no handler found): %s' % (messageId, frame.info()))
             defer.returnValue(None)
 
-        with self._messages(messageId, self.log) as finished:
-            finished.addErrback(lambda _: None)
+        with self._messages(messageId, self.log):
             try:
                 yield subscription['handler'](self, frame)
                 if subscription['ack']:
                     self.ack(frame)
-
             except Exception as e:
                 try:
                     self._onMessageFailed(e, frame, subscription)
                 except Exception as e:
-                    if not self.disconnect.running:
+                    if not self._disconnecting:
                         self.disconnect(failure=e)
                 finally:
                     if subscription['ack']:
@@ -486,7 +487,7 @@ class Stomp(object):
     def _onConnectionLost(self, reason):
         self._protocol = None
         self.log.info('Disconnected: %s' % reason.getErrorMessage())
-        if not self.disconnect.running:
+        if not self._disconnecting:
             self._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
         self.session.close(flush=not self._disconnectReason)
         self._beats()
@@ -494,13 +495,15 @@ class Stomp(object):
             for waiting in operations.values():
                 if not waiting.called:
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
+                    waiting.addErrback(lambda _: None)
         if self._disconnectReason:
-            #self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
+            self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
             self._disconnected.errback(self._disconnectReason)
             self._disconnectReason = None
         else:
             #self.log.debug('Calling disconnected deferred callback')
             self._disconnected.callback(None)
+        self._disconnecting = False
         self._disconnected = None
 
     def _replay(self):

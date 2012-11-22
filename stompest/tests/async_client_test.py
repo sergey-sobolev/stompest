@@ -33,16 +33,16 @@ logging.basicConfig(level=logging.DEBUG)
 
 class AsyncClientBaseTestCase(unittest.TestCase):
     protocols = []
-    
+
     def setUp(self):
         self.connections = map(self._create_connection, self.protocols)
-    
+
     def _create_connection(self, protocol):
         factory = Factory()
         factory.protocol = protocol
         connection = reactor.listenTCP(0, factory) #@UndefinedVariable
         return connection
-        
+
     def tearDown(self):
         for connection in self.connections:
             connection.stopListening()
@@ -72,7 +72,7 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
             pass
         else:
             raise
-    
+
     @defer.inlineCallbacks
     def test_not_connected(self):
         port = self.connections[0].getHost().port
@@ -82,7 +82,7 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
             yield client.send('/queue/fake')
         except StompConnectionError:
             pass
-        
+
 class AsyncClientConnectErrorTestCase(AsyncClientBaseTestCase):
     protocols = [ErrorOnConnectStompServer]
 
@@ -100,7 +100,7 @@ class AsyncClientErrorAfterConnectedTestCase(AsyncClientBaseTestCase):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='failover:(tcp://nosuchhost:65535,tcp://localhost:%d)?startupMaxReconnectAttempts=1,initialReconnectDelay=0,randomize=false' % port)
         client = Stomp(config)
-        
+
         yield client.connect()
         client.send('/queue/fake', 'fake message')
         try:
@@ -112,13 +112,13 @@ class AsyncClientErrorAfterConnectedTestCase(AsyncClientBaseTestCase):
 
 class AsyncClientFailoverOnDisconnectTestCase(AsyncClientBaseTestCase):
     protocols = [RemoteControlViaFrameStompServer, ErrorOnSendStompServer]
-    
+
     @defer.inlineCallbacks
     def test_failover_on_connection_lost(self):
         ports = tuple(c.getHost().port for c in self.connections)
         config = StompConfig(uri='failover:(tcp://localhost:%d,tcp://localhost:%d)?startupMaxReconnectAttempts=0,initialReconnectDelay=0,randomize=false,maxReconnectAttempts=1' % ports)
         client = Stomp(config)
-        
+
         yield client.connect()
         self.connections[0].stopListening()
         client.send('/queue/fake', 'shutdown')
@@ -127,7 +127,7 @@ class AsyncClientFailoverOnDisconnectTestCase(AsyncClientBaseTestCase):
         except StompConnectionError:
             yield client.connect()
         client.send('/queue/fake', 'fake message')
-        
+
         try:
             yield client.disconnected
         except StompProtocolError:
@@ -135,7 +135,7 @@ class AsyncClientFailoverOnDisconnectTestCase(AsyncClientBaseTestCase):
 
 class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
     protocols = [RemoteControlViaFrameStompServer]
-    
+
     @defer.inlineCallbacks
     def test_replay_after_failover(self):
         ports = tuple(c.getHost().port for c in self.connections)
@@ -147,10 +147,10 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
             pass
         else:
             raise
-        
+
         self.assertEquals(client.session._subscriptions, {}) # check that no subscriptions have been accepted
         yield client.connect()
-        
+
         self.shutdown = True # the callback handler will kill the broker connection ... 
         client.subscribe('/queue/bla', self._on_message)
         try:
@@ -159,16 +159,16 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
             pass
         else:
             raise
-            
+
         self.shutdown = False # the callback handler will not kill the broker connection, but callback self._got_message
         self._got_message = defer.Deferred()
-        
+
         yield client.connect()
         self.assertNotEquals(client.session._subscriptions, []) # the subscriptions have been replayed ...
-        
+
         result = yield self._got_message
         self.assertEquals(result, None) # ... and the message comes back
-        
+
         yield client.disconnect()
         self.assertEquals(list(client.session.replay()), []) # after a clean disconnect, the subscriptions are forgotten.
 
@@ -179,10 +179,10 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
             client.send('/queue/fake', 'shutdown')
         else:
             self._got_message.callback(None)
-        
+
 class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
     protocols = [RemoteControlViaFrameStompServer]
-    
+
     @defer.inlineCallbacks
     def test_disconnect_timeout(self):
         port = self.connections[0].getHost().port
@@ -199,28 +199,28 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         else:
             raise
         self.wait.callback(None)
-        
+
     @defer.inlineCallbacks
     def test_disconnect_connection_lost_unexpectedly(self):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='tcp://localhost:%d' % port, version='1.1')
         client = Stomp(config)
-        
+
         yield client.connect()
-        
+
         self._got_message = defer.Deferred()
         client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False) # we're acking the frames ourselves
         yield self._got_message
-        
-        disconnected = client.disconnect()
+
+        disconnected = client.disconnected
         client.send('/queue/fake', 'shutdown') # tell the broker to drop the connection
         try:
             yield disconnected
-        except StompCancelledError:
+        except StompConnectionError:
             pass
         else:
             raise
-        
+
         self.wait.callback(None)
 
     @defer.inlineCallbacks

@@ -39,10 +39,10 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     log = logging.getLogger(LOG_CATEGORY)
     headers = {StompSpec.ID_HEADER: '4711'}
 
-    TIMEOUT = 0.1
+    TIMEOUT = 0.2
 
-    def getConfig(self, version):
-        return StompConfig('tcp://%s:%s' % (HOST, PORT), login=LOGIN, passcode=PASSCODE, version=version)
+    def getConfig(self, version, port=None):
+        return StompConfig('tcp://%s:%s' % (HOST, port or PORT), login=LOGIN, passcode=PASSCODE, version=version)
 
     def cleanQueues(self):
         self.cleanQueue(self.queue)
@@ -141,7 +141,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
             yield client.disconnect()
             defer.returnValue(None)
 
-        #Enqueue two messages
+        # enqueue two messages
         client.send(self.queue, self.frame1, self.msg1Hdrs)
         client.send(self.queue, self.frame2)
 
@@ -149,13 +149,13 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         if version != '1.0':
             defaultHeaders.update(self.headers)
 
-        #Barf on first message so it will get put in error queue
-        #Use selector to guarantee message order.  AMQ doesn't guarantee order by default
+        # barf on first message so it will get put in error queue
+        # use selector to guarantee message order.  AMQ doesn't guarantee order by default
         headers = {'selector': "food = 'barf'"}
         headers.update(defaultHeaders)
         client.subscribe(self.queue, self._saveFrameAndBarf, headers, errorDestination=self.errorQueue, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
 
-        #Client disconnected and returned error
+        # client disconnected and returned error
         try:
             yield client.disconnected
         except StompestTestError:
@@ -165,27 +165,27 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
 
-        #Reconnect and subscribe again - consuming second message then disconnecting
+        # reconnect and subscribe again - consuming second message then disconnecting
         client = yield client.connect(host=VIRTUALHOST)
         headers.pop('selector')
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, headers, errorDestination=self.errorQueue)
 
-        #Client disconnects without error
+        # client disconnects without error
         yield client.disconnected
 
-        #Reconnect and subscribe to error queue
+        # reconnect and subscribe to error queue
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, defaultHeaders)
 
-        #Wait for disconnect
+        # wait for disconnect
         yield client.disconnected
 
-        #Verify that first message was in error queue
+        # verify that first message was in error queue
         self.assertEquals(self.frame1, self.errorQueueFrame.body)
         self.assertEquals(self.msg1Hdrs['food'], self.errorQueueFrame.headers['food'])
         self.assertNotEquals(self.unhandledFrame.headers['message-id'], self.errorQueueFrame.headers['message-id'])
 
-        #Verify that second message was consumed
+        # verify that second message was consumed
         self.assertEquals(self.frame2, self.consumedFrame.body)
 
     @defer.inlineCallbacks
@@ -193,27 +193,27 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
 
-        #Connect
+        # connect
         client = yield client.connect(host=VIRTUALHOST)
 
-        #Enqueue two messages
+        # enqueue two messages
         client.send(self.queue, self.frame1, self.msg1Hdrs)
         client.send(self.queue, self.frame2)
 
-        #Barf on first frame, disconnect on second frame
+        # barf on first frame, disconnect on second frame
         client.subscribe(self.queue, self._barfOneEatOneAndDisonnect, {StompSpec.ACK_HEADER: 'client-individual'}, errorDestination=self.errorQueue)
 
-        #Client disconnects without error
+        # client disconnects without error
         yield client.disconnected
 
-        #Reconnect and subscribe to error queue
+        # reconnect and subscribe to error queue
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
-        #Wait for disconnect
+        # wait for disconnect
         yield client.disconnected
 
-        #Verify that one message was in error queue (can't guarantee order)
+        # verify that one message was in error queue (can't guarantee order)
         self.assertNotEquals(None, self.errorQueueFrame)
         self.assertTrue(self.errorQueueFrame.body in (self.frame1, self.frame2))
 
@@ -222,15 +222,15 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
 
-        client = yield client.connect(host=VIRTUALHOST)
-
-        #Enqueue a message
+        yield client.connect(host=VIRTUALHOST)
         client.send(self.queue, self.frame1, self.msg1Hdrs)
+        yield client.disconnect()
 
-        #Barf on first frame (implicit disconnect)
+        yield client.connect(host=VIRTUALHOST)
+        # barf on first frame (implicit disconnect)
         client.subscribe(self.queue, self._saveFrameAndBarf, {StompSpec.ACK_HEADER: 'client-individual'}, ack=False, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
 
-        #Client disconnected and returned error
+        # client disconnected and returned error
         try:
             yield client.disconnected
         except StompestTestError:
@@ -238,15 +238,15 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         else:
             raise
 
-        #Reconnect and subscribe again - consuming retried message and disconnecting
+        # reconnect and subscribe again - consuming retried message and disconnecting
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
-        #Client disconnects without error
+        # client disconnects without error
         yield client.disconnected
 
-        #Verify that message was retried
+        # verify that message was retried
         self.assertEquals(self.frame1, self.unhandledFrame.body)
         self.assertEquals(self.frame1, self.consumedFrame.body)
 
@@ -261,24 +261,24 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config, receiptTimeout=1.0)
 
-        #Connect
+        # connect
         client = yield client.connect(host=VIRTUALHOST)
         yield task.cooperate(iter([client.send(self.queue, self.frame, receipt='message-%d' % j) for j in xrange(self.numMsgs)])).whenDone()
         client.subscribe(self.queue, self._frameHandler, {StompSpec.ACK_HEADER: 'client-individual'})
 
-        #Wait for disconnect
+        # wait for disconnect
         yield client.disconnected
 
-        #Reconnect and subscribe again to make sure that all messages in the queue were ack'ed
+        # reconnect and subscribe again to make sure that all messages in the queue were ack'ed
         client = yield client.connect(host=VIRTUALHOST)
         self.timeExpired = False
         self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client) #@UndefinedVariable
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
-        #Wait for disconnect
+        # wait for disconnect
         yield client.disconnected
 
-        #Time should have expired if there were no messages left in the queue
+        # time should have expired if there were no messages left in the queue
         self.assertTrue(self.timeExpired)
 
     def _frameHandler(self, client, _):
@@ -373,15 +373,18 @@ class NackTestCase(AsyncClientBaseTestCase):
 
         client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=False)
         client.send(self.queue, self.frame)
-        while self.framesHandled < 1:
+        while not self.framesHandled:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
         yield client.disconnect()
 
+        if BROKER == 'activemq':
+            print 'Broker %s by default does not redeliver messages. Will not try and harvest the NACKed message.' % BROKER
+            return
+
         self.framesHandled = 0
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
-        client.send(self.queue, self.frame)
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
@@ -437,13 +440,24 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
 
     @defer.inlineCallbacks
     def test_heart_beat(self):
+        if BROKER == 'apollo':
+            print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
+            defer.returnValue(None)
+
         port = 61612 if (BROKER == 'activemq') else PORT
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, port), version='1.1')
+        config = self.getConfig(StompSpec.VERSION_1_1, port)
         client = async.Stomp(config)
         yield client.connect(host=VIRTUALHOST, heartBeats=(250, 250))
+        disconnected = client.disconnected
 
-        yield task.deferLater(reactor, 1.0, lambda: None)
-        yield client.disconnect()
+        yield task.deferLater(reactor, 2.5, lambda: None)
+        client.session._clientHeartBeat = 0
+        try:
+            yield disconnected
+        except StompConnectionError:
+            pass
+        else:
+            raise
 
 if __name__ == '__main__':
     import sys

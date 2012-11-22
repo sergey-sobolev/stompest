@@ -179,6 +179,10 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertRaises(StompConnectionError, client.canRead, 0)
 
     def test_5_integration_stomp_1_1_heartbeat(self):
+        if BROKER == 'apollo':
+            print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
+            return
+
         if StompSpec.VERSION_1_1 not in commands.versions(VERSION):
             print 'This broker does not support STOMP protocol version 1.1'
             return
@@ -214,7 +218,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
             while not client.canRead(0.5 * clientHeartBeatInSeconds):
                 pass
         except StompConnectionError:
-            self.assertTrue((time.time() - start) < (2.5 * clientHeartBeatInSeconds))
+            self.assertTrue((time.time() - start) < (3.0 * clientHeartBeatInSeconds))
             self.assertTrue((time.time() - client.lastReceived) < (1.5 * serverHeartBeatInSeconds))
             self.assertTrue((time.time() - client.lastSent) > clientHeartBeatInSeconds)
         else:
