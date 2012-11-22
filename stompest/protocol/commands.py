@@ -68,7 +68,7 @@ def connect(login=None, passcode=None, headers=None, versions=None, host=None, h
     :param headers: Additional STOMP headers.
     :param versions: A list of the STOMP versions we wish to support. The default is :obj:`None`, which means that we will offer the broker to accept any version prior or equal to the default STOMP protocol version.
     :param host: The **host** header which gives this client a human readable name on the broker side.
-    :param heartBeats: A pair (client, server) of integer heart-beat intervals in ms. Both intervals must be non-negative (0 means no heart-beats will be sent by the client or expected from the server).
+    :param heartBeats: A pair (client heart-beat, server heart-beat) of integer heart-beat intervals in ms. Both intervals must be non-negative. A client heart-beat of 0 means that no heart-beats will be sent by the client. Similarly, a server heart-beat of 0 means that the client does not expect heart-beats from the server.
     """
     headers = dict(headers or [])
     if login is not None:
@@ -211,7 +211,7 @@ def commit(transaction, receipt=None):
     return frame
 
 def beat(version=None):
-    """Create a STOMP heartbeat.
+    """Create a STOMP heart-beat.
     """
     version = _version(version)
     if version == StompSpec.VERSION_1_0:

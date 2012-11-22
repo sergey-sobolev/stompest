@@ -255,7 +255,7 @@ class StompSession(object):
     # heartbeating
 
     def beat(self):
-        """Create a STOMP heartbeat.
+        """Create a STOMP heart-beat.
         """
         return commands.beat(self.version)
 

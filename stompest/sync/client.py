@@ -362,7 +362,7 @@ class Stomp(object):
     def beat(self):
         """beat()
         
-        Create a STOMP heartbeat.
+        Create a STOMP heart-beat.
         """
         self.sendFrame(self.session.beat())
 
