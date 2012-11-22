@@ -67,7 +67,8 @@ class Stomp(object):
 
     :param config: A :class:`~.StompConfig` object.
     :param receiptTimeout: When a STOMP frame was sent to the broker and a **RECEIPT** frame was requested, this is the time (in seconds) to wait for the **RECEIPT** frame to arrive. If :obj:`None`, we will wait indefinitely.
-
+    :param heartBeatThresholds: a mapping of the keys 'client'/'server' to the relative heart-beat tolerance threshold. The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: `{'client': 0.6, 'server' 2.5}` means that the client will send a heart-beat if it had shown no activity for 60 %% of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 %% of the negotiated server heart-beat period.
+    
     .. note :: All API methods which may request a **RECEIPT** frame from the broker -- which is indicated by the **receipt** parameter -- will wait for the **RECEIPT** response until this client's **receiptTimeout**. Here, "wait" is to be understood in the asynchronous sense that the method's :class:`twisted.internet.defer.Deferred` result will only call back then. If **receipt** is :obj:`None`, no such header is sent, and the callback will be triggered earlier.
 
     .. seealso :: :class:`~.StompConfig` for how to set configuration options, :class:`~.StompSession` for session state, :mod:`.protocol.commands` for all API options which are documented here.
@@ -132,7 +133,7 @@ class Stomp(object):
     @exclusive
     @defer.inlineCallbacks
     def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None):
-        """connect(headers=None, versions=None, host=None, connectTimeout=None, connectedTimeout=None)
+        """connect(headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None)
 
         Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.async.client.Stomp.session`, replay them when the STOMP connection is established. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`self` when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.
 

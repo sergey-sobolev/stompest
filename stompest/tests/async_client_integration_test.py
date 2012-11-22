@@ -373,15 +373,16 @@ class NackTestCase(AsyncClientBaseTestCase):
 
         client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=False)
         client.send(self.queue, self.frame)
-        while self.framesHandled != 1:
+        while self.framesHandled < 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
         yield client.disconnect()
 
+        self.framesHandled = 0
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=True)
         client.send(self.queue, self.frame)
-        while self.framesHandled != 2:
+        while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
         yield client.disconnect()
