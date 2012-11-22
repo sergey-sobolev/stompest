@@ -321,7 +321,7 @@
 <dl class="method">
 <dt id="stompest.protocol.session.StompSession.beat">
 <tt class="descname">beat</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.beat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a STOMP heartbeat.</p>
+<dd><p>Create a STOMP heart-beat.</p>
 </dd></dl>
 
 <dl class="method">
@@ -618,7 +618,7 @@
 <dl class="function">
 <dt id="stompest.protocol.commands.beat">
 <tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">beat</tt><big>(</big><em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.beat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a STOMP heartbeat.</p>
+<dd><p>Create a STOMP heart-beat.</p>
 </dd></dl>
 
 <dl class="function">
@@ -671,7 +671,7 @@
 <li><strong>headers</strong> &#8211; Additional STOMP headers.</li>
 <li><strong>versions</strong> &#8211; A list of the STOMP versions we wish to support. The default is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, which means that we will offer the broker to accept any version prior or equal to the default STOMP protocol version.</li>
 <li><strong>host</strong> &#8211; The <strong>host</strong> header which gives this client a human readable name on the broker side.</li>
-<li><strong>heartBeats</strong> &#8211; A pair (client, server) of integer heart-beat intervals in ms. Both intervals must be non-negative (0 means no heart-beats will be sent by the client or expected from the server).</li>
+<li><strong>heartBeats</strong> &#8211; A pair (client heart-beat, server heart-beat) of integer heart-beat intervals in ms. Both intervals must be non-negative. A client heart-beat of 0 means that no heart-beats will be sent by the client. Similarly, a server heart-beat of 0 means that the client does not expect heart-beats from the server.</li>
 </ul>
 </td>
 </tr>

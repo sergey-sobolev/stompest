@@ -246,7 +246,7 @@
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.async.client.Stomp">
-<em class="property">class </em><tt class="descclassname">stompest.async.client.</tt><tt class="descname">Stomp</tt><big>(</big><em>config</em>, <em>receiptTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stompest.async.client.</tt><tt class="descname">Stomp</tt><big>(</big><em>config</em>, <em>receiptTimeout=None</em>, <em>heartBeatThresholds=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp" title="Permalink to this definition">¶</a></dt>
 <dd><p>An asynchronous STOMP client for the Twisted framework.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -255,6 +255,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>config</strong> &#8211; A <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object.</li>
 <li><strong>receiptTimeout</strong> &#8211; When a STOMP frame was sent to the broker and a <strong>RECEIPT</strong> frame was requested, this is the time (in seconds) to wait for the <strong>RECEIPT</strong> frame to arrive. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>heartBeatThresholds</strong> &#8211; tolerance thresholds (relative to the negotiated heart-beat periods). The default <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> is equivalent to the content of the class atrribute <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_HEART_BEAT_THRESHOLDS</span></tt>. Example: <tt class="docutils literal"><span class="pre">{'client':</span> <span class="pre">0.6,</span> <span class="pre">'server'</span> <span class="pre">2.5}</span></tt> means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.</li>
 </ul>
 </td>
 </tr>
@@ -294,7 +295,7 @@
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.connect">
-<tt class="descname">connect</tt><big>(</big><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect</tt><big>(</big><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>heartBeats=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client&#8217;s <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. If there are active subscriptions in the <a class="reference internal" href="#stompest.async.client.Stomp.session" title="stompest.async.client.Stomp.session"><tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt></a>, replay them when the STOMP connection is established. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which calls back with <tt class="xref py py-obj docutils literal"><span class="pre">self</span></tt> when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -321,7 +322,7 @@
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.disconnect">
-<tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em>, <em>failure=None</em>, <em>timeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">disconnect</tt><big>(</big><em>self</em>, <em>receipt=None</em>, <em>failure=None</em>, <em>timeout=None</em><big>)</big><a class="headerlink" href="#stompest.async.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>DISCONNECT</strong> frame and terminate the STOMP connection. This method returns a <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> object which calls back with <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
