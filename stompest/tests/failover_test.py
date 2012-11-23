@@ -1,19 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-"""
-Copyright 2012 Mozes, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-"""
 import itertools
 import unittest
 
@@ -25,7 +9,7 @@ class StompFailoverUriTest(unittest.TestCase):
         uri = 'tcp://localhost:61613'
         configuration = StompFailoverUri(uri)
         self.assertEquals(configuration.brokers, [{'host': 'localhost', 'protocol': 'tcp', 'port': 61613}])
-        self.assertEquals(configuration.options, {'priorityBackup': False, 'initialReconnectDelay': 10, 'reconnectDelayJitter': 0, 'maxReconnectDelay': 30000, 'backOffMultiplier': 2.0, 'startupMaxReconnectAttempts': 0, 'maxReconnectAttempts': -1, 'useExponentialBackOff': True, 'randomize': True})
+        self.assertEquals(configuration.options, {'priorityBackup': False, 'initialReconnectDelay': 10, 'reconnectDelayJitter': 0, 'maxReconnectDelay': 30000, 'backOffMultiplier': 2.0, 'startupMaxReconnectAttempts': 0, 'maxReconnectAttempts':-1, 'useExponentialBackOff': True, 'randomize': True})
 
         uri = 'tcp://123.456.789.0:61616?randomize=true,maxReconnectAttempts=-1,priorityBackup=true'
         configuration = StompFailoverUri(uri)

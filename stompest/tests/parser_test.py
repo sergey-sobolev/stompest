@@ -1,19 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-"""
-Copyright 2011, 2012 Mozes, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-"""
 import binascii
 import unittest
 
@@ -38,12 +22,12 @@ class StompParserTest(unittest.TestCase):
         }
         frame = StompFrame(**message)
         parser = StompParser()
-        
+
         parser.add(str(frame))
         self.assertEqual(parser.get(), frame)
         self.assertEqual(parser.get(), None)
         parser = StompParser()
-        
+
     def test_reset_succeeds(self):
         message = {
             'command': 'SEND',
@@ -52,13 +36,13 @@ class StompParserTest(unittest.TestCase):
         }
         frame = StompFrame(**message)
         parser = StompParser()
-        
+
         parser.add(str(frame))
         parser.reset()
         self.assertEqual(parser.get(), None)
         parser.add(str(frame)[:20])
         self.assertEqual(parser.get(), None)
-        
+
     def test_frame_without_header_or_body_succeeds(self):
         parser = StompParser()
         parser.add(str(commands.disconnect()))
@@ -81,8 +65,8 @@ class StompParserTest(unittest.TestCase):
         frames = []
         while parser.canRead():
             frames.append(parser.get())
-        self.assertEquals(frames, [StompHeartBeat(), disconnect, StompHeartBeat(),StompHeartBeat(), disconnect, StompHeartBeat()])
- 
+        self.assertEquals(frames, [StompHeartBeat(), disconnect, StompHeartBeat(), StompHeartBeat(), disconnect, StompHeartBeat()])
+
         #self.assert frames   
         #StompFrame(command='DISCONNECT', headers={}, body=''), StompFrame(command='DISCONNECT', headers={}, body='')]
 
@@ -94,10 +78,10 @@ class StompParserTest(unittest.TestCase):
         self.assertEqual(None, parser.get())
         parser.add('CONNECT')
         self.assertEqual(None, parser.get())
-        
+
     def test_processLine_throws_FrameError_on_invalid_command(self):
         parser = StompParser()
-        
+
         self.assertRaises(StompFrameError, lambda: parser.add('HELLO\n'))
         self.assertFalse(parser.canRead())
         parser.add('DISCONNECT\n\n\x00')
@@ -121,7 +105,7 @@ class StompParserTest(unittest.TestCase):
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body, frame.body)
         self.assertEquals(parser.get(), None)
-        
+
     def test_binary_body(self):
         body = binascii.a2b_hex('f0000a09')
         headers = {'content-length': str(len(body))}
@@ -133,9 +117,9 @@ class StompParserTest(unittest.TestCase):
         self.assertEquals('MESSAGE', frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body, frame.body)
-        
-        self.assertEquals(parser.get(), None)        
-        
+
+        self.assertEquals(parser.get(), None)
+
     def test_receiveFrame_multiple_frames_per_read(self):
         body1 = 'boo'
         body2 = 'hoo'
@@ -143,7 +127,7 @@ class StompParserTest(unittest.TestCase):
         frameBytes = str(StompFrame('MESSAGE', headers, body1)) + str(StompFrame('MESSAGE', headers, body2))
         parser = StompParser()
         parser.add(frameBytes)
-        
+
         frame = parser.get()
         self.assertEquals('MESSAGE', frame.command)
         self.assertEquals(headers, frame.headers)
@@ -153,8 +137,8 @@ class StompParserTest(unittest.TestCase):
         self.assertEquals('MESSAGE', frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body2, frame.body)
-    
+
         self.assertEquals(parser.get(), None)
-        
+
 if __name__ == '__main__':
     unittest.main()

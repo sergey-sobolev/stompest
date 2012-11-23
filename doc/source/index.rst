@@ -46,3 +46,7 @@ Installation
 Questions or Suggestions?
 =========================
 Feel free to open an issue `here <https://github.com/nikipore/stompest/issues/>`_ or post a question on the `forum <http://groups.google.com/group/stompest/>`_.
+
+Versions
+========
+This is the latest version of the documentation and is generated from the latest commit on the `main branch <https://github.com/nikipore/stompest>`_. If you are looking for documentation which is consistent to a specific release, you may download the corresponding `tarball <https://github.com/nikipore/stompest/tags>`_ for offline browsing. If someone is willing to (teach me how to) set up release specific documentation on PyPI, please go ahead!

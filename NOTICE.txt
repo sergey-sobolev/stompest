@@ -1,0 +1,41 @@
+=========================================================================
+==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+==  Version 2.0, in this case for the stompest distribution.           ==
+=========================================================================
+
+Copyright 2012, Jan MŸller
+All rights reserved.
+
+=========================================================================
+==  stompest 1 Notice                                                  ==
+=========================================================================
+
+Version 1 of stompest (https://github.com/mozes/stompest) was written
+by Roger Hoover (http://github.com/theduderog)
+at Mozes, Inc. (http://www.mozes.com)
+and deployed in their production environment.
+
+Thanks to Roger for still being available for questions and discussions
+and to Mozes, Inc. for having open-sourced this useful piece of software. 
+
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+Copyright 2011-2012, Mozes, Inc.
+All rights reserved.
+
+=========================================================================
+==  stomper Notice                                                     ==
+=========================================================================
+
+Version 1 of stompest was based upon
+stomper (http://code.google.com/p/stomper),
+an independent, transport and client agnostic STOMP API written
+by Oisin Mulvihill (https://github.com/oisinmulvihill).
+
+This functionality was insourced because stomper was no longer actively
+pursued.
+
+License: http://www.apache.org/licenses/LICENSE-2.0
+
+Copyright 2007, Oisin Mulvihill
+All rights reserved.

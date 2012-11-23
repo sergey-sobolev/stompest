@@ -1,20 +1,3 @@
-"""
-"""
-"""
-Copyright 2011, 2012 Mozes, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-"""
 import collections
 import cStringIO
 
@@ -60,18 +43,18 @@ class StompParser(object):
             'body': self._parseBody
         }
         self.reset()
-    
+
     def canRead(self):
         """Indicates whether there are frames available.
         """
         return bool(self._frames)
-    
+
     def get(self):
         """Return the next frame as a :class:`~.frame.StompFrame` object (if any), or :obj:`None` (otherwise).
         """
         if self.canRead():
             return self._frames.popleft()
-    
+
     def add(self, data):
         """Add a byte-stream of wire-level data.
         
@@ -81,13 +64,13 @@ class StompParser(object):
             if not character:
                 return
             self.parse(character)
-    
+
     def reset(self):
         """Reset internal state, including all fully or partially parsed frames.
         """
         self._frames = collections.deque()
         self._next()
-        
+
     def _flush(self):
         self._buffer = cStringIO.StringIO()
 
@@ -96,20 +79,20 @@ class StompParser(object):
         self._length = -1
         self._read = 0
         self._transition('heart-beat')
-            
+
     def _transition(self, state):
         self._flush()
         self.parse = self._parsers[state]
-    
+
     def _parseHeartBeat(self, character):
         if character != StompSpec.LINE_DELIMITER:
             self._transition('command')
             self.parse(character)
             return
-        
+
         if self.version != StompSpec.VERSION_1_0:
             self._frames.append(StompHeartBeat())
-            
+
     def _parseCommand(self, character):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)
@@ -122,7 +105,7 @@ class StompParser(object):
             raise StompFrameError('Invalid command: %s' % repr(command))
         self._frame.command = command
         self._transition('headers')
-        
+
     def _parseHeader(self, character):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)
@@ -138,7 +121,7 @@ class StompParser(object):
         else:
             self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
             self._transition('body')
-        
+
     def _parseBody(self, character):
         self._read += 1
         if (self._read <= self._length) or (character != StompSpec.FRAME_DELIMITER):

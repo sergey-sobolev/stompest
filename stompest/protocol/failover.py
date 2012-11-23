@@ -1,20 +1,3 @@
-"""
-"""
-"""
-Copyright 2012 Mozes, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-"""
 import collections
 import random
 import re
@@ -57,13 +40,13 @@ class StompFailoverTransport(object):
     def __init__(self, uri):
         self._failoverUri = StompFailoverUri(uri)
         self._maxReconnectAttempts = None
-    
+
     def __iter__(self):
         self._reset()
         while True:
             for broker in self._brokers():
                 yield broker, self._delay()
-    
+
     def _brokers(self):
         failoverUri = self._failoverUri
         options = failoverUri.options
@@ -73,14 +56,14 @@ class StompFailoverTransport(object):
         if options['priorityBackup']:
             brokers.sort(key=lambda b: b['host'] in failoverUri.LOCAL_HOST_NAMES, reverse=True)
         return brokers
-    
+
     def _delay(self):
         options = self._failoverUri.options
         self._reconnectAttempts += 1
         if self._reconnectAttempts == 0:
             return 0
         if (self._maxReconnectAttempts != -1) and (self._reconnectAttempts > self._maxReconnectAttempts):
-            raise StompConnectTimeout('Reconnect timeout: %d attempts'  % self._maxReconnectAttempts)
+            raise StompConnectTimeout('Reconnect timeout: %d attempts' % self._maxReconnectAttempts)
         delay = max(0, (min(self._reconnectDelay + (random.random() * options['reconnectDelayJitter']), options['maxReconnectDelay'])))
         self._reconnectDelay *= (options['backOffMultiplier'] if options['useExponentialBackOff'] else 1)
         return delay / 1000.0
@@ -93,7 +76,7 @@ class StompFailoverTransport(object):
         else:
             self._maxReconnectAttempts = options['maxReconnectAttempts']
         self._reconnectAttempts = -1
-        
+
 class StompFailoverUri(object):
     """This is a parser for the failover URI scheme used in stompest. The parsed parameters are available in the attributes :attr:`brokers` and :attr:`options`. The Failover transport syntax is very close to the one used in ActiveMQ.
     
@@ -141,13 +124,13 @@ class StompFailoverUri(object):
         socket.gethostname(),
         socket.getfqdn(socket.gethostname())
     ])
-    
+
     _configurationOption = collections.namedtuple('_configurationOption', ['parser', 'default'])
     _bool = {'true': True, 'false': False}.__getitem__
-    
+
     _FAILOVER_PREFIX = 'failover:'
     _REGEX_URI = re.compile('^(?P<protocol>tcp)://(?P<host>[^:]+):(?P<port>\d+)$')
-    _REGEX_BRACKETS =  re.compile('^\((?P<uri>.+)\)$')
+    _REGEX_BRACKETS = re.compile('^\((?P<uri>.+)\)$')
     _SUPPORTED_OPTIONS = {
         'initialReconnectDelay': _configurationOption(int, 10)
         , 'maxReconnectDelay': _configurationOption(int, 30000)
@@ -164,36 +147,36 @@ class StompFailoverUri(object):
         #, 'maxCacheSize': _configurationOption(int, 131072), # size in bytes for the cache, if trackMessages is enabled
         #, 'updateURIsSupported': _configurationOption(_bool, True), # determines whether the client should accept updates to its list of known URIs from the connected broker
     }
-    
+
     def __init__(self, uri):
         self._parse(uri)
-    
+
     def __repr__(self):
         return "StompFailoverUri('%s')" % self.uri
-    
+
     def __str__(self):
         return self.uri
-    
+
     def _parse(self, uri):
         self.uri = uri
         try:
             (uri, _, options) = uri.partition('?')
             if uri.startswith(self._FAILOVER_PREFIX):
                 (_, _, uri) = uri.partition(self._FAILOVER_PREFIX)
-            
+
             try:
                 self._setOptions(options)
             except Exception, msg:
                 raise ValueError('invalid options: %s' % msg)
-            
+
             try:
                 self._setBrokers(uri)
             except Exception, msg:
                 raise ValueError('invalid broker(s): %s' % msg)
-            
+
         except ValueError, msg:
             raise ValueError('invalid uri: %s [%s]' % (self.uri, msg))
-    
+
     def _setBrokers(self, uri):
         brackets = self._REGEX_BRACKETS.match(uri)
         uri = brackets.groupdict()['uri'] if brackets else uri

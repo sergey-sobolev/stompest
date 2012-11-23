@@ -1,19 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-"""
-Copyright 2011, 2012 Mozes, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-"""
 import logging
 import unittest
 
@@ -38,7 +22,7 @@ class SimpleStompTest(unittest.TestCase):
         if receive:
             stomp._transport.receive.return_value = receive
         return stomp
-    
+
     def _get_connect_mock(self, receive=None, config=None):
         stomp = Stomp(config or CONFIG)
         stomp._transportFactory = Mock()
@@ -48,9 +32,9 @@ class SimpleStompTest(unittest.TestCase):
         if receive:
             transport.receive.return_value = receive
         return stomp
-        
+
     def test_receiveFrame(self):
-        frame_ = StompFrame('MESSAGE', {'x': 'y'}, 'testing 1 2 3')        
+        frame_ = StompFrame('MESSAGE', {'x': 'y'}, 'testing 1 2 3')
         stomp = self._get_transport_mock(frame_)
         frame = stomp.receiveFrame()
         self.assertEquals(frame_, frame)
@@ -67,24 +51,24 @@ class SimpleStompTest(unittest.TestCase):
     def test_subscribe_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
         self.assertRaises(Exception, stomp.subscribe, '/queue/foo')
-    
+
     def test_disconnect_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
         self.assertRaises(Exception, stomp.disconnect)
-    
+
     def test_connect_raises_exception_for_bad_host(self):
         stomp = Stomp(StompConfig('tcp://nosuchhost:2345'))
         self.assertRaises(Exception, stomp.connect)
-        
+
     def test_error_frame_after_connect_raises_StompProtocolError(self):
         stomp = self._get_connect_mock(StompFrame('ERROR', body='fake error'))
         self.assertRaises(StompProtocolError, stomp.connect)
         self.assertEquals(stomp._transport.receive.call_count, 1)
-    
+
     def test_connect_when_connected_raises_StompConnectionError(self):
         stomp = self._get_transport_mock()
         self.assertRaises(StompConnectionError, stomp.connect)
-    
+
     def test_connect_writes_correct_frame(self):
         login = 'curious'
         passcode = 'george'
@@ -95,7 +79,7 @@ class SimpleStompTest(unittest.TestCase):
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
         self.assertEquals(StompFrame('CONNECT', {'login': login, 'passcode': passcode}), sentFrame)
-    
+
     def test_send_writes_correct_frame(self):
         destination = '/queue/foo'
         message = 'test message'
@@ -156,16 +140,16 @@ class SimpleStompTest(unittest.TestCase):
             args, _ = stomp._transport.send.call_args
             sentFrame = args[0]
             self.assertEquals(StompFrame(command, {'transaction': transaction}), sentFrame)
-            
+
         with stomp.transaction(transaction):
             args, _ = stomp._transport.send.call_args
             sentFrame = args[0]
             self.assertEquals(StompFrame('BEGIN', {'transaction': transaction}), sentFrame)
-            
+
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
         self.assertEquals(StompFrame('COMMIT', {'transaction': transaction}), sentFrame)
-            
+
         try:
             with stomp.transaction(transaction):
                 raise

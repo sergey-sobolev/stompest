@@ -1,19 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-"""
-Copyright 2012 Mozes, Inc.
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either expressed or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-"""
 import logging
 
 from twisted.internet import defer, reactor, task
@@ -35,20 +19,20 @@ class ExclusiveWrapperTest(unittest.TestCase):
         def f(d):
             result = yield task.deferLater(reactor, 0, lambda: (d.errback(RuntimeError('hi')) or 4711))
             defer.returnValue(result)
-            
+
         d = defer.Deferred()
         running = f(d)
         self.assertRaises(StompAlreadyRunningError, lambda: f(d))
         self.assertFalse(running.called)
         result = yield running
-        self.assertEquals(result, 4711)        
+        self.assertEquals(result, 4711)
         self.assertFailure(d, RuntimeError)
-        
+
         @exclusive
         @defer.inlineCallbacks
         def g():
             yield task.deferLater(reactor, 0, lambda: {}[None])
-        
+
         for _ in xrange(5):
             running = g()
             for _ in xrange(5):
@@ -59,17 +43,17 @@ class ExclusiveWrapperTest(unittest.TestCase):
                 pass
             else:
                 raise
-        
+
         @exclusive
         def h(*args, **kwargs):
             return task.deferLater(reactor, 0, lambda: (args, kwargs))
-        
+
         running = h(1, 2, a=3, b=4)
         self.assertRaises(StompAlreadyRunningError, h)
 
         result = yield running
         self.assertEquals(result, ((1, 2), {'a': 3, 'b': 4}))
-    
+
 class InFlightOperationsTest(unittest.TestCase):
     def test_dict_interface(self):
         op = InFlightOperations('test')
@@ -91,7 +75,7 @@ class InFlightOperationsTest(unittest.TestCase):
         self.assertEquals(list(op), [])
         self.assertIdentical(op.setdefault(1, w), w)
         self.assertIdentical(op.setdefault(1, w), w)
-    
+
     @defer.inlineCallbacks
     def test_context_single(self):
         op = InFlightOperations('test')
@@ -101,13 +85,13 @@ class InFlightOperationsTest(unittest.TestCase):
             self.assertIdentical(w, op[1])
             self.assertIdentical(op.get(1), op[1])
         self.assertEquals(list(op), [])
-        
+
         with op(key=2, log=logging.getLogger(LOG_CATEGORY)):
             self.assertEquals(list(op), [2])
             self.assertIsInstance(op.get(2), defer.Deferred)
             self.assertIdentical(op.get(2), op[2])
         self.assertEquals(list(op), [])
-        
+
         try:
             with op(None, logging.getLogger(LOG_CATEGORY)) as w:
                 reactor.callLater(0, w.cancel) #@UndefinedVariable
@@ -117,7 +101,7 @@ class InFlightOperationsTest(unittest.TestCase):
         else:
             raise
         self.assertEquals(list(op), [])
-        
+
         try:
             with op(None, logging.getLogger(LOG_CATEGORY)) as w:
                 reactor.callLater(0, w.errback, StompCancelledError('4711')) #@UndefinedVariable
@@ -127,13 +111,13 @@ class InFlightOperationsTest(unittest.TestCase):
         else:
             raise
         self.assertEquals(list(op), [])
-        
+
         with op(None, logging.getLogger(LOG_CATEGORY)) as w:
             reactor.callLater(0, w.callback, 4711) #@UndefinedVariable
             result = yield wait(w)
             self.assertEquals(result, 4711)
         self.assertEquals(list(op), [])
-        
+
         try:
             with op(None) as w:
                 raise RuntimeError('hi')
@@ -146,7 +130,7 @@ class InFlightOperationsTest(unittest.TestCase):
             self.assertEquals(str(e), 'hi')
         else:
             raise
-        
+
         try:
             with op(None) as w:
                 d = wait(w)
@@ -160,7 +144,7 @@ class InFlightOperationsTest(unittest.TestCase):
             self.assertEquals(str(e), 'hi')
         else:
             pass
-    
+
     @defer.inlineCallbacks
     def test_timeout(self):
         op = InFlightOperations('test')
@@ -173,7 +157,7 @@ class InFlightOperationsTest(unittest.TestCase):
                 raise
             self.assertEquals(list(op), [None])
         self.assertEquals(list(op), [])
- 
+
 if __name__ == '__main__':
     import sys
     from twisted.scripts import trial
