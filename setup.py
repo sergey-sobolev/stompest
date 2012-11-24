@@ -21,7 +21,6 @@ setup(
     long_description=read('README.txt'),
     keywords='stomp twisted activemq rabbitmq apollo',
     url='https://github.com/nikipore/stompest',
-    py_modules=['stompest'],
     include_package_data=True,
     zip_safe=True,
     install_requires=[
