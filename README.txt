@@ -28,11 +28,11 @@ Installation
 
 Documentation & Code Examples
 =============================
-The stompest API is fully documented `here <http://nikipore.github.com/stompest/>`_.
+The stompest API is `fully documented here <http://nikipore.github.com/stompest/>`_.
 
 Questions or Suggestions?
 =========================
-Feel free to open an issue `here <https://github.com/nikipore/stompest/issues/>`_ or post a question on the `forum <http://groups.google.com/group/stompest/>`_.
+Feel free to `open an issue <https://github.com/nikipore/stompest/issues/>`_ or post a question on the `forum <http://groups.google.com/group/stompest/>`_.
 
 Acknowledgements
 ================
