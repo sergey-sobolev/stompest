@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contents &mdash; stompest documentation - v2.0a1</title>
+    <title>Contents &mdash; stompest documentation - v2.0a2</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a1',
+        VERSION:     '2.0a2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a1" href="#" />
+    <link rel="top" title="stompest documentation - v2.0a2" href="#" />
     <link rel="next" title="Synchronous Client" href="sync.html" /> 
   </head>
   <body>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              accesskey="N">next</a> |</li>
-        <li><a href="#">stompest documentation - v2.0a1</a> &raquo;</li> 
+        <li><a href="#">stompest documentation - v2.0a2</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -55,6 +55,7 @@
 <li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#questions-or-suggestions">Questions or Suggestions?</a></li>
+<li><a class="reference internal" href="#versions">Versions</a></li>
 </ul>
 
   <h4>Next topic</h4>
@@ -125,7 +126,7 @@
 <ul class="simple">
 <li>a wire-level STOMP frame parser <a class="reference internal" href="protocol.html#stompest.protocol.parser.StompParser" title="stompest.protocol.parser.StompParser"><tt class="xref py py-class docutils literal"><span class="pre">StompParser</span></tt></a> and compiler <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a>,</li>
 <li>a faithful implementation of the syntax of the STOMP 1.0 and 1.1 protocols with a simple stateless function API in the <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt></a> module,</li>
-<li>a generic implementation of the STOMP 1.0 and 1.1 session state semantics in <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a>, such as protocol version negotiation at connect time, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
+<li>a generic implementation of the STOMP 1.0 and 1.1 session state semantics in <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a>, such as protocol version negotiation at connect time, heart-beating, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
 <li>and <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompFailoverTransport" title="stompest.protocol.failover.StompFailoverTransport"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverTransport</span></tt></a>, a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in ActiveMQ.</li>
 </ul>
 <p>This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and <a class="reference external" href="http://www.mozes.com/">Mozes</a> &#8212; persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. The module is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests also pass against <a class="reference external" href="http://www.rabbitmq.com/">RabbitMQ</a> 2.8.7 and <a class="reference external" href="http://activemq.apache.org/apollo/">Apollo</a> 1.5. All of these brokers were tested with STOMP protocols 1.0 and 1.1. Minor enhancements may be required to use this STOMP adapter with other brokers.</p>
@@ -149,6 +150,10 @@
 <h1>Questions or Suggestions?<a class="headerlink" href="#questions-or-suggestions" title="Permalink to this headline">¶</a></h1>
 <p>Feel free to open an issue <a class="reference external" href="https://github.com/nikipore/stompest/issues/">here</a> or post a question on the <a class="reference external" href="http://groups.google.com/group/stompest/">forum</a>.</p>
 </div>
+<div class="section" id="versions">
+<h1>Versions<a class="headerlink" href="#versions" title="Permalink to this headline">¶</a></h1>
+<p>This is the latest version of the documentation and is generated from the latest commit on the <a class="reference external" href="https://github.com/nikipore/stompest">main branch</a>. If you are looking for documentation which is consistent to a specific release, you may download the corresponding <a class="reference external" href="https://github.com/nikipore/stompest/tags">tarball</a> for offline browsing. If someone is willing to (teach me how to) set up release specific documentation on PyPI, please go ahead!</p>
+</div>
 
 
           </div>
@@ -168,11 +173,11 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              >next</a> |</li>
-        <li><a href="#">stompest documentation - v2.0a1</a> &raquo;</li> 
+        <li><a href="#">stompest documentation - v2.0a2</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, Roger Hoover, Jan Müller.
+        &copy; Copyright 2012, Jan Müller.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

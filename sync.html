@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Synchronous Client &mdash; stompest documentation - v2.0a1</title>
+    <title>Synchronous Client &mdash; stompest documentation - v2.0a2</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a1',
+        VERSION:     '2.0a2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a1" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.0a2" href="index.html" />
     <link rel="next" title="Asynchronous Client" href="async.html" />
     <link rel="prev" title="Contents" href="index.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="index.html" title="Contents"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a2</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -183,6 +183,40 @@
 <dt id="stompest.sync.client.Stomp.beat">
 <tt class="descname">beat</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.beat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a STOMP heart-beat.</p>
+<p><strong>Example</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># you might want to enable logging to trace the wire-level traffic</span>
+<span class="gp">... </span><span class="kn">import</span> <span class="nn">time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61612&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.1&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">heartBeats</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elapsed</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">None</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">start</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;elapsed: </span><span class="si">%.2f</span><span class="s">, last received: </span><span class="si">%.2f</span><span class="s">, last sent: </span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+<span class="gp">... </span>    <span class="n">elapsed</span><span class="p">(),</span> <span class="n">elapsed</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">lastReceived</span><span class="p">),</span> <span class="n">elapsed</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">lastSent</span><span class="p">)</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="n">elapsed</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">clientHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">serverHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span> <span class="c"># poll server heart-beats</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">beat</span><span class="p">()</span> <span class="c"># send client heart-beat</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">times</span><span class="p">()</span>
+<span class="gp">... </span>
+<span class="go">False</span>
+<span class="go">elapsed: 0.08, last received: 0.00, last sent: 0.08</span>
+<span class="go">False</span>
+<span class="go">elapsed: 0.17, last received: 0.00, last sent: 0.17</span>
+<span class="go">False</span>
+<span class="go">elapsed: 0.25, last received: 0.20, last sent: 0.25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span> <span class="c"># server will disconnect us because we&#39;re not heart-beating any more</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;build/bdist.macosx-10.7-x86_64/egg/stompest/util.py&quot;</span>, line <span class="m">16</span>, in <span class="n">__checkattr</span>
+  File <span class="nb">&quot;build/bdist.macosx-10.7-x86_64/egg/stompest/sync/client.py&quot;</span>, line <span class="m">293</span>, in <span class="n">canRead</span>
+  File <span class="nb">&quot;build/bdist.macosx-10.7-x86_64/egg/stompest/sync/transport.py&quot;</span>, line <span class="m">63</span>, in <span class="n">receive</span>
+<span class="gr">stompest.error.StompConnectionError</span>: <span class="n">Connection closed [No more data]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">times</span><span class="p">()</span>
+<span class="go">elapsed: 0.50, last received: 0.50, last sent: 0.25</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -459,11 +493,11 @@
         <li class="right" >
           <a href="index.html" title="Contents"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a1</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a2</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, Roger Hoover, Jan Müller.
+        &copy; Copyright 2012, Jan Müller.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
