@@ -7,10 +7,10 @@ Copyright 2012, Jan MŸller
 All rights reserved.
 
 =========================================================================
-==  stompest 1 Notice                                                  ==
+==  stompest 1.x Notice                                                ==
 =========================================================================
 
-Version 1 of stompest (https://github.com/mozes/stompest) was written
+Version 1.x of stompest (https://github.com/mozes/stompest) was written
 by Roger Hoover (http://github.com/theduderog)
 at Mozes, Inc. (http://www.mozes.com)
 and deployed in their production environment.
