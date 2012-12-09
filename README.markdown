@@ -48,7 +48,6 @@ Session layer
 -------------
 * Manages the state of a connection.
 * Replays subscriptions upon reconnect.
-* Not yet fully client agnostic (currently only works on top of the simple client; support for the Twisted client is planned).
 * Heart-beat handling.
 
 Failover layer
@@ -92,8 +91,8 @@ Caveats
 
 To Do
 =====
-* The URI scheme supports only TCP, no SSL (the authors don't need it because the client is run in "safe" production environments). For the `async` client, however, it should be straightforward to enhance the URI scheme by means of the [Endpoint API](http://twistedmatrix.com/documents/current/api/twisted.internet.endpoints.html). Contributions are welcome!
-* [STOMP 1.2 protocol](http://stomp.github.com/stomp-specification-1.2.html) (not before there is a reference broker implementation available).
+* The URI scheme supports only TCP, no SSL. (The authors don't need it because the client is run in "safe" production environments.) For the `async` client, however, it should be straightforward to enhance the URI scheme by means of the [Endpoint API](http://twistedmatrix.com/documents/current/api/twisted.internet.endpoints.html). Contributions are welcome!
+* [STOMP 1.2 protocol](http://stomp.github.com/stomp-specification-1.2.html) support.
 
 Changes
 =======
