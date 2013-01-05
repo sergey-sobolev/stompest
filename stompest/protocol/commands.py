@@ -223,6 +223,7 @@ def connected(frame, versions=None):
     except StompProtocolError:
         raise StompProtocolError('Server version incompatible with accepted versions %s [headers=%s]' % (versions, headers))
 
+    session = headers.get(StompSpec.SESSION_HEADER)
     server = None if (version == StompSpec.VERSION_1_0) else headers.get(StompSpec.SERVER_HEADER)
 
     heartBeats = (0, 0)
@@ -234,14 +235,7 @@ def connected(frame, versions=None):
         except:
             raise StompProtocolError('Invalid %s header (two comma-separated and non-negative integers required): %s' % (StompSpec.HEART_BEAT_HEADER, heartBeats))
 
-    try:
-        id_ = headers[StompSpec.SESSION_HEADER]
-    except KeyError:
-        if version == StompSpec.VERSION_1_0:
-            raise StompProtocolError('Invalid %s frame (%s header is missing) [headers=%s]' % (StompSpec.CONNECTED, StompSpec.SESSION_HEADER, headers))
-        id_ = None
-
-    return version, server, id_, heartBeats
+    return version, server, session, heartBeats
 
 def message(frame, version):
     """Handle a **MESSAGE** frame. Returns a token which you can use to match this message to its subscription.

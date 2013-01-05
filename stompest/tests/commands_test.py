@@ -48,7 +48,7 @@ class CommandsTest(unittest.TestCase):
 
     def test_connected(self):
         self.assertEquals(commands.connected(StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'hi'})), ('1.0', None, 'hi', (0, 0)))
-        self.assertRaises(StompProtocolError, commands.connected, StompFrame(StompSpec.CONNECTED, {}))
+        self.assertEquals(commands.connected(StompFrame(StompSpec.CONNECTED, {})), ('1.0', None, None, (0, 0)))
         self.assertEquals(commands.connected(StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'hi'}), versions=['1.0']), ('1.0', None, 'hi', (0, 0)))
         self.assertEquals(commands.connected(StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'hi'}), versions=['1.0', '1.1']), ('1.0', None, 'hi', (0, 0)))
         self.assertRaises(StompProtocolError, commands.connected, StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'hi'}), versions=['1.1'])
