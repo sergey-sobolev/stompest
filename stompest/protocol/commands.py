@@ -301,15 +301,22 @@ def _ackHeaders(frame, transactions, version):
     _checkHeader(frame, StompSpec.MESSAGE_ID_HEADER, version)
     if version != StompSpec.VERSION_1_0:
         _checkHeader(frame, StompSpec.SUBSCRIPTION_HEADER, version)
-    keys = [StompSpec.SUBSCRIPTION_HEADER, StompSpec.MESSAGE_ID_HEADER]
+    if version in (StompSpec.VERSION_1_0, StompSpec.VERSION_1_1):
+        keys = {
+            StompSpec.SUBSCRIPTION_HEADER: StompSpec.SUBSCRIPTION_HEADER,
+            StompSpec.MESSAGE_ID_HEADER: StompSpec.MESSAGE_ID_HEADER
+        }
+    else:
+        _checkHeader(frame, StompSpec.ACK_HEADER, version)
+        keys = {StompSpec.ACK_HEADER: StompSpec.ID_HEADER}
     try:
         transaction = frame.headers[StompSpec.TRANSACTION_HEADER]
     except KeyError:
         pass
     else:
         if transaction in set(transactions or []):
-            keys.append(StompSpec.TRANSACTION_HEADER)
-    return dict((key, value) for (key, value) in frame.headers.iteritems() if key in keys)
+            keys[StompSpec.TRANSACTION_HEADER] = StompSpec.TRANSACTION_HEADER
+    return dict((keys[key], value) for (key, value) in frame.headers.iteritems() if key in keys)
 
 def _addReceiptHeader(frame, receipt):
     if not receipt:

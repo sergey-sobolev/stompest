@@ -82,6 +82,10 @@ class CommandsTest(unittest.TestCase):
         self.assertRaises(StompProtocolError, commands.ack, StompFrame(StompSpec.MESSAGE, {StompSpec.SUBSCRIPTION_HEADER: 'hi'}), version='1.1')
         self.assertRaises(StompProtocolError, commands.ack, StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi'}), version='1.1')
 
+        self.assertEquals(commands.ack(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi', StompSpec.SUBSCRIPTION_HEADER: 'there', StompSpec.ACK_HEADER: '4711'}), version='1.2'), StompFrame(command='ACK', headers={'id': '4711'}))
+        self.assertRaises(StompProtocolError, commands.ack, StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi'}), version='1.2')
+        self.assertRaises(StompProtocolError, commands.ack, StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi', StompSpec.SUBSCRIPTION_HEADER: 'there'}), version='1.2')
+
     def test_nack(self):
         self.assertEquals(commands.nack(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi', StompSpec.SUBSCRIPTION_HEADER: 'there'}), version='1.1'), StompFrame(command='NACK', headers={'message-id': 'hi', 'subscription': 'there'}))
         self.assertEquals(commands.nack(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi', StompSpec.SUBSCRIPTION_HEADER: 'there'}), receipt='4711', version='1.1'), StompFrame(command='NACK', headers={'message-id': 'hi', 'subscription': 'there', StompSpec.RECEIPT_HEADER: '4711'}))
