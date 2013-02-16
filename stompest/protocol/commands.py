@@ -41,7 +41,7 @@ def stomp(login=None, passcode=None, headers=None, versions=None, host=None, hea
     """Create a **STOMP** frame. Not supported in STOMP protocol 1.0, synonymous to :func:`connect` for STOMP protocol 1.1 and higher.
     """
     if (versions is None) or (list(versions) == [StompSpec.VERSION_1_0]):
-        raise StompProtocolError('Unsupported command (version %s): %s' % (StompSpec.VERSION_1_0, StompSpec.NACK))
+        raise StompProtocolError('Unsupported command (version %s): %s' % (StompSpec.VERSION_1_0, StompSpec.STOMP))
     frame = connect(login=login, passcode=passcode, headers=headers, versions=versions, host=host, heartBeats=heartBeats)
     return StompFrame(StompSpec.STOMP, frame.headers, frame.body)
 

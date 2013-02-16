@@ -3,6 +3,7 @@ import cStringIO
 
 from stompest.error import StompFrameError
 
+import commands
 from .frame import StompFrame, StompHeartBeat
 from .spec import StompSpec
 
@@ -35,7 +36,7 @@ class StompParser(object):
     
     """
     def __init__(self, version=None):
-        self.version = version or StompSpec.DEFAULT_VERSION
+        self.version = version
         self._parsers = {
             'heart-beat': self._parseHeartBeat,
             'command': self._parseCommand,
@@ -75,10 +76,16 @@ class StompParser(object):
         self._buffer = cStringIO.StringIO()
 
     def _next(self):
-        self._frame = StompFrame()
+        self._frame = None
         self._length = -1
         self._read = 0
         self._transition('heart-beat')
+
+    def _append(self):
+        if self._frame is not None:
+            self._frame.version = self.version
+            self._frames.append(self._frame)
+        self._next()
 
     def _transition(self, state):
         self._flush()
@@ -86,21 +93,22 @@ class StompParser(object):
 
     def _parseHeartBeat(self, character):
         if character != StompSpec.LINE_DELIMITER:
+            self._frame = StompFrame(version=self.version)
             self._transition('command')
             self.parse(character)
             return
 
         if self.version != StompSpec.VERSION_1_0:
-            self._frames.append(StompHeartBeat())
+            self._frame = StompHeartBeat()
+            self._append()
 
     def _parseCommand(self, character):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)
             return
-        command = self._stripLineDelimiter(self._buffer.getvalue())
+        command = self._decode(self._buffer.getvalue())
         if command not in StompSpec.COMMANDS[self.version]:
-            self._flush()
-            raise StompFrameError('Invalid command: %s' % repr(command))
+            self._raise('Invalid command: %s' % repr(command))
         self._frame.command = command
         self._transition('headers')
 
@@ -108,12 +116,12 @@ class StompParser(object):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)
             return
-        header = self._stripLineDelimiter(self._buffer.getvalue())
+        header = self._decode(self._buffer.getvalue())
         if header:
             try:
                 name, value = header.split(StompSpec.HEADER_SEPARATOR, 1)
             except ValueError:
-                raise StompFrameError('No separator in header line: %s' % header)
+                self._raise('No separator in header line: %s' % header)
             self._frame.headers.setdefault(name, value)
             self._transition('headers')
         else:
@@ -128,12 +136,25 @@ class StompParser(object):
         self._frame.body = self._buffer.getvalue()
         command = self._frame.command
         if self._frame.body and (command not in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [command])):
-            raise StompFrameError('No body allowed for this command: %s' % command)
-        self._frames.append(self._frame)
-        self._next()
+            self._raise('No body allowed for this command: %s' % command)
+        self._append()
 
-    def _stripLineDelimiter(self, text):
+    def _raise(self, message):
+        self._flush()
+        raise StompFrameError(message)
+
+    def _decode(self, text):
+        text = StompSpec.CODECS[self.version].decode(text)[0]
         stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
         if stripLineDelimiter and text.endswith(stripLineDelimiter):
             return text[:-1]
         return text
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, value):
+        self._version = commands.version(value)
+

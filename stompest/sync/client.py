@@ -305,6 +305,7 @@ class Stomp(object):
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.sync.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
+        frame.version = self.session.version
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Sending %s' % frame.info())
         self._transport.send(frame)

@@ -24,12 +24,12 @@ StompFrame(command='DISCONNECT', headers={}, body='')
 1.1 disconnected
 
 """
-import commands
 import copy
 import itertools
 import time
 import uuid
 
+import commands
 from stompest.error import StompProtocolError
 
 class StompSession(object):

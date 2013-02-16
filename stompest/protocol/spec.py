@@ -1,3 +1,5 @@
+import codecs
+
 class StompSpec(object):
     """This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn't much to document, but you are invited to take a look at all available constants in the source code. Wait a minute ... one attribute is particularly noteworthy, name :attr:`DEFAULT_VERSION` --- which currently is :obj:`'1.0'` (but this may change in upcoming stompest releases, so you're advised to always explicitly define which STOMP protocol version you are going to use).
     
@@ -54,6 +56,13 @@ class StompSpec(object):
         VERSION_1_1: set([SEND, MESSAGE, ERROR]),
         VERSION_1_2: set([SEND, MESSAGE, ERROR])
     }
+
+    CODECS = { # for command and headers
+        VERSION_1_0: 'ascii'
+    }
+    CODECS = dict([
+        (version, codecs.lookup(CODECS.get(version, 'utf-8'))) for version in VERSIONS
+    ])
 
     LINE_DELIMITER = '\n'
     STRIP_LINE_DELIMITER = {
