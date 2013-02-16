@@ -181,5 +181,17 @@ class StompParserTest(unittest.TestCase):
 
         self.assertEquals(parser.get(), None)
 
+    def test_decoding(self):
+        headers = {u'fen\xeatre': u'\xbfqu\xe9 tal?, s\xfc\xdf'}
+        frameBytes = str(StompFrame(command=StompSpec.DISCONNECT, headers=headers, version=StompSpec.VERSION_1_1))
+
+        parser = StompParser(version=StompSpec.VERSION_1_1)
+        parser.add(frameBytes)
+        frame = parser.get()
+        self.assertEquals(frame.headers, headers)
+
+        parser = StompParser(version=StompSpec.VERSION_1_0)
+        self.assertRaises(UnicodeDecodeError, parser.add, frameBytes)
+
 if __name__ == '__main__':
     unittest.main()

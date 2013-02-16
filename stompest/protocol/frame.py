@@ -9,7 +9,7 @@ class StompFrame(object):
         self.version = version
 
         self.command = str(command)
-        self.headers = {} if (headers is None) else dict(map(str, item) for item in headers.iteritems())
+        self.headers = dict(headers or {})
         self.body = str(body)
 
     def __eq__(self, other):

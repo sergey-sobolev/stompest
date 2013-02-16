@@ -121,7 +121,7 @@ def subscribe(destination, headers, receipt=None, version=None):
         if (version != StompSpec.VERSION_1_0):
             raise
     token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
-    return frame, token
+    return frame, tuple(map(unicode, token))
 
 def unsubscribe(token, receipt=None, version=None):
     """Create an **UNSUBSCRIBE** frame.
