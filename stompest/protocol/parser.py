@@ -97,9 +97,7 @@ class StompParser(object):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)
             return
-        command = self._buffer.getvalue()
-        if not command:
-            return
+        command = self._stripLineDelimiter(self._buffer.getvalue())
         if command not in StompSpec.COMMANDS[self.version]:
             self._flush()
             raise StompFrameError('Invalid command: %s' % repr(command))
@@ -110,13 +108,13 @@ class StompParser(object):
         if character != StompSpec.LINE_DELIMITER:
             self._buffer.write(character)
             return
-        header = self._buffer.getvalue()
+        header = self._stripLineDelimiter(self._buffer.getvalue())
         if header:
             try:
                 name, value = header.split(StompSpec.HEADER_SEPARATOR, 1)
             except ValueError:
                 raise StompFrameError('No separator in header line: %s' % header)
-            self._frame.headers[name] = value
+            self._frame.headers.setdefault(name, value)
             self._transition('headers')
         else:
             self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
@@ -128,5 +126,14 @@ class StompParser(object):
             self._buffer.write(character)
             return
         self._frame.body = self._buffer.getvalue()
+        command = self._frame.command
+        if self._frame.body and (command not in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [command])):
+            raise StompFrameError('No body allowed for this command: %s' % command)
         self._frames.append(self._frame)
         self._next()
+
+    def _stripLineDelimiter(self, text):
+        stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
+        if stripLineDelimiter and text.endswith(stripLineDelimiter):
+            return text[:-1]
+        return text

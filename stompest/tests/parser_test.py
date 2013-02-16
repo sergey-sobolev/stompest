@@ -14,7 +14,7 @@ class StompParserTest(unittest.TestCase):
         while True:
             yield ''
 
-    def test_frameParse_succeeds(self):
+    def test_frame_parse_succeeds(self):
         message = {
             'command': 'SEND',
             'headers': {'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
@@ -73,13 +73,13 @@ class StompParserTest(unittest.TestCase):
         #self.assertEqual(parser.get(), commands.disconnect())
         self.assertEqual(parser.get(), None)
 
-    def test_getMessage_returns_None_if_not_done(self):
+    def test_get_returns_None_if_not_done(self):
         parser = StompParser()
         self.assertEqual(None, parser.get())
         parser.add('CONNECT')
         self.assertEqual(None, parser.get())
 
-    def test_processLine_throws_FrameError_on_invalid_command(self):
+    def test_add_throws_FrameError_on_invalid_command(self):
         parser = StompParser()
 
         self.assertRaises(StompFrameError, lambda: parser.add('HELLO\n'))
@@ -88,7 +88,7 @@ class StompParserTest(unittest.TestCase):
         self.assertEquals(StompFrame('DISCONNECT'), parser.get())
         self.assertFalse(parser.canRead())
 
-    def test_processLine_throws_FrameError_on_header_line_missing_separator(self):
+    def test_add_throws_FrameError_on_header_line_missing_separator(self):
         parser = StompParser()
         parser.add('SEND\n')
         self.assertRaises(StompFrameError, lambda: parser.add('no separator\n'))
@@ -120,7 +120,48 @@ class StompParserTest(unittest.TestCase):
 
         self.assertEquals(parser.get(), None)
 
-    def test_receiveFrame_multiple_frames_per_read(self):
+    def test_body_allowed_commands(self):
+        head = str(commands.disconnect()).rstrip(StompSpec.FRAME_DELIMITER)
+        for (version, bodyAllowed) in [
+            (StompSpec.VERSION_1_0, True),
+            (StompSpec.VERSION_1_1, False),
+            (StompSpec.VERSION_1_2, False)
+        ]:
+            parser = StompParser(version)
+            parser.add(head)
+            parser.add('ouch!')
+            try:
+                parser.add(StompSpec.FRAME_DELIMITER)
+            except StompFrameError:
+                if bodyAllowed:
+                    raise
+            except:
+                raise
+            else:
+                if not bodyAllowed:
+                    raise
+
+    def test_strip_line_delimiter(self):
+        frame = commands.send('/queue/test')
+        rawFrameReplaced = str(commands.send('/queue/test')).replace('\n', '\r\n')
+        for (version, replace) in [
+            (StompSpec.VERSION_1_0, False),
+            (StompSpec.VERSION_1_1, False),
+            (StompSpec.VERSION_1_2, True)
+        ]:
+            if replace:
+                parser = StompParser(version)
+                parser.add(rawFrameReplaced)
+                self.assertEquals(parser.get(), frame)
+            else:
+                self.assertRaises(StompFrameError, StompParser(version).add, rawFrameReplaced)
+        textWithCarriageReturn = 'there\rfolks'
+        frame = commands.send('/queue/test', headers={'hi': textWithCarriageReturn})
+        parser = StompParser(StompSpec.VERSION_1_2)
+        parser.add(str(frame))
+        self.assertEquals(parser.get().headers['hi'], textWithCarriageReturn)
+
+    def test_add_multiple_frames_per_read(self):
         body1 = 'boo'
         body2 = 'hoo'
         headers = {'x': 'y'}

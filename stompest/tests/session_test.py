@@ -20,7 +20,7 @@ class StompSessionTest(unittest.TestCase):
         session = StompSession('1.1')
         self.assertEquals(session.version, '1.1')
 
-        self.assertRaises(StompProtocolError, lambda: StompSession(version='1.2'))
+        self.assertRaises(StompProtocolError, lambda: StompSession(version='1.3'))
         self.assertRaises(StompProtocolError, lambda: session.send('', '', {}))
 
     def test_session_connect(self):

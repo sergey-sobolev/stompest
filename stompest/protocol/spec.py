@@ -4,8 +4,8 @@ class StompSpec(object):
     .. seealso :: Specification of STOMP protocols `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_ and `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, your favorite broker's documentation for additional STOMP headers.
     """
     # specification of the STOMP protocol: http://stomp.github.com//index.html
-    VERSION_1_0, VERSION_1_1 = '1.0', '1.1'
-    VERSIONS = [VERSION_1_0, VERSION_1_1]
+    VERSION_1_0, VERSION_1_1, VERSION_1_2 = '1.0', '1.1', '1.2'
+    VERSIONS = [VERSION_1_0, VERSION_1_1, VERSION_1_2]
     DEFAULT_VERSION = VERSION_1_0
 
     ABORT = 'ABORT'
@@ -21,11 +21,15 @@ class StompSpec(object):
     UNSUBSCRIBE = 'UNSUBSCRIBE'
 
     CLIENT_COMMANDS = {
-        '1.0': set([
+        VERSION_1_0: set([
             ABORT, ACK, BEGIN, COMMIT, CONNECT, DISCONNECT,
             SEND, SUBSCRIBE, UNSUBSCRIBE
         ]),
-        '1.1': set([
+        VERSION_1_1: set([
+            ABORT, ACK, BEGIN, COMMIT, CONNECT, DISCONNECT,
+            NACK, SEND, STOMP, SUBSCRIBE, UNSUBSCRIBE
+        ]),
+        VERSION_1_2: set([
             ABORT, ACK, BEGIN, COMMIT, CONNECT, DISCONNECT,
             NACK, SEND, STOMP, SUBSCRIBE, UNSUBSCRIBE
         ])
@@ -37,15 +41,28 @@ class StompSpec(object):
     RECEIPT = 'RECEIPT'
 
     SERVER_COMMANDS = {
-        '1.0': set([CONNECTED, ERROR, MESSAGE, RECEIPT]),
-        '1.1': set([CONNECTED, ERROR, MESSAGE, RECEIPT])
+        VERSION_1_0: set([CONNECTED, ERROR, MESSAGE, RECEIPT]),
+        VERSION_1_1: set([CONNECTED, ERROR, MESSAGE, RECEIPT]),
+        VERSION_1_2: set([CONNECTED, ERROR, MESSAGE, RECEIPT])
     }
 
     COMMANDS = dict(CLIENT_COMMANDS)
     for (version, commands) in SERVER_COMMANDS.iteritems():
         COMMANDS.setdefault(version, set()).update(commands)
 
+    COMMANDS_BODY_ALLOWED = {
+        VERSION_1_1: set([SEND, MESSAGE, ERROR]),
+        VERSION_1_2: set([SEND, MESSAGE, ERROR])
+    }
+
     LINE_DELIMITER = '\n'
+    STRIP_LINE_DELIMITER = {
+        VERSION_1_2: '\r'
+    }
+
+    ESCAPE_CHARACTER = '\\'
+    ESCAPED_CHARACTERS = set(['\r', '\t', '\c', '\\'])
+
     FRAME_DELIMITER = '\x00'
     HEADER_SEPARATOR = ':'
 
