@@ -63,8 +63,8 @@ fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
         frame = StompFrame(**message)
         self.assertEquals(frame.command, '0')
         self.assertEquals(frame.headers, {123: 456})
-        self.assertEquals(frame.body, '789')
-        self.assertEquals(dict(frame), {'command': '0', 'headers': {123: 456}, 'body': '789'})
+        self.assertEquals(frame.body, 789)
+        self.assertEquals(dict(frame), {'command': '0', 'headers': {123: 456}, 'body': 789})
         self.assertEquals(str(frame), """\
 0
 123:456

@@ -2,15 +2,23 @@ import commands
 from .spec import StompSpec
 
 class StompFrame(object):
-    """This object represents a STOMP frame which consists of a STOMP :attr:`command`, :attr:`headers`, and a message :attr:`body`. Its string representation (via :meth:`__str__`) renders the wire-level STOMP frame."""
+    """This object represents a STOMP frame.
+    
+    :param command: A valid STOMP command.
+    :param headers: The STOMP headers (represented as a :class:`dict`), or :obj:`None` (no headers).
+    :param body: The frame body.
+    :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
+        
+    .. note :: The frame's attributes are internally stored as arbitrary Python objects. The frame's :attr:`version` attribute controls the wire-level encoding of its :attr:`command` and :attr:`headers` (depending on STOMP protocol version, this may be ASCII or UTF-8), while its :attr:`body` is not encoded at all (it's just cast as a :class:`str`).
+    """
     INFO_LENGTH = 20
 
-    def __init__(self, command='', headers=None, body='', version=None):
+    def __init__(self, command, headers=None, body='', version=None):
         self.version = version
 
         self.command = str(command)
         self.headers = dict(headers or {})
-        self.body = str(body)
+        self.body = body
 
     def __eq__(self, other):
         return all(getattr(self, key) == getattr(other, key) for key in ('command', 'headers', 'body'))

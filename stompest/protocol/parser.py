@@ -93,7 +93,6 @@ class StompParser(object):
 
     def _parseHeartBeat(self, character):
         if character != StompSpec.LINE_DELIMITER:
-            self._frame = StompFrame(version=self.version)
             self._transition('command')
             self.parse(character)
             return
@@ -109,7 +108,7 @@ class StompParser(object):
         command = self._decode(self._buffer.getvalue())
         if command not in StompSpec.COMMANDS[self.version]:
             self._raise('Invalid command: %s' % repr(command))
-        self._frame.command = command
+        self._frame = StompFrame(command=command, version=self.version)
         self._transition('headers')
 
     def _parseHeader(self, character):

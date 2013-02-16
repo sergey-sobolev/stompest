@@ -1,7 +1,7 @@
 stomp, stomper, stompest!
 =========================
 
-stompest is a full-featured [STOMP](http://stomp.github.com/) [1.0](http://stomp.github.com//stomp-specification-1.0.html) and [1.1](http://stomp.github.com//stomp-specification-1.1.html) implementation for Python including both synchronous and asynchronous clients:
+stompest is a full-featured [STOMP](http://stomp.github.com/) [1.0](http://stomp.github.com//stomp-specification-1.0.html), [1.1](http://stomp.github.com//stomp-specification-1.1.html), and [1.2](http://stomp.github.com//stomp-specification-1.2.html) implementation for Python including both synchronous and asynchronous clients:
 
 * The `sync.Stomp` client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.
 * The `async.Stomp` client is based on [Twisted](http://twistedmatrix.com/), a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default "poison pill" error handling), concurrent message processing, graceful shutdown, and connect and disconnect timeouts.
@@ -10,15 +10,15 @@ Both clients make use of a generic set of components in the `protocol` module ea
 
 * a wire-level STOMP frame parser `protocol.StompParser` and compiler `protocol.StompFrame`,
 
-* a faithful implementation of the syntax of the STOMP 1.0 and 1.1 protocols with a simple stateless function API in the `protocol.commands` module,
+* a faithful implementation of the syntax of the STOMP protocol with a simple stateless function API in the `protocol.commands` module,
 
-* a generic implementation of the STOMP 1.0 and 1.1 session state semantics in `protocol.StompSession`, such as protocol version negotiation at connect time, heart-beating, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session's subscription state after a forced disconnect),
+* a generic implementation of the STOMP session state semantics in `protocol.StompSession`, such as protocol version negotiation at connect time, heart-beating, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session's subscription state after a forced disconnect),
 
 * and `protocol.StompFailoverTransport`, a [failover transport](http://activemq.apache.org/failover-transport-reference.html) URI scheme akin to the one used in ActiveMQ.
 
 This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
 
-The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (in particular STOMP 1.2 support) may still require minor changes of the API. 
+The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (for instance, support for [STOMP 1.2 repeated header entries](http://stomp.github.com/stomp-specification-1.2.html#Repeated_Header_Entries)) may still require minor changes of the API. 
 
 Installation
 ============
@@ -40,8 +40,8 @@ Features
 Commands layer
 --------------
 * Transport and client agnostic.
-* Full-featured implementation of all STOMP 1.0 and 1.1 client commands.
-* Client-side handling of STOMP 1.0 and 1.1 commands received from the broker.
+* Full-featured implementation of all STOMP client commands.
+* Client-side handling of STOMP commands received from the broker.
 * Stateless and simple function API.
 
 Session layer
@@ -91,8 +91,7 @@ Caveats
 
 To Do
 =====
-* The URI scheme supports only TCP, no SSL. (The authors don't need it because the client is run in "safe" production environments.) For the `async` client, however, it should be straightforward to enhance the URI scheme by means of the [Endpoint API](http://twistedmatrix.com/documents/current/api/twisted.internet.endpoints.html). Contributions are welcome!
-* [STOMP 1.2 protocol](http://stomp.github.com/stomp-specification-1.2.html) support.
+* see [proprosed enhancements](https://github.com/nikipore/stompest/issues?labels=enhancement&state=open)
 
 Changes
 =======
@@ -101,3 +100,4 @@ Changes
 * 1.1.2 - Fixed issue with stomper adding a space in ACK message-id header. ActiveMQ 5.6.0 no longer tolerates this.
 * 2.0a1 - Complete redesign: feature-complete implementation of STOMP 1.0 and 1.1. Broker failover. Decoupled from [stomper](http://code.google.com/p/stomper/).
 * 2.0a2 - Heart-beating.
+* 2.0a3 - Implementation of STOMP 1.2 (except repeated header entries).
