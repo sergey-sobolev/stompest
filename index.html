@@ -52,9 +52,10 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#stomp-stomper-stompest">stomp, stomper, stompest!</a></li>
-<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#documentation-code-examples">Documentation &amp; Code Examples</a></li>
 <li><a class="reference internal" href="#questions-or-suggestions">Questions or Suggestions?</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
 <li><a class="reference internal" href="#versions">Versions</a></li>
 </ul>
 
@@ -117,27 +118,20 @@
 </div>
 <div class="section" id="stomp-stomper-stompest">
 <h1>stomp, stomper, stompest!<a class="headerlink" href="#stomp-stomper-stompest" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference external" href="https://github.com/nikipore/stompest/">stompest</a> is a full-featured implementation of the <a class="reference external" href="http://stomp.github.com/">STOMP</a> protocol (versions <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>) for Python 2.6 (and higher) including both synchronous and <a class="reference external" href="http://twistedmatrix.com/">Twisted</a> clients:</p>
+<p><a class="reference external" href="https://github.com/nikipore/stompest/">stompest</a> is a full-featured implementation of the <a class="reference external" href="http://stomp.github.com/">STOMP</a> protocol (versions <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a>, <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.2.html">1.2</a>) for Python 2.6 (and higher) including both synchronous and asynchronous clients:</p>
 <ul class="simple">
-<li>The synchronous <a class="reference internal" href="sync.html#stompest.sync.client.Stomp" title="stompest.sync.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.</li>
-<li>The asynchronous <a class="reference internal" href="async.html#stompest.async.client.Stomp" title="stompest.async.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client is based on <a class="reference external" href="http://twistedmatrix.com/">Twisted</a>, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default &#8220;poison pill&#8221; error handling), concurrent message processing, graceful shutdown, and connect, receipt, and disconnect timeouts.</li>
+<li>The synchronous client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.</li>
+<li>The asynchronous client is based on <a class="reference external" href="http://twistedmatrix.com/">Twisted</a>, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default &#8220;poison pill&#8221; error handling), concurrent message processing, graceful shutdown, and connect, receipt, and disconnect timeouts.</li>
 </ul>
-<p>Both clients make use of a generic set of components in the <a class="reference internal" href="protocol.html#module-stompest.protocol" title="stompest.protocol"><tt class="xref py py-mod docutils literal"><span class="pre">protocol</span></tt></a> module each of which can be used independently to roll your own STOMP client:</p>
+<p>Both clients make use of a generic set of components in the each of which can be used independently to roll your own STOMP client:</p>
 <ul class="simple">
-<li>a wire-level STOMP frame parser <a class="reference internal" href="protocol.html#stompest.protocol.parser.StompParser" title="stompest.protocol.parser.StompParser"><tt class="xref py py-class docutils literal"><span class="pre">StompParser</span></tt></a> and compiler <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a>,</li>
-<li>a faithful implementation of the syntax of the STOMP 1.0 and 1.1 protocols with a simple stateless function API in the <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt></a> module,</li>
-<li>a generic implementation of the STOMP 1.0 and 1.1 session state semantics in <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a>, such as protocol version negotiation at connect time, heart-beating, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
-<li>and <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompFailoverTransport" title="stompest.protocol.failover.StompFailoverTransport"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverTransport</span></tt></a>, a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in ActiveMQ.</li>
+<li>a wire-level STOMP frame parser and compiler,</li>
+<li>a faithful implementation of the syntax of the STOMP protocol with a simple stateless function API,</li>
+<li>a generic implementation of the STOMP session state semantics, such as protocol version negotiation at connect time, transaction and subscription handling (including a generic subscription replay scheme which may be used to reconstruct the session&#8217;s subscription state after a forced disconnect),</li>
+<li>and a <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> URI scheme akin to the one used in ActiveMQ.</li>
 </ul>
-<p>This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by the current maintainer and <a class="reference external" href="http://www.mozes.com/">Mozes</a> &#8212; persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. The module is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests also pass against <a class="reference external" href="http://www.rabbitmq.com/">RabbitMQ</a> 3.0.0 and <a class="reference external" href="http://activemq.apache.org/apollo/">Apollo</a> 1.5. All of these brokers were tested with STOMP protocols 1.0 and 1.1. Minor enhancements may be required to use this STOMP adapter with other brokers.</p>
-<p>A few words about history: When stompest was brought into being, there were already several STOMP related modules around, but none of them did address the main requirements: a simple access to the STOMP protocol which stays out of your way (the synchronous <a class="reference internal" href="sync.html#stompest.sync.client.Stomp" title="stompest.sync.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client) features and an event-driven implementation which leverages the power of the <a class="reference external" href="http://twistedmatrix.com/">Twisted</a> framework (the asynchronous <a class="reference internal" href="async.html#stompest.async.client.Stomp" title="stompest.async.client.Stomp"><tt class="xref py py-class docutils literal"><span class="pre">Stomp</span></tt></a> client). The <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a> package provided an abstract implementation of the STOMP protocol which stompest 1 took advantage of: stomp, stomper, stompest! During the redesign which lead to stompest 2, the <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a> package turned out to suffer from being out-of-maintenance, so the appealing feature of an abstract STOMP API was insourced.</p>
-</div>
-<div class="section" id="acknowledgements">
-<h1>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li>Version 1.x of stompest was written by <a class="reference external" href="http://github.com/theduderog/">Roger Hoover</a> at <a class="reference external" href="http://www.mozes.com/">Mozes</a> and deployed in their production environment.</li>
-<li>Kudos to <a class="reference external" href="https://github.com/oisinmulvihill/">Oisin Mulvihill</a>, the developer of <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a>! The idea of an abstract representation of the STOMP protocol lives on in stompest.</li>
-</ul>
+<p>This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by <a class="reference external" href="http://www.mozes.com/">Mozes</a> &#8212; persistent queueing on <a class="reference external" href="http://activemq.apache.org/">ActiveMQ</a>. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (for instance, support for <a class="reference external" href="http://stomp.github.com/stomp-specification-1.2.html#Repeated_Header_Entries">STOMP 1.2 repeated header entries</a>) may still require minor changes of the API.</p>
+<p>The module is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests also pass against <a class="reference external" href="http://www.rabbitmq.com/">RabbitMQ</a> 3.0.0 and <a class="reference external" href="http://activemq.apache.org/apollo/">Apollo</a> 1.5. All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable). Minor enhancements may be required to use this STOMP adapter with other brokers.</p>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
@@ -146,9 +140,20 @@
 <li>Just use the method you like most: <tt class="docutils literal"><span class="pre">easy_install</span> <span class="pre">stompest</span></tt>, <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">stompest</span></tt>, or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt>.</li>
 </ul>
 </div>
+<div class="section" id="documentation-code-examples">
+<h1>Documentation &amp; Code Examples<a class="headerlink" href="#documentation-code-examples" title="Permalink to this headline">¶</a></h1>
+<p>The stompest API is <a class="reference external" href="http://nikipore.github.com/stompest/">fully documented here</a>.</p>
+</div>
 <div class="section" id="questions-or-suggestions">
 <h1>Questions or Suggestions?<a class="headerlink" href="#questions-or-suggestions" title="Permalink to this headline">¶</a></h1>
-<p>Feel free to open an issue <a class="reference external" href="https://github.com/nikipore/stompest/issues/">here</a> or post a question on the <a class="reference external" href="http://groups.google.com/group/stompest/">forum</a>.</p>
+<p>Feel free to <a class="reference external" href="https://github.com/nikipore/stompest/issues/">open an issue</a> or post a question on the <a class="reference external" href="http://groups.google.com/group/stompest/">forum</a>.</p>
+</div>
+<div class="section" id="acknowledgements">
+<h1>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Version 1.x of stompest was written by <a class="reference external" href="http://github.com/theduderog/">Roger Hoover</a> at <a class="reference external" href="http://www.mozes.com/">Mozes</a> and deployed in their production environment.</li>
+<li>Kudos to <a class="reference external" href="https://github.com/oisinmulvihill/">Oisin Mulvihill</a>, the developer of <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a>! The idea of an abstract representation of the STOMP protocol lives on in stompest.</li>
+</ul>
 </div>
 <div class="section" id="versions">
 <h1>Versions<a class="headerlink" href="#versions" title="Permalink to this headline">¶</a></h1>

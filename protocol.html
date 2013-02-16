@@ -527,8 +527,26 @@
 <span id="stomp-frame-representation"></span><span id="frame"></span><h2>STOMP Frame Representation<a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.frame.StompFrame">
-<em class="property">class </em><tt class="descclassname">stompest.protocol.frame.</tt><tt class="descname">StompFrame</tt><big>(</big><em>command=''</em>, <em>headers=None</em>, <em>body=''</em><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
-<dd><p>This object represents a STOMP frame which consists of a STOMP <tt class="xref py py-attr docutils literal"><span class="pre">command</span></tt>, <tt class="xref py py-attr docutils literal"><span class="pre">headers</span></tt>, and a message <tt class="xref py py-attr docutils literal"><span class="pre">body</span></tt>. Its string representation (via <tt class="xref py py-meth docutils literal"><span class="pre">__str__()</span></tt>) renders the wire-level STOMP frame.</p>
+<em class="property">class </em><tt class="descclassname">stompest.protocol.frame.</tt><tt class="descname">StompFrame</tt><big>(</big><em>command</em>, <em>headers=None</em>, <em>body=''</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>This object represents a STOMP frame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>command</strong> &#8211; A valid STOMP command.</li>
+<li><strong>headers</strong> &#8211; The STOMP headers (represented as a <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt>), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (no headers).</li>
+<li><strong>body</strong> &#8211; The frame body.</li>
+<li><strong>version</strong> &#8211; A valid STOMP protocol version, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (equivalent to the <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> attribute of the <a class="reference internal" href="#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><tt class="xref py py-class docutils literal"><span class="pre">StompSpec</span></tt></a> class).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The frame&#8217;s attributes are internally stored as arbitrary Python objects. The frame&#8217;s <tt class="xref py py-attr docutils literal"><span class="pre">version</span></tt> attribute controls the wire-level encoding of its <tt class="xref py py-attr docutils literal"><span class="pre">command</span></tt> and <tt class="xref py py-attr docutils literal"><span class="pre">headers</span></tt> (depending on STOMP protocol version, this may be ASCII or UTF-8), while its <tt class="xref py py-attr docutils literal"><span class="pre">body</span></tt> is not encoded at all (it&#8217;s just cast as a <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt>).</p>
+</div>
 <dl class="method">
 <dt id="stompest.protocol.frame.StompFrame.info">
 <tt class="descname">info</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame.info" title="Permalink to this definition">¶</a></dt>
