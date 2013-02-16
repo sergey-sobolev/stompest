@@ -193,5 +193,16 @@ class StompParserTest(unittest.TestCase):
         parser = StompParser(version=StompSpec.VERSION_1_0)
         self.assertRaises(UnicodeDecodeError, parser.add, frameBytes)
 
+    def test_keep_first_of_repeated_headers(self):
+        parser = StompParser()
+        parser.add("""
+CONNECT
+repeat:1
+repeat:2
+
+\x00""")
+        frame = parser.get()
+        self.assertEquals(frame.headers['repeat'], '1')
+
 if __name__ == '__main__':
     unittest.main()

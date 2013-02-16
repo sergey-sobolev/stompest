@@ -101,28 +101,19 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         self.cleanQueue(self.queue, self.headers)
         return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.1')
 
+    def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_2(self):
+        self.cleanQueue(self.queue)
+        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.2')
+
     @defer.inlineCallbacks
     def _test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(self, version):
-        if version not in commands.versions(VERSION):
-            print 'This broker does not support STOMP protocol version 1.1'
-            return
-
-        config = self.getConfig(StompSpec.VERSION_1_1)
+        config = self.getConfig(version)
         client = async.Stomp(config)
 
         try:
-            client = yield client.connect(host=VIRTUALHOST)
-            if client.session.version == '1.0':
-                yield client.disconnect()
-                raise StompProtocolError('Broker chose STOMP protocol 1.0')
-
+            client = yield client.connect(host=VIRTUALHOST, versions=[version])
         except StompProtocolError as e:
-            print 'Broker does not support STOMP protocol 1.1. Skipping this test case. [%s]' % e
-            defer.returnValue(None)
-
-        if client.session.version != version:
-            print 'Broker does not support STOMP protocol %s. Skipping this test case.' % version
-            yield client.disconnect()
+            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version)
             defer.returnValue(None)
 
         # enqueue two messages
@@ -341,21 +332,24 @@ class NackTestCase(AsyncClientBaseTestCase):
     frame = 'test'
     queue = '/queue/asyncNackTestCase'
 
+    def test_nack_stomp_1_1(self):
+        return self._test_nack(StompSpec.VERSION_1_1)
+
+    def test_nack_stomp_1_2(self):
+        return self._test_nack(StompSpec.VERSION_1_2)
+
     @defer.inlineCallbacks
-    def test_nack(self):
-        config = StompConfig(uri='tcp://%s:%d' % (HOST, PORT), version='1.1')
+    def _test_nack(self, version):
+        config = self.getConfig(version)
         client = async.Stomp(config)
         try:
-            client = yield client.connect(host=VIRTUALHOST)
-            if client.session.version == '1.0':
-                yield client.disconnect()
-                raise StompProtocolError('Broker chose STOMP protocol 1.0')
+            client = yield client.connect(host=VIRTUALHOST, versions=[version])
 
         except StompProtocolError as e:
-            print 'Broker does not support STOMP protocol 1.1. Skipping this test case. [%s]' % e
+            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (version, e)
             defer.returnValue(None)
 
-        client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: 'client-individual', 'id': '4711'}, ack=False)
+        client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, ack=False)
         client.send(self.queue, self.frame)
         while not self.framesHandled:
             yield task.deferLater(reactor, 0.01, lambda: None)

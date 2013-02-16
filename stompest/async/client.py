@@ -355,7 +355,7 @@ class Stomp(object):
         if self._disconnecting:
             self.log.info('[%s] Ignoring message (disconnecting)' % messageId)
             try:
-                self.nack(frame)
+                yield self.nack(frame)
             except StompProtocolError:
                 pass
             defer.returnValue(None)

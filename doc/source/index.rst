@@ -28,9 +28,9 @@ Both clients make use of a generic set of components in the each of which can be
 
 * and a `failover transport <http://activemq.apache.org/failover-transport-reference.html>`_ URI scheme akin to the one used in ActiveMQ.
 
-This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (for instance, support for `STOMP 1.2 repeated header entries <http://stomp.github.com/stomp-specification-1.2.html#Repeated_Header_Entries>`_) may still require minor changes of the API.
+This package is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (for instance, support for `STOMP 1.2 repeated header entries <http://stomp.github.com/stomp-specification-1.2.html#Repeated_Header_Entries>`_) may still require minor changes of the API.
 
-The module is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, and 5.7. The integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 3.0.0 and `Apollo <http://activemq.apache.org/apollo/>`_ 1.5. All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable). Minor enhancements may be required to use this STOMP adapter with other brokers.
+The package is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, 5.7, 5.8. The integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 3.0.2 and `Apollo <http://activemq.apache.org/apollo/>`_ 1.5. All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable). Minor enhancements may be required to use this STOMP adapter with other brokers.
 
 Installation
 ============

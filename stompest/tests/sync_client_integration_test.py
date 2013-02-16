@@ -2,7 +2,7 @@ import logging
 import unittest
 
 from stompest.config import StompConfig
-from stompest.error import StompConnectionError
+from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import commands, StompFrame, StompSpec
 from stompest.sync import Stomp
 import time
@@ -127,13 +127,13 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.unsubscribe(('id', 'bla'))
         client.disconnect()
 
-    def test_4_integration_stomp_1_1(self):
-        if StompSpec.VERSION_1_1 not in commands.versions(VERSION):
-            print 'This broker does not support STOMP protocol version 1.1'
+    def _test_4_integration_stomp(self, version):
+        client = Stomp(self.getConfig(version))
+        try:
+            client.connect(host=VIRTUALHOST, versions=[version])
+        except StompProtocolError as e:
+            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version)
             return
-
-        client = Stomp(self.getConfig(StompSpec.VERSION_1_1))
-        client.connect(host=VIRTUALHOST)
 
         client.send(self.DESTINATION, 'test message 1')
         client.send(self.DESTINATION, 'test message 2')
@@ -162,13 +162,16 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.close()
         self.assertRaises(StompConnectionError, client.canRead, 0)
 
+    def test_4_integration_stomp_1_1(self):
+        self._test_4_integration_stomp(StompSpec.VERSION_1_1)
+
+    def test_4_integration_stomp_1_2(self):
+        self._test_4_integration_stomp(StompSpec.VERSION_1_2)
+
     def test_5_integration_stomp_1_1_heartbeat(self):
+        version = StompSpec.VERSION_1_1
         if BROKER == 'apollo':
             print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
-            return
-
-        if StompSpec.VERSION_1_1 not in commands.versions(VERSION):
-            print 'This broker does not support STOMP protocol version 1.1'
             return
 
         port = 61612 if (BROKER == 'activemq') else PORT # stomp+nio on 61613 does not work properly, so use stomp on 61612
@@ -177,7 +180,12 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertEquals(client.lastSent, None)
 
         heartBeatPeriod = 100
-        client.connect(host=VIRTUALHOST, heartBeats=(heartBeatPeriod, heartBeatPeriod))
+        try:
+            client.connect(host=VIRTUALHOST, heartBeats=(heartBeatPeriod, heartBeatPeriod), versions=[version])
+        except StompProtocolError as e:
+            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version)
+            return
+
         self.assertTrue((time.time() - client.lastReceived) < 0.1)
         if not (client.serverHeartBeat and client.clientHeartBeat):
             print 'broker does not support heart-beating. disconnecting ...'
