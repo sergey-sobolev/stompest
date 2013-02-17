@@ -40,6 +40,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEquals(eval(repr(frame)), frame)
         frame.version = StompSpec.VERSION_1_1
         self.assertEquals(eval(repr(frame)), frame)
+
         self.assertEquals(str(frame), """\
 DISCONNECT
 fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
@@ -49,6 +50,9 @@ fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
         frame.version = StompSpec.VERSION_1_0
         self.assertEquals(eval(repr(frame)), frame)
         self.assertRaises(UnicodeEncodeError, frame.__str__)
+
+        otherFrame = StompFrame(version=StompSpec.VERSION_1_1, **message)
+        self.assertEquals(frame, otherFrame)
 
     def test_binary_body(self):
         body = binascii.a2b_hex('f0000a09')

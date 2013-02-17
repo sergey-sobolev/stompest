@@ -29,11 +29,11 @@ class StompFrame(object):
         return {'command': self.command, 'headers': self.headers, 'body': self.body}.iteritems()
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, ', '.join("%s=%s" % (key, repr(self.__dict__[key])) for key in ('command', 'headers', 'body')))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join("%s=%s" % (key, repr(getattr(self, key))) for key in ('command', 'headers', 'body', 'version')))
 
     def __str__(self):
-        headers = ''.join(u'%s:%s%s' % (self._encode(self._escape(str(key))), self._encode(self._escape(str(value))), StompSpec.LINE_DELIMITER) for (key, value) in self.headers.iteritems())
-        return StompSpec.LINE_DELIMITER.join([self._encode(str(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
+        headers = ''.join('%s:%s%s' % (self._encode(self._escape(unicode(key))), self._encode(self._escape(unicode(value))), StompSpec.LINE_DELIMITER) for (key, value) in self.headers.iteritems())
+        return StompSpec.LINE_DELIMITER.join([self._encode(unicode(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters.)"""
