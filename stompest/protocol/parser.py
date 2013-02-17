@@ -1,12 +1,12 @@
 import collections
 import cStringIO
-import re
 
 from stompest.error import StompFrameError
 
 import commands
 from .frame import StompFrame, StompHeartBeat
 from .spec import StompSpec
+from .util import unescape
 
 class StompParser(object):
     """This is a parser for a wire-level byte-stream of STOMP frames.
@@ -151,7 +151,10 @@ class StompParser(object):
         return text
 
     def _unescape(self, text):
-        return HeadersUnescaper.get(self.version)(self._frame.command, text)
+        try:
+            return unescape(self.version)(self._frame.command, text)
+        except KeyError as e:
+            raise StompFrameError('No escape sequence defined for this character: %s [text=%s]' % (e, repr(text)))
 
     @property
     def version(self):
@@ -160,29 +163,3 @@ class StompParser(object):
     @version.setter
     def version(self, value):
         self._version = commands.version(value)
-
-class HeadersUnescaper(object):
-    _INSTANCES = {}
-    _REGEX_UNESCAPE = re.compile('%s(.)' % re.escape(StompSpec.ESCAPE_CHARACTER))
-
-    @classmethod
-    def get(cls, version):
-        try:
-            return cls._INSTANCES[version]
-        except KeyError:
-            return cls._INSTANCES.setdefault(version, cls(version))
-
-    def __init__(self, version):
-        self._excludedCommands = StompSpec.COMMANDS_ESCAPE_EXCLUDED[version]
-        escapeSequences = StompSpec.ESCAPED_CHARACTERS[version]
-        self._regex = self._REGEX_UNESCAPE
-        self._sub = lambda m: escapeSequences[m.group(1)]
-
-    def __call__(self, command, text):
-        if command in self._excludedCommands:
-            return text
-        try:
-            return self._regex.sub(self._sub, text)
-        except KeyError as e:
-            raise StompFrameError('No escape sequence defined for this character: %s [text=%s]' % (e, repr(text)))
-
