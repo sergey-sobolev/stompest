@@ -57,10 +57,28 @@ class StompFrame(object):
         return StompSpec.CODECS[self.version].encode(text)[0]
 
     def _escape(self, text):
-        if self.command in StompSpec.COMMANDS_ESCAPE_EXCLUDED[self.version]:
+        return HeadersEscaper.get(self.version)(self.command, text)
+
+class HeadersEscaper(object):
+    _INSTANCES = {}
+
+    @classmethod
+    def get(cls, version):
+        try:
+            return cls._INSTANCES[version]
+        except KeyError:
+            return cls._INSTANCES.setdefault(version, cls(version))
+
+    def __init__(self, version):
+        self._excludedCommands = StompSpec.COMMANDS_ESCAPE_EXCLUDED[version]
+        escapeSequences = dict((escapeSequence, '%s%s' % (StompSpec.ESCAPE_CHARACTER, character)) for (character, escapeSequence) in StompSpec.ESCAPED_CHARACTERS[version].iteritems())
+        self._regex = re.compile('(%s)' % '|'.join(map(re.escape, escapeSequences)))
+        self._sub = lambda m: escapeSequences[m.group(1)]
+
+    def __call__(self, command, text):
+        if command in self._excludedCommands:
             return text
-        escapeSequences = dict((escapeSequence, '%s%s' % (StompSpec.ESCAPE_CHARACTER, character)) for (character, escapeSequence) in StompSpec.ESCAPED_CHARACTERS[self.version].iteritems())
-        return re.sub('(%s)' % '|'.join(map(re.escape, escapeSequences)), lambda m: escapeSequences[m.groups()[0]], text)
+        return self._regex.sub(self._sub, text)
 
 class StompHeartBeat(object):
     """This object represents a STOMP heart-beat. Its string representation (via :meth:`__str__`) renders the wire-level STOMP heart-beat."""

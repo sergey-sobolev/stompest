@@ -202,19 +202,29 @@ class StompParserTest(unittest.TestCase):
 
 \x00""" % StompSpec.DISCONNECT
 
-        for version in StompSpec.VERSIONS:
+        for version in (StompSpec.VERSION_1_1, StompSpec.VERSION_1_2):
             parser = StompParser(version=version)
             parser.add(frameBytes)
             frame = parser.get()
             self.assertEquals(frame.headers, {'\n\\': ':\t\n'})
+
+        parser = StompParser(version=StompSpec.VERSION_1_0)
+        parser.add(frameBytes)
+        frame = parser.get()
+        self.assertEquals(frame.headers, {'\\n\\\\': '\\c\t\\n'})
 
         frameBytes = """%s
 \\n\\\\:\\c\\t
 
 \x00""" % StompSpec.DISCONNECT
 
-        for version in StompSpec.VERSIONS:
+        for version in (StompSpec.VERSION_1_1, StompSpec.VERSION_1_2):
             self.assertRaises(StompFrameError, StompParser(version=version).add, frameBytes)
+
+        parser = StompParser(version=StompSpec.VERSION_1_0)
+        parser.add(frameBytes)
+        frame = parser.get()
+        self.assertEquals(frame.headers, {'\\n\\\\': '\\c\\t'})
 
         frameBytes = """%s
 \\n\\\\:\\c\t\\r
