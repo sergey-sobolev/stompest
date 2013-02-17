@@ -12,7 +12,7 @@ if sys.version_info[:2] < (2, 6):
 
 setup(
     name='stompest',
-    version='2.0a2',
+    version='2.0a3',
     author='Jan Mueller',
     author_email='nikipore@gmail.com',
     description='STOMP client library for Python including both synchronous and Twisted clients.',
