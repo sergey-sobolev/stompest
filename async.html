@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Asynchronous Client &mdash; stompest documentation - v2.0a2</title>
+    <title>Asynchronous Client &mdash; stompest documentation - v2.0a3</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a2',
+        VERSION:     '2.0a3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a2" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.0a3" href="index.html" />
     <link rel="next" title="Protocol Layer" href="protocol.html" />
     <link rel="prev" title="Synchronous Client" href="sync.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a2</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a3</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -133,15 +133,15 @@
         <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        
+
     <span class="nd">@defer.inlineCallbacks</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">stomp</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-            <span class="n">stomp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&#39;count&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">}),</span> <span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">stomp</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&#39;count&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">}),</span> <span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
         <span class="k">yield</span> <span class="n">stomp</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span> <span class="c"># graceful disconnect: waits until all receipts have arrived</span>
         <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-    
+
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
     <span class="n">Producer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -158,8 +158,9 @@
 
 <span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
 <span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
+<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
 
-<span class="k">class</span> <span class="nc">IncrementTransformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>    
+<span class="k">class</span> <span class="nc">IncrementTransformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="n">IN_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testIn&#39;</span>
     <span class="n">OUT_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testOut&#39;</span>
     <span class="n">ERROR_QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testTransformerError&#39;</span>
@@ -168,19 +169,19 @@
         <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        
+
     <span class="nd">@defer.inlineCallbacks</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">client</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
             <span class="c"># client-individual mode is necessary for concurrent processing</span>
             <span class="c"># (requires ActiveMQ &gt;= 5.2)</span>
-            <span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">,</span>
+            <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_CLIENT_INDIVIDUAL</span><span class="p">,</span>
             <span class="c"># the maximal number of messages the broker will let you work on at the same time</span>
-            <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">,</span> 
+            <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IN_QUEUE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addOne</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">errorDestination</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ERROR_QUEUE</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">addOne</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        NOTE: you can return a Deferred here</span>
@@ -188,7 +189,7 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
         <span class="n">data</span><span class="p">[</span><span class="s">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OUT_QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
-    
+
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
     <span class="n">IncrementTransformer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -205,6 +206,7 @@
 
 <span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
 <span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
+<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
 
 <span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/testOut&#39;</span>
@@ -214,26 +216,26 @@
         <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
-        
+
     <span class="nd">@defer.inlineCallbacks</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">stomp</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span>
             <span class="c"># client-individual mode is necessary for concurrent processing</span>
             <span class="c"># (requires ActiveMQ &gt;= 5.2)</span>
-            <span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">,</span>
+            <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_CLIENT_INDIVIDUAL</span><span class="p">,</span>
             <span class="c"># the maximal number of messages the broker will let you work on at the same time</span>
-            <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">,</span> 
+            <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="n">stomp</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">consume</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">errorDestination</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ERROR_QUEUE</span><span class="p">)</span>
-    
+
     <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        NOTE: you can return a Deferred here</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
         <span class="k">print</span> <span class="s">&#39;Received frame with count </span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;count&#39;</span><span class="p">]</span>
-    
+
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
     <span class="n">Consumer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -330,7 +332,7 @@
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>failure</strong> &#8211; A disconnect reason (a <tt class="xref py py-class docutils literal"><span class="pre">Exception</span></tt>) to err back. Example: <tt class="docutils literal"><span class="pre">versions=['1.0',</span> <span class="pre">'1.1']</span></tt></li>
-<li><strong>timeout</strong> &#8211; This is the time (in seconds) to wait for a graceful disconnect, thas is, for pending message handlers to complete. If receipt is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>timeout</strong> &#8211; This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If receipt is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
 </ul>
 </td>
 </tr>
@@ -450,11 +452,11 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a2</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a3</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, Jan Müller.
+        &copy; Copyright 2013, Jan Müller.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
