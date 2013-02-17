@@ -208,11 +208,11 @@ class Stomp(object):
         >>> client = Stomp(StompConfig('tcp://localhost:61613'))
         >>> client.connect()
         >>> client.subscribe('/queue/test', {'ack': 'client-individual'})
-        ('destination', '/queue/test')
+        (u'destination', u'/queue/test')
         >>> client.canRead(0) # Check that queue is empty.
         False
         >>> with client.transaction(receipt='important') as transaction:
-        ...     client.send('/queue/test', 'message with transaction header', {'transaction': transaction})
+        ...     client.send('/queue/test', 'message with transaction header', {StompSpec.TRANSACTION_HEADER: transaction})
         ...     client.send('/queue/test', 'message without transaction header')
         ...     raise RuntimeError('poof')
         ... 
@@ -220,12 +220,12 @@ class Stomp(object):
           File "<stdin>", line 4, in <module>
         RuntimeError: poof
         >>> client.receiveFrame()
-        StompFrame(command='RECEIPT', headers={'receipt-id': 'important-begin'}, body='')
+        StompFrame(command=u'RECEIPT', headers={u'receipt-id': u'important-begin'}, body='')
         >>> client.receiveFrame()
-        StompFrame(command='RECEIPT', headers={'receipt-id': 'important-abort'}, body='')
+        StompFrame(command=u'RECEIPT', headers={u'receipt-id': u'important-abort'}, body='')
         >>> frame = client.receiveFrame()
         >>> frame.command, frame.body
-        ('MESSAGE', 'message without transaction header')
+        (u'MESSAGE', 'message without transaction header')
         >>> client.ack(frame)
         >>> client.canRead(0) # frame with transaction header was dropped by the broker
         False

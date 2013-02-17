@@ -100,4 +100,4 @@ Changes
 * 1.1.2 - Fixed issue with stomper adding a space in ACK message-id header. ActiveMQ 5.6.0 no longer tolerates this.
 * 2.0a1 - Complete redesign: feature-complete implementation of STOMP 1.0 and 1.1. Broker failover. Decoupled from [stomper](http://code.google.com/p/stomper/).
 * 2.0a2 - Heart-beating.
-* 2.0a3 - Implementation of STOMP 1.2 (except repeated header entries).
+* 2.0a3 - Implementation of STOMP 1.2 (except repeated header entries). Support for UTF-8 headers and escaping of header delimiting characters (STOMP 1.1 and 1.2).

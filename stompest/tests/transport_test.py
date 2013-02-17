@@ -5,9 +5,9 @@ import unittest
 
 from mock import Mock
 
-from stompest.sync.transport import StompFrameTransport
-from stompest.protocol.frame import StompFrame
 from stompest.error import StompConnectionError
+from stompest.protocol import StompFrame
+from stompest.sync.transport import StompFrameTransport
 
 logging.basicConfig(level=logging.DEBUG)
 

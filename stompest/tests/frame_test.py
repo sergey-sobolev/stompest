@@ -1,32 +1,31 @@
 import binascii
 import unittest
 
-from stompest.protocol.frame import StompFrame
-from stompest.protocol.spec import StompSpec
+from stompest.protocol import StompFrame, StompSpec
 
 class StompFrameTest(unittest.TestCase):
     def test_frame(self):
-        message = {'command': 'SEND', 'headers': {StompSpec.DESTINATION_HEADER: '/queue/world'}, 'body': 'two\nlines'}
+        message = {'command': StompSpec.SEND, 'headers': {StompSpec.DESTINATION_HEADER: '/queue/world'}, 'body': 'two\nlines'}
         frame = StompFrame(**message)
         self.assertEquals(message['headers'], frame.headers)
         self.assertEquals(dict(frame), message)
         self.assertEquals(str(frame), """\
-SEND
-destination:/queue/world
+%s
+%s:/queue/world
 
 two
-lines\x00""")
+lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEquals(eval(repr(frame)), frame)
 
     def test_frame_without_headers_and_body(self):
-        message = {'command': 'DISCONNECT', 'headers': {}, 'body': ''}
+        message = {'command': StompSpec.DISCONNECT, 'headers': {}, 'body': ''}
         frame = StompFrame(**message)
         self.assertEquals(message['headers'], frame.headers)
         self.assertEquals(dict(frame), message)
         self.assertEquals(str(frame), """\
-DISCONNECT
+%s
 
-\x00""")
+\x00""" % StompSpec.DISCONNECT)
         self.assertEquals(eval(repr(frame)), frame)
 
     def test_encoding(self):
@@ -61,16 +60,63 @@ fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
     def test_non_string_arguments(self):
         message = {'command': 0, 'headers': {123: 456}, 'body': 789}
         frame = StompFrame(**message)
-        self.assertEquals(frame.command, '0')
+        self.assertEquals(frame.command, 0)
         self.assertEquals(frame.headers, {123: 456})
         self.assertEquals(frame.body, 789)
-        self.assertEquals(dict(frame), {'command': '0', 'headers': {123: 456}, 'body': 789})
+        self.assertEquals(dict(frame), {'command': 0, 'headers': {123: 456}, 'body': 789})
         self.assertEquals(str(frame), """\
 0
 123:456
 
 789\x00""")
         self.assertEquals(eval(repr(frame)), frame)
+
+    def test_unescape(self):
+        frameBytes = """%s
+\\n\\\\:\\c\t\\n
+
+\x00""" % StompSpec.DISCONNECT
+
+        frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\n'}, version=StompSpec.VERSION_1_1)
+        self.assertEquals(str(frame), frameBytes)
+
+        frameBytes = """%s
+\\n\\\\:\\c\t\\r
+
+\x00""" % StompSpec.DISCONNECT
+
+        frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\r'}, version=StompSpec.VERSION_1_2)
+        self.assertEquals(str(frame), frameBytes)
+
+        frameBytes = """%s
+\\n\\\\:\\c\t\r
+
+\x00""" % StompSpec.DISCONNECT
+
+        frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\r'}, version=StompSpec.VERSION_1_1)
+        self.assertEquals(str(frame), frameBytes)
+
+        frameBytes = """%s
+
+\\::\t\r
+
+
+\x00""" % StompSpec.DISCONNECT
+
+        frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\r\n'}, version=StompSpec.VERSION_1_0)
+        self.assertEquals(str(frame), frameBytes)
+
+        frameBytes = """%s
+
+\\::\t\r
+
+
+\x00""" % StompSpec.CONNECT
+
+        frame = StompFrame(command=StompSpec.CONNECT, headers={'\n\\': ':\t\r\n'})
+        for version in StompSpec.VERSIONS:
+            frame.version = version
+            self.assertEquals(str(frame), frameBytes)
 
 if __name__ == '__main__':
     unittest.main()

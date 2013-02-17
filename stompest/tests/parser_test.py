@@ -2,10 +2,8 @@ import binascii
 import unittest
 
 from stompest.error import StompFrameError
-from stompest.protocol import commands
-from stompest.protocol.frame import StompFrame, StompHeartBeat
-from stompest.protocol.parser import StompParser
-from stompest.protocol.spec import StompSpec
+from stompest.protocol import commands, StompFrame, StompParser, StompSpec
+from stompest.protocol.frame import StompHeartBeat
 
 class StompParserTest(unittest.TestCase):
     def _generate_bytes(self, stream):
@@ -82,7 +80,7 @@ class StompParserTest(unittest.TestCase):
     def test_add_throws_FrameError_on_invalid_command(self):
         parser = StompParser()
 
-        self.assertRaises(StompFrameError, lambda: parser.add('HELLO\n'))
+        self.assertRaises(StompFrameError, parser.add, 'HELLO\n')
         self.assertFalse(parser.canRead())
         parser.add('DISCONNECT\n\n\x00')
         self.assertEquals(StompFrame('DISCONNECT'), parser.get())
@@ -91,7 +89,12 @@ class StompParserTest(unittest.TestCase):
     def test_add_throws_FrameError_on_header_line_missing_separator(self):
         parser = StompParser()
         parser.add('SEND\n')
-        self.assertRaises(StompFrameError, lambda: parser.add('no separator\n'))
+        self.assertRaises(StompFrameError, parser.add, 'no separator\n')
+
+    def test_colon_in_header_value(self):
+        parser = StompParser()
+        parser.add('DISCONNECT\nheader:with:colon\n\n\x00')
+        self.assertEquals(parser.get().headers['header'], 'with:colon')
 
     def test_no_newline(self):
         headers = {'x': 'y'}
@@ -181,7 +184,7 @@ class StompParserTest(unittest.TestCase):
 
         self.assertEquals(parser.get(), None)
 
-    def test_decoding(self):
+    def test_decode(self):
         headers = {u'fen\xeatre': u'\xbfqu\xe9 tal?, s\xfc\xdf'}
         frameBytes = str(StompFrame(command=StompSpec.DISCONNECT, headers=headers, version=StompSpec.VERSION_1_1))
 
@@ -192,6 +195,36 @@ class StompParserTest(unittest.TestCase):
 
         parser = StompParser(version=StompSpec.VERSION_1_0)
         self.assertRaises(UnicodeDecodeError, parser.add, frameBytes)
+
+    def test_unescape(self):
+        frameBytes = """%s
+\\n\\\\:\\c\t\\n
+
+\x00""" % StompSpec.DISCONNECT
+
+        for version in StompSpec.VERSIONS:
+            parser = StompParser(version=version)
+            parser.add(frameBytes)
+            frame = parser.get()
+            self.assertEquals(frame.headers, {'\n\\': ':\t\n'})
+
+        frameBytes = """%s
+\\n\\\\:\\c\\t
+
+\x00""" % StompSpec.DISCONNECT
+
+        for version in StompSpec.VERSIONS:
+            self.assertRaises(StompFrameError, StompParser(version=version).add, frameBytes)
+
+        frameBytes = """%s
+\\n\\\\:\\c\t\\r
+
+\x00""" % StompSpec.DISCONNECT
+
+        parser = StompParser(version=StompSpec.VERSION_1_2)
+        parser.add(frameBytes)
+        frame = parser.get()
+        self.assertEquals(frame.headers, {'\n\\': ':\t\r'})
 
     def test_keep_first_of_repeated_headers(self):
         parser = StompParser()

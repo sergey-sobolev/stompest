@@ -5,18 +5,16 @@
 
 Examples:
 
->>> from stompest.protocol import commands
+>>> from stompest.protocol import commands, StompFrame, StompSpec
 >>> versions = list(commands.versions('1.1'))
 >>> print versions
 ['1.0', '1.1']
 >>> print repr(commands.connect(versions=versions))
-StompFrame(command='CONNECT', headers={'host': 'earth.solar-system', 'accept-version': '1.0,1.1'}, body='')
->>> frame, token = commands.subscribe('/queue/test', {'ack': 'client-individual', 'activemq.prefetchSize': '100'})
+StompFrame(command=u'CONNECT', headers={u'host': '', u'accept-version': '1.0,1.1'}, body='')
+>>> frame, token = commands.subscribe('/queue/test', {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '100'})
+>>> frame = StompFrame(StompSpec.MESSAGE, {StompSpec.DESTINATION_HEADER: '/queue/test', StompSpec.MESSAGE_ID_HEADER: '007'}, 'hello')
 >>> print repr(frame)
-StompFrame(command='SUBSCRIBE', headers={'ack': 'client-individual', 'destination': '/queue/test', 'activemq.prefetchSize': '100'}, body='')
->>> frame = StompFrame('MESSAGE', {'destination': '/queue/test', 'message-id': '007'}, '¿qué tal estás?')
->>> print repr(frame)
-StompFrame(command='MESSAGE', headers={'destination': '/queue/test', 'message-id': '007'}, body='\\xc2\\xbfqu\\xc3\\xa9 tal est\\xc3\\xa1s?')
+StompFrame(command=u'MESSAGE', headers={u'destination': '/queue/test', u'message-id': '007'}, body='hello')
 >>> commands.message(frame, version='1.0') == token # This message matches your subscription.
 True
 >>> commands.message(frame, version='1.1')
@@ -24,12 +22,10 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={'destination': '/queue/test', 'message-id': '007'}]
 >>> print repr(commands.disconnect(receipt='message-12345'))
-StompFrame(command='DISCONNECT', headers={'receipt': 'message-12345'}, body='')
+StompFrame(command=u'DISCONNECT', headers={u'receipt': 'message-12345'}, body='')
 
 .. seealso :: Specification of STOMP protocols `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_ and `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, your favorite broker's documentation for additional STOMP headers.
 """
-import socket
-
 from stompest.error import StompProtocolError
 
 from .frame import StompFrame, StompHeartBeat
@@ -64,7 +60,7 @@ def connect(login=None, passcode=None, headers=None, versions=None, host=None, h
     if versions != [StompSpec.VERSION_1_0]:
         headers[StompSpec.ACCEPT_VERSION_HEADER] = ','.join(_version(version) for version in versions)
         if host is None:
-            host = socket.gethostbyaddr(socket.gethostname())[0]
+            host = ''
         headers[StompSpec.HOST_HEADER] = host
     if heartBeats:
         if versions == [StompSpec.VERSION_1_0]:

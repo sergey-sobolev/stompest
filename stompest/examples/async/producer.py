@@ -13,15 +13,15 @@ class Producer(object):
         if config is None:
             config = StompConfig('tcp://localhost:61613')
         self.config = config
-        
+
     @defer.inlineCallbacks
     def run(self):
         stomp = yield Stomp(self.config).connect()
         for j in range(10):
-            stomp.send(self.QUEUE, json.dumps({'count': j}), receipt='message-%d' % j)
+            yield stomp.send(self.QUEUE, json.dumps({'count': j}), receipt='message-%d' % j)
         yield stomp.disconnect() # graceful disconnect: waits until all receipts have arrived
         reactor.stop()
-    
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     Producer().run()

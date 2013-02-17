@@ -1,8 +1,7 @@
 import unittest
 
 from stompest.error import StompProtocolError
-from stompest.protocol import StompSession, StompSpec, commands
-from stompest.protocol.frame import StompFrame
+from stompest.protocol import commands, StompFrame, StompSession, StompSpec
 
 class StompSessionTest(unittest.TestCase):
     def test_session_init(self):

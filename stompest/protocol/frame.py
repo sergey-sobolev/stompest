@@ -1,3 +1,5 @@
+import re
+
 import commands
 from .spec import StompSpec
 
@@ -16,7 +18,7 @@ class StompFrame(object):
     def __init__(self, command, headers=None, body='', version=None):
         self.version = version
 
-        self.command = str(command)
+        self.command = command
         self.headers = dict(headers or {})
         self.body = body
 
@@ -30,8 +32,8 @@ class StompFrame(object):
         return '%s(%s)' % (self.__class__.__name__, ', '.join("%s=%s" % (key, repr(self.__dict__[key])) for key in ('command', 'headers', 'body')))
 
     def __str__(self):
-        headers = ''.join(u'%s:%s%s' % (key, value, StompSpec.LINE_DELIMITER) for (key, value) in self.headers.iteritems())
-        return StompSpec.LINE_DELIMITER.join([self._encode(self.command), self._encode(headers), '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
+        headers = ''.join(u'%s:%s%s' % (self._encode(self._escape(str(key))), self._encode(self._escape(str(value))), StompSpec.LINE_DELIMITER) for (key, value) in self.headers.iteritems())
+        return StompSpec.LINE_DELIMITER.join([self._encode(str(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters.)"""
@@ -43,9 +45,6 @@ class StompFrame(object):
         info = ', '.join(i for i in (headers, body) if i)
         return '%s frame%s' % (self.command, info and (' [%s]' % info))
 
-    def _encode(self, text):
-        return StompSpec.CODECS[self.version].encode(text)[0]
-
     @property
     def version(self):
         return self._version
@@ -53,6 +52,15 @@ class StompFrame(object):
     @version.setter
     def version(self, value):
         self._version = commands.version(value)
+
+    def _encode(self, text):
+        return StompSpec.CODECS[self.version].encode(text)[0]
+
+    def _escape(self, text):
+        if self.command in StompSpec.COMMANDS_ESCAPE_EXCLUDED[self.version]:
+            return text
+        escapeSequences = dict((escapeSequence, '%s%s' % (StompSpec.ESCAPE_CHARACTER, character)) for (character, escapeSequence) in StompSpec.ESCAPED_CHARACTERS[self.version].iteritems())
+        return re.sub('(%s)' % '|'.join(map(re.escape, escapeSequences)), lambda m: escapeSequences[m.groups()[0]], text)
 
 class StompHeartBeat(object):
     """This object represents a STOMP heart-beat. Its string representation (via :meth:`__str__`) renders the wire-level STOMP heart-beat."""

@@ -1,5 +1,6 @@
 import collections
 import cStringIO
+import re
 
 from stompest.error import StompFrameError
 
@@ -12,7 +13,7 @@ class StompParser(object):
     
     :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
     
-    Example: 
+    Example:
 
     >>> from stompest.protocol import StompParser
     >>> messages = ['RECEIPT\\nreceipt-id:message-12345\\n\\n\\x00', 'NACK\\nsubscription:0\\nmessage-id:007\\n\\n\\x00']
@@ -22,9 +23,9 @@ class StompParser(object):
     ... 
     Traceback (most recent call last):
       File "<stdin>", line 2, in <module>
-    stompest.error.StompFrameError: Invalid command: 'NACK'
+    stompest.error.StompFrameError: Invalid command: u'NACK'
     >>> print repr(parser.get())
-    StompFrame(command='RECEIPT', headers={'receipt-id': 'message-12345'}, body='')
+    StompFrame(command='RECEIPT', headers={u'receipt-id': u'message-12345'}, body='')
     >>> print parser.canRead()
     False
     >>> print parser.get()
@@ -32,9 +33,11 @@ class StompParser(object):
     >>> parser = StompParser('1.1')
     >>> parser.add(messages[1])
     >>> print repr(parser.get())
-    StompFrame(command='NACK', headers={'message-id': '007', 'subscription': '0'}, body='')
+    StompFrame(command=u'NACK', headers={u'message-id': u'007', u'subscription': u'0'}, body='')
     
     """
+    _REGEX_UNESCAPE = re.compile('%s(.)' % re.escape(StompSpec.ESCAPE_CHARACTER))
+
     def __init__(self, version=None):
         self.version = version
         self._parsers = {
@@ -121,7 +124,7 @@ class StompParser(object):
                 name, value = header.split(StompSpec.HEADER_SEPARATOR, 1)
             except ValueError:
                 self._raise('No separator in header line: %s' % header)
-            self._frame.headers.setdefault(name, value)
+            self._frame.headers.setdefault(self._unescape(name), self._unescape(value))
             self._transition('headers')
         else:
             self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
@@ -149,6 +152,15 @@ class StompParser(object):
             return text[:-1]
         return text
 
+    def _unescape(self, text):
+        if self._frame in StompSpec.COMMANDS_ESCAPE_EXCLUDED[self.version]:
+            return text
+        escapedCharacters = StompSpec.ESCAPED_CHARACTERS[self.version]
+        try:
+            return self._REGEX_UNESCAPE.sub(lambda m: escapedCharacters[m.groups()[0]], text)
+        except KeyError as e:
+            self._raise('No escape sequence defined for this character: %s [text=%s]' % (e, repr(text)))
+
     @property
     def version(self):
         return self._version
@@ -156,4 +168,3 @@ class StompParser(object):
     @version.setter
     def version(self, value):
         self._version = commands.version(value)
-

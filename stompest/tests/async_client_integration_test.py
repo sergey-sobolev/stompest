@@ -7,12 +7,12 @@ from stompest import async, sync
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
-from stompest.protocol import StompSpec, commands
+from stompest.protocol import StompSpec
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from . import HOST, PORT, VERSION, LOGIN, PASSCODE, VIRTUALHOST, BROKER
+from . import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
 
 class StompestTestError(Exception):
     pass

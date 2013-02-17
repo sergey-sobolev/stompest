@@ -70,7 +70,16 @@ class StompSpec(object):
     }
 
     ESCAPE_CHARACTER = '\\'
-    ESCAPED_CHARACTERS = set(['\r', '\t', '\c', '\\'])
+    ESCAPED_CHARACTERS = {
+        VERSION_1_0: {'\\': '\\', 'c': ':', 'n': '\n'},
+        VERSION_1_1: {'\\': '\\', 'c': ':', 'n': '\n'},
+        VERSION_1_2: {'\\': '\\', 'c': ':', 'n': '\n', 'r': '\r'}
+    }
+    COMMANDS_ESCAPE_EXCLUDED = {
+        VERSION_1_0: COMMANDS[VERSION_1_0],
+        VERSION_1_1: set([CONNECT, CONNECTED]),
+        VERSION_1_2: set([CONNECT, CONNECTED])
+    }
 
     FRAME_DELIMITER = '\x00'
     HEADER_SEPARATOR = ':'

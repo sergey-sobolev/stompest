@@ -2,7 +2,7 @@ import itertools
 import unittest
 
 from stompest.error import StompConnectTimeout
-from stompest.protocol.failover import StompFailoverUri, StompFailoverTransport
+from stompest.protocol import StompFailoverUri, StompFailoverTransport
 
 class StompFailoverUriTest(unittest.TestCase):
     def test_configuration(self):
