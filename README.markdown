@@ -101,3 +101,4 @@ Changes
 * 2.0a1 - Complete redesign: feature-complete implementation of STOMP 1.0 and 1.1. Broker failover. Decoupled from [stomper](http://code.google.com/p/stomper/).
 * 2.0a2 - Heart-beating.
 * 2.0a3 - Implementation of STOMP 1.2 (except repeated header entries). Support for UTF-8 headers and escaping of header delimiting characters (STOMP 1.1 and 1.2).
+* 2.0a4 - Improved STOMP protocol version. Minor incompatible changes of the low-level API (protocol.session and protocol.commands). Bugfixes headers encoding.

@@ -10,3 +10,5 @@
     Heart-beating.
 2.0a3
     Implementation of STOMP 1.2 (except repeated header entries). Support for UTF-8 headers and escaping of header delimiting characters (STOMP 1.1 and 1.2).
+2.0a4
+    Improved STOMP protocol version. Minor incompatible changes of the low-level API (protocol.session and protocol.commands). Bugfixes headers encoding.
