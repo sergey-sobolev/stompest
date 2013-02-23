@@ -80,6 +80,13 @@ class StompFrame(object):
     def headers(self, value):
         self._headers = dict(value or {})
 
+    def unraw(self):
+        """If the frame has raw headers, copy their deduplicated version to the :attr:`headers` attribute, and remove the raw headers afterwards."""
+        if self.rawHeaders is None:
+            return
+        self.headers = self.headers
+        self.rawHeaders = None
+
 class StompHeartBeat(object):
     """This object represents a STOMP heart-beat. Its string representation (via :meth:`__str__`) renders the wire-level STOMP heart-beat."""
     __slots__ = ('version',)

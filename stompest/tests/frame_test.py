@@ -61,13 +61,23 @@ fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
         self.assertEquals(str(frame), 'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
 
     def test_duplicate_headers(self):
-        rawFrame = 'SEND\nfoo:bar1\nfoo:bar2\n\nsome stuff\nand more\x00'
+        rawHeaders = (('foo', 'bar1'), ('foo', 'bar2'))
+        headers = dict(reversed(rawHeaders))
         message = {
             'command': 'SEND',
-            'body': 'some stuff\nand more'
+            'body': 'some stuff\nand more',
+            'rawHeaders': rawHeaders
         }
         frame = StompFrame(**message)
-        frame.rawHeaders = (('foo', 'bar1'), ('foo', 'bar2'))
+        self.assertEquals(frame.headers, headers)
+        self.assertEquals(frame.rawHeaders, rawHeaders)
+        rawFrame = 'SEND\nfoo:bar1\nfoo:bar2\n\nsome stuff\nand more\x00'
+        self.assertEquals(str(frame), rawFrame)
+
+        frame.unraw()
+        self.assertEquals(frame.headers, headers)
+        self.assertEquals(frame.rawHeaders, None)
+        rawFrame = 'SEND\nfoo:bar1\n\nsome stuff\nand more\x00'
         self.assertEquals(str(frame), rawFrame)
 
     def test_non_string_arguments(self):
