@@ -567,7 +567,7 @@
 <span class="target" id="module-stompest.protocol.commands"></span><p>This module implements a low-level and stateless API for all commands of the STOMP protocol version supported by stompest. All STOMP command frames are represented as <a class="reference internal" href="#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> objects. It forms the basis for <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> which represents the full state of an abstract STOMP protocol session and (via <a class="reference internal" href="#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a>) of both high-level STOMP clients. You can use the commands API independently of other stompest modules to roll your own STOMP related functionality.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Whenever you have to pass a <strong>version</strong> parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of <tt class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></tt>, which is currently <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> but may change in upcoming versions of stompest (or you might override it yourself). Any command which does not conform to the STOMP protocol version in question will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>. The <strong>version</strong> parameter will always be the last argument in the signature; since command signatures may vary with a new STOMP protocol version, you are advised to always specify it as a keyword (as opposed to a positional) argument.</p>
+<p class="last">Whenever you have to pass a <strong>version</strong> parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of <tt class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></tt>, which is currently <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> but may change in upcoming versions of stompest (and by you, if you wish to override it). Any command which does not conform to the STOMP protocol version in question will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
 </div>
 <p>Examples:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">commands</span><span class="p">,</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
@@ -596,7 +596,7 @@
 </div>
 <dl class="function">
 <dt id="stompest.protocol.commands.abort">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">abort</tt><big>(</big><em>transaction</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.abort" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">abort</tt><big>(</big><em>transaction</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.abort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an <strong>ABORT</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -614,7 +614,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.ack">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>transactions=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.ack" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>transactions=None</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create an <strong>ACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -639,7 +639,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.begin">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">begin</tt><big>(</big><em>transaction</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.begin" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">begin</tt><big>(</big><em>transaction</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.begin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <strong>BEGIN</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -657,7 +657,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.commit">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">commit</tt><big>(</big><em>transaction</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.commit" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">commit</tt><big>(</big><em>transaction</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.commit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <strong>COMMIT</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -711,7 +711,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.disconnect">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.disconnect" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <strong>DISCONNECT</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -725,13 +725,13 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.error">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">error</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.error" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">error</tt><big>(</big><em>frame</em>, <em>version</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle an <strong>ERROR</strong> frame. Does not really do anything except checking that this is an <strong>ERROR</strong> frame.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stompest.protocol.commands.message">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.message" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">message</tt><big>(</big><em>frame</em>, <em>version</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle a <strong>MESSAGE</strong> frame. Returns a token which you can use to match this message to its subscription.</p>
 <div class="admonition-see-also admonition seealso">
 <p class="first admonition-title">See also</p>
@@ -741,7 +741,7 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.nack">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>transactions=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.nack" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>transactions=None</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.nack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <strong>NACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -760,13 +760,13 @@
 
 <dl class="function">
 <dt id="stompest.protocol.commands.receipt">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">receipt</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.receipt" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">receipt</tt><big>(</big><em>frame</em>, <em>version</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.receipt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle a <strong>RECEIPT</strong> frame. Returns the receipt id which you can use to match this receipt to the command that requested it.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="stompest.protocol.commands.send">
-<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.send" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.send" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a <strong>SEND</strong> frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -827,20 +827,9 @@
 </table>
 </dd></dl>
 
-</div>
-<div class="section" id="module-stompest.protocol.spec">
-<span id="stomp-protocol-specification"></span><span id="spec"></span><h2>STOMP Protocol Specification<a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="stompest.protocol.spec.StompSpec">
-<em class="property">class </em><tt class="descclassname">stompest.protocol.spec.</tt><tt class="descname">StompSpec</tt><a class="headerlink" href="#stompest.protocol.spec.StompSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn&#8217;t much to document, but you are invited to take a look at all available constants in the source code. Wait a minute ... one attribute is particularly noteworthy, name <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> &#8212; which currently is <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> (but this may change in upcoming stompest releases, so you&#8217;re advised to always explicitly define which STOMP protocol version you are going to use).</p>
-<div class="admonition-see-also admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last">Specification of STOMP protocols <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, your favorite broker&#8217;s documentation for additional STOMP headers.</p>
-</div>
-<dl class="classmethod">
-<dt id="stompest.protocol.spec.StompSpec.version">
-<em class="property">classmethod </em><tt class="descname">version</tt><big>(</big><em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.spec.StompSpec.version" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="stompest.protocol.commands.version">
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">version</tt><big>(</big><em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether <strong>version</strong> is a valid STOMP protocol version.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -852,12 +841,23 @@
 </table>
 </dd></dl>
 
-<dl class="classmethod">
-<dt id="stompest.protocol.spec.StompSpec.versions">
-<em class="property">classmethod </em><tt class="descname">versions</tt><big>(</big><em>version</em><big>)</big><a class="headerlink" href="#stompest.protocol.spec.StompSpec.versions" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="stompest.protocol.commands.versions">
+<tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">versions</tt><big>(</big><em>version</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.versions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Obtain all versions prior or equal to <strong>version</strong>.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-stompest.protocol.spec">
+<span id="stomp-protocol-specification"></span><span id="spec"></span><h2>STOMP Protocol Specification<a class="headerlink" href="#module-stompest.protocol.spec" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="stompest.protocol.spec.StompSpec">
+<em class="property">class </em><tt class="descclassname">stompest.protocol.spec.</tt><tt class="descname">StompSpec</tt><a class="headerlink" href="#stompest.protocol.spec.StompSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn&#8217;t much to document, but you are invited to take a look at all available constants in the source code. Wait a minute ... one attribute is particularly noteworthy, name <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> &#8212; which currently is <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> (but this may change in upcoming stompest releases, so you&#8217;re advised to always explicitly define which STOMP protocol version you are going to use).</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">Specification of STOMP protocols <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, your favorite broker&#8217;s documentation for additional STOMP headers.</p>
+</div>
 </dd></dl>
 
 </div>
