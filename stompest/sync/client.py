@@ -29,7 +29,6 @@ from stompest.protocol import StompFailoverTransport, StompSession
 from stompest.util import checkattr
 
 from .transport import StompFrameTransport
-from stompest.protocol import commands
 
 LOG_CATEGORY = __name__
 
@@ -85,7 +84,7 @@ class Stomp(object):
 
         try:
             for (broker, connectDelay) in self._failover:
-                transport = self._transportFactory(broker['host'], broker['port'], self.session.version)
+                transport = self._transportFactory(broker['host'], broker['port'])
                 if connectDelay:
                     self.log.debug('Delaying connect attempt for %d ms' % int(connectDelay * 1000))
                     time.sleep(connectDelay)
@@ -111,7 +110,8 @@ class Stomp(object):
             raise StompProtocolError('STOMP session connect failed [timeout=%s]' % timeout)
         frame = self.receiveFrame()
         self.session.connected(frame)
-        self.log.info('STOMP session established with broker %s' % self._transport)
+        self.log.info('Connected to stomp broker [session=%s, version=%s]' % (self.session.id, self.session.version))
+        self._transport.setVersion(self.session.version)
         for (destination, headers, receipt, _) in self.session.replay():
             self.log.info('Replaying subscription %s' % headers)
             self.subscribe(destination, headers, receipt)
@@ -136,7 +136,7 @@ class Stomp(object):
         
         Send a **SEND** frame.
         """
-        self.sendFrame(commands.send(destination, body, headers, receipt))
+        self.sendFrame(self.session.send(destination, body, headers, receipt))
 
     @connected
     def subscribe(self, destination, headers=None, receipt=None):

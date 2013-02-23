@@ -12,7 +12,7 @@ from stompest.protocol import StompSpec
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from . import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
+from stompest.tests import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
 
 class StompestTestError(Exception):
     pass
@@ -95,15 +95,15 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_0(self):
         self.cleanQueue(self.queue)
-        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.0')
+        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(StompSpec.VERSION_1_0)
 
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_1(self):
         self.cleanQueue(self.queue, self.headers)
-        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.1')
+        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(StompSpec.VERSION_1_1)
 
     def test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect_version_1_2(self):
         self.cleanQueue(self.queue)
-        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect('1.2')
+        return self._test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(StompSpec.VERSION_1_2)
 
     @defer.inlineCallbacks
     def _test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(self, version):
@@ -117,16 +117,19 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
             defer.returnValue(None)
 
         # enqueue two messages
-        client.send(self.queue, self.frame1, self.msg1Hdrs)
-        client.send(self.queue, self.frame2)
-
+        messageHeaders = dict(self.msg1Hdrs)
         defaultHeaders = {StompSpec.ACK_HEADER: 'client-individual'}
-        if version != '1.0':
+        specialCharactersHeader = u'fen\xeatre:\r\n'
+        if version != StompSpec.VERSION_1_0:
             defaultHeaders.update(self.headers)
+            messageHeaders[specialCharactersHeader] = u'\xbfqu\xe9 tal?, s\xfc\xdf'
+
+        client.send(self.queue, self.frame1, messageHeaders)
+        client.send(self.queue, self.frame2)
 
         # barf on first message so it will get put in error queue
         # use selector to guarantee message order.  AMQ doesn't guarantee order by default
-        headers = {'selector': "food = 'barf'"}
+        headers = {'selector': "food='barf'"}
         headers.update(defaultHeaders)
         client.subscribe(self.queue, self._saveFrameAndBarf, headers, errorDestination=self.errorQueue, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
 
@@ -138,7 +141,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         else:
             raise
 
-        client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
+        client = async.Stomp(config)  # take a fresh client to prevent replay (we were disconnected by an error)
 
         # reconnect and subscribe again - consuming second message then disconnecting
         client = yield client.connect(host=VIRTUALHOST)
@@ -157,7 +160,9 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         # verify that first message was in error queue
         self.assertEquals(self.frame1, self.errorQueueFrame.body)
-        self.assertEquals(self.msg1Hdrs['food'], self.errorQueueFrame.headers['food'])
+        self.assertEquals(messageHeaders['food'], self.errorQueueFrame.headers['food'])
+        if version != StompSpec.VERSION_1_0:
+            self.assertEquals(messageHeaders[specialCharactersHeader], self.errorQueueFrame.headers[specialCharactersHeader])
         self.assertNotEquals(self.unhandledFrame.headers['message-id'], self.errorQueueFrame.headers['message-id'])
 
         # verify that second message was consumed
@@ -214,7 +219,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
             raise
 
         # reconnect and subscribe again - consuming retried message and disconnecting
-        client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
+        client = async.Stomp(config)  # take a fresh client to prevent replay (we were disconnected by an error)
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
@@ -247,7 +252,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         # reconnect and subscribe again to make sure that all messages in the queue were ack'ed
         client = yield client.connect(host=VIRTUALHOST)
         self.timeExpired = False
-        self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client) #@UndefinedVariable
+        self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client)  # @UndefinedVariable
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: 'client-individual'})
 
         # wait for disconnect
@@ -260,7 +265,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         self.msgCount += 1
         if self.msgCount < self.numMsgs:
             d = defer.Deferred()
-            reactor.callLater(1, d.callback, None) #@UndefinedVariable
+            reactor.callLater(1, d.callback, None)  # @UndefinedVariable
             return d
         else:
             client.disconnect(receipt='bye-bye')

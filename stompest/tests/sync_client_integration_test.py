@@ -102,7 +102,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61611)?startupMaxReconnectAttempts=1,backOffMultiplier=3', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0))
         self.assertRaises(StompConnectionError, client.connect, host=VIRTUALHOST, connectTimeout=timeout)
 
-        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61613)?randomize=false', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0)) # default is startupMaxReconnectAttempts = 0
+        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61613)?randomize=false', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0))  # default is startupMaxReconnectAttempts = 0
         self.assertRaises(StompConnectionError, client.connect, host=VIRTUALHOST, connectTimeout=timeout)
 
     def test_3_socket_failure_and_replay(self):
@@ -110,7 +110,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.connect(host=VIRTUALHOST)
         headers = {StompSpec.ACK_HEADER: 'client-individual'}
         token = client.subscribe(self.DESTINATION, headers)
-        client.sendFrame(StompFrame('DISCONNECT')) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
+        client.sendFrame(StompFrame('DISCONNECT'))  # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
         client.connect(host=VIRTUALHOST)
         client.send(self.DESTINATION, 'test message 1')
@@ -119,7 +119,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         headers = {'id': 'bla', StompSpec.ACK_HEADER: 'client-individual'}
         client.subscribe(self.DESTINATION, headers)
         headers[StompSpec.DESTINATION_HEADER] = self.DESTINATION
-        client.sendFrame(StompFrame('DISCONNECT')) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
+        client.sendFrame(StompFrame('DISCONNECT'))  # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
         client.connect(host=VIRTUALHOST)
         client.send(self.DESTINATION, 'test message 2')
@@ -174,7 +174,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
             print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
             return
 
-        port = 61612 if (BROKER == 'activemq') else PORT # stomp+nio on 61613 does not work properly, so use stomp on 61612
+        port = 61612 if (BROKER == 'activemq') else PORT  # stomp+nio on 61613 does not work properly, so use stomp on 61612
         client = Stomp(self.getConfig(StompSpec.VERSION_1_1, port))
         self.assertEquals(client.lastReceived, None)
         self.assertEquals(client.lastSent, None)
@@ -200,7 +200,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         while (time.time() - start) < (2.5 * max(serverHeartBeatInSeconds, clientHeartBeatInSeconds)):
             time.sleep(0.5 * min(serverHeartBeatInSeconds, clientHeartBeatInSeconds))
             client.canRead(0)
-            self.assertTrue((time.time() - client.lastReceived) < (1.5 * serverHeartBeatInSeconds))
+            self.assertTrue((time.time() - client.lastReceived) < (2.0 * serverHeartBeatInSeconds))
             if (time.time() - client.lastSent) > (0.5 * clientHeartBeatInSeconds):
                 client.beat()
                 self.assertTrue((time.time() - client.lastSent) < 0.1)
@@ -211,11 +211,34 @@ class SimpleStompIntegrationTest(unittest.TestCase):
                 pass
         except StompConnectionError:
             self.assertTrue((time.time() - start) < (3.0 * clientHeartBeatInSeconds))
-            self.assertTrue((time.time() - client.lastReceived) < (1.5 * serverHeartBeatInSeconds))
+            self.assertTrue((time.time() - client.lastReceived) < (2.0 * serverHeartBeatInSeconds))
             self.assertTrue((time.time() - client.lastSent) > clientHeartBeatInSeconds)
         else:
             raise
         client.close()
+
+    def test_6_integration_stomp_1_1_encoding_and_escaping_headers(self):
+        version = StompSpec.VERSION_1_1
+        client = Stomp(self.getConfig(version))
+        try:
+            client.connect(host=VIRTUALHOST, versions=[version])
+        except StompProtocolError as e:
+            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version)
+            return
+
+        specialCharactersHeader = u'fen\xeatre:\r\n'
+        headers = {specialCharactersHeader: u'\xbfqu\xe9 tal?, s\xfc\xdf'}
+        client.send(self.DESTINATION, body='test message 1', headers=headers)
+        self.assertFalse(client.canRead(self.TIMEOUT))
+        token = client.subscribe(self.DESTINATION, {StompSpec.ID_HEADER: 4711, StompSpec.ACK_HEADER: 'client-individual'})
+        self.assertTrue(client.canRead(self.TIMEOUT))
+        frame = client.receiveFrame()
+        client.ack(frame)
+        self.assertEquals(frame.version, version)
+        self.assertEquals(frame.headers[specialCharactersHeader], headers[specialCharactersHeader])
+        self.assertFalse(client.canRead(self.TIMEOUT))
+        client.unsubscribe(token)
+        client.disconnect(receipt='4712')
 
 if __name__ == '__main__':
     unittest.main()

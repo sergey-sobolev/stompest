@@ -20,7 +20,7 @@ class StompProtocol(Protocol):
             Protocol.connectionLost(self, reason)
 
     def dataReceived(self, data):
-        #self.log.debug('Received data: %s' % repr(data))
+        # self.log.debug('Received data: %s' % repr(data))
         self._parser.add(data)
         while True:
             frame = self._parser.get()
@@ -33,25 +33,27 @@ class StompProtocol(Protocol):
             except Exception as e:
                 self.log.error('Unhandled error in frame handler: %s' % e)
 
-    def __init__(self, version, onFrame, onConnectionLost):
+    def __init__(self, onFrame, onConnectionLost):
         self._onFrame = onFrame
         self._onConnectionLost = onConnectionLost
+        self._parser = StompParser()
 
-        # leave the used logger public in case the user wants to override it
+        # leave the logger public in case the user wants to override it
         self.log = logging.getLogger(LOG_CATEGORY)
-
-        self._parser = StompParser(version)
 
     #
     # user interface
     #
+    def loseConnection(self):
+        self.transport.loseConnection()
+
     def send(self, frame):
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Sending %s' % frame.info())
         self.transport.write(str(frame))
 
-    def loseConnection(self):
-        self.transport.loseConnection()
+    def setVersion(self, version):
+        self._parser.version = version
 
 class StompFactory(Factory):
     protocol = StompProtocol

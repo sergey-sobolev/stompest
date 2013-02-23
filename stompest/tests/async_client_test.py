@@ -24,7 +24,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     def _create_connection(self, protocol):
         factory = Factory()
         factory.protocol = protocol
-        connection = reactor.listenTCP(0, factory) #@UndefinedVariable
+        connection = reactor.listenTCP(0, factory)  # @UndefinedVariable
         return connection
 
     def tearDown(self):
@@ -126,35 +126,35 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
         config = StompConfig(uri='failover:(tcp://localhost:%d)?startupMaxReconnectAttempts=0,initialReconnectDelay=0,maxReconnectAttempts=1' % ports)
         client = Stomp(config)
         try:
-            client.subscribe('/queue/bla', self._on_message) # client is not connected, so it won't accept subscriptions
+            client.subscribe('/queue/bla', self._on_message)  # client is not connected, so it won't accept subscriptions
         except StompConnectionError:
             pass
         else:
             raise
 
-        self.assertEquals(client.session._subscriptions, {}) # check that no subscriptions have been accepted
+        self.assertEquals(client.session._subscriptions, {})  # check that no subscriptions have been accepted
         yield client.connect()
 
-        self.shutdown = True # the callback handler will kill the broker connection ... 
+        self.shutdown = True  # the callback handler will kill the broker connection ...
         client.subscribe('/queue/bla', self._on_message)
         try:
-            client = yield client.disconnected # the callback handler has killed the broker connection
+            client = yield client.disconnected  # the callback handler has killed the broker connection
         except StompConnectionError:
             pass
         else:
             raise
 
-        self.shutdown = False # the callback handler will not kill the broker connection, but callback self._got_message
+        self.shutdown = False  # the callback handler will not kill the broker connection, but callback self._got_message
         self._got_message = defer.Deferred()
 
         yield client.connect()
-        self.assertNotEquals(client.session._subscriptions, []) # the subscriptions have been replayed ...
+        self.assertNotEquals(client.session._subscriptions, [])  # the subscriptions have been replayed ...
 
         result = yield self._got_message
-        self.assertEquals(result, None) # ... and the message comes back
+        self.assertEquals(result, None)  # ... and the message comes back
 
         yield client.disconnect()
-        self.assertEquals(list(client.session.replay()), []) # after a clean disconnect, the subscriptions are forgotten.
+        self.assertEquals(list(client.session.replay()), [])  # after a clean disconnect, the subscriptions are forgotten.
 
     def _on_message(self, client, msg):
         self.assertTrue(isinstance(client, Stomp))
@@ -174,7 +174,7 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         client = Stomp(config)
         yield client.connect()
         self._got_message = defer.Deferred()
-        client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False) # we're acking the frames ourselves
+        client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False)  # we're acking the frames ourselves
         yield self._got_message
         try:
             yield client.disconnect(timeout=0.02)
@@ -193,11 +193,11 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         yield client.connect()
 
         self._got_message = defer.Deferred()
-        client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False) # we're acking the frames ourselves
+        client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False)  # we're acking the frames ourselves
         yield self._got_message
 
         disconnected = client.disconnected
-        client.send('/queue/fake', 'shutdown') # tell the broker to drop the connection
+        client.send('/queue/fake', 'shutdown')  # tell the broker to drop the connection
         try:
             yield disconnected
         except StompConnectionError:

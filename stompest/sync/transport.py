@@ -9,24 +9,15 @@ class StompFrameTransport(object):
 
     READ_SIZE = 4096
 
-    def __init__(self, host, port, version=None):
+    def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.version = version
 
         self._socket = None
-        self._parser = self.factory(self.version)
+        self._parser = self.factory()
 
     def __str__(self):
         return '%s:%d' % (self.host, self.port)
-
-    def connect(self, timeout=None):
-        kwargs = {} if (timeout is None) else {'timeout': timeout}
-        try:
-            self._socket = socket.create_connection((self.host, self.port), **kwargs)
-        except IOError as e:
-            raise StompConnectionError('Could not establish connection [%s]' % e)
-        self._parser.reset()
 
     def canRead(self, timeout=None):
         self._check()
@@ -38,6 +29,14 @@ class StompFrameTransport(object):
             files, _, _ = select.select([self._socket], [], [], timeout)
         return bool(files)
 
+    def connect(self, timeout=None):
+        kwargs = {} if (timeout is None) else {'timeout': timeout}
+        try:
+            self._socket = socket.create_connection((self.host, self.port), **kwargs)
+        except IOError as e:
+            raise StompConnectionError('Could not establish connection [%s]' % e)
+        self._parser.reset()
+
     def disconnect(self):
         try:
             self._socket and self._socket.close()
@@ -45,9 +44,6 @@ class StompFrameTransport(object):
             raise StompConnectionError('Could not close connection cleanly [%s]' % e)
         finally:
             self._socket = None
-
-    def send(self, frame):
-        self._write(str(frame))
 
     def receive(self):
         while True:
@@ -62,6 +58,12 @@ class StompFrameTransport(object):
                 self.disconnect()
                 raise StompConnectionError('Connection closed [%s]' % e)
             self._parser.add(data)
+
+    def send(self, frame):
+        self._write(str(frame))
+
+    def setVersion(self, version):
+        self._parser.version = version
 
     def _check(self):
         if not self._connected():

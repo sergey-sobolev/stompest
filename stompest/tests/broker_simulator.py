@@ -11,26 +11,23 @@ LOG_CATEGORY = __name__
 class BlackHoleStompServer(Protocol):
     delimiter = StompSpec.FRAME_DELIMITER
 
-    def __init__(self, version=None):
+    def __init__(self):
         self.log = logging.getLogger(LOG_CATEGORY)
-        self.resetParser(version)
+        self._parser = StompParser()
         self.commandMap = {
             StompSpec.CONNECT: self.handleConnect,
             StompSpec.DISCONNECT: self.handleDisconnect,
             StompSpec.SEND: self.handleSend,
             StompSpec.SUBSCRIBE: self.handleSubscribe,
             StompSpec.ACK: self.handleAck,
+            StompSpec.NACK: self.handleNack
         }
-        if version == '1.1':
-            self.commandMap[StompSpec.NACK] = self.handleNack
 
     def connectionMade(self):
         self.log.debug('Connection made')
 
     def connectionLost(self, reason):
         self.log.debug('Connection lost: %s' % reason)
-        if hasattr(self.factory, 'disconnectDeferred'):
-            self.factory.disconnectDeferred.callback('Disconnected')
 
     def dataReceived(self, data):
         self._parser.add(data)
@@ -45,11 +42,8 @@ class BlackHoleStompServer(Protocol):
                 raise StompFrameError('Unknown STOMP command: %s' % repr(frame))
             self.commandMap[frame.command](frame)
 
-    def resetParser(self, version=None):
-        self._parser = StompParser(version)
-
     def getFrame(self, command, headers, body):
-        return str(StompFrame(command, headers, body))
+        return str(StompFrame(command, headers, body, version=self._parser.version))
 
     def handleConnect(self, frame):
         pass
@@ -80,6 +74,7 @@ class ErrorOnSendStompServer(BlackHoleStompServer):
             headers[StompSpec.SESSION_HEADER] = 'YMCA'
         else:
             headers = {StompSpec.VERSION_HEADER: '1.1'}
+            self._parser.version = '1.1'
         self.transport.write(self.getFrame(StompSpec.CONNECTED, headers, ''))
 
     def handleDisconnect(self, frame):
@@ -89,15 +84,13 @@ class ErrorOnSendStompServer(BlackHoleStompServer):
         self.transport.write(self.getFrame(StompSpec.ERROR, {}, 'Fake error message'))
 
 class RemoteControlViaFrameStompServer(BlackHoleStompServer):
-    def __init__(self):
-        BlackHoleStompServer.__init__(self, version='1.1')
-
     def handleConnect(self, frame):
         headers = {}
         if StompSpec.ACCEPT_VERSION_HEADER not in frame.headers:
             headers[StompSpec.SESSION_HEADER] = 'YMCA'
         else:
             headers = {StompSpec.VERSION_HEADER: '1.1'}
+            self._parser.version = '1.1'
         self.transport.write(self.getFrame(StompSpec.CONNECTED, headers, ''))
 
     def handleDisconnect(self, frame):

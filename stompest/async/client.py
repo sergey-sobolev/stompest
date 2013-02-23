@@ -140,7 +140,7 @@ class Stomp(object):
             raise StompConnectionError('Already connected')
 
         try:
-            self._protocol = yield self._protocolCreator.connect(connectTimeout, self.session.version, self._onFrame, self._onConnectionLost)
+            self._protocol = yield self._protocolCreator.connect(connectTimeout, self._onFrame, self._onConnectionLost)
         except Exception as e:
             self.log.error('Endpoint connect failed')
             raise
@@ -331,9 +331,10 @@ class Stomp(object):
 
     def _onConnected(self, frame):
         self.session.connected(frame)
-        self.log.info('Connected to stomp broker [session=%s]' % self.session.id)
-        self._connecting[None].callback(None)
+        self.log.info('Connected to stomp broker [session=%s, version=%s]' % (self.session.id, self.session.version))
+        self._protocol.setVersion(self.session.version)
         self._beats()
+        self._connecting[None].callback(None)
 
     def _onError(self, frame):
         if self._connecting:
@@ -482,7 +483,7 @@ class Stomp(object):
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
                     waiting.addErrback(lambda _: None)
         if self._disconnectReason:
-            self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
+            # self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
             self._disconnected.errback(self._disconnectReason)
         else:
             # self.log.debug('Calling disconnected deferred callback')

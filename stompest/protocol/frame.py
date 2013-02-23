@@ -40,8 +40,9 @@ class StompFrame(object):
         if body not in self.body:
             body = '%s...' % body
         body = body and ('body=%s' % repr(body))
-        info = ', '.join(i for i in (headers, body) if i)
-        return '%s frame%s' % (self.command, info and (' [%s]' % info))
+        version = 'version=%s' % self.version
+        info = ', '.join(i for i in (headers, body, version) if i)
+        return '%s frame [%s]' % (self.command, info)
 
     @property
     def version(self):
