@@ -93,7 +93,7 @@ class StompSession(object):
     def disconnect(self, receipt=None):
         """Create a **DISCONNECT** frame and set the session state to :attr:`DISCONNECTING`."""
         self.__check('disconnect', [self.CONNECTED])
-        frame = commands.disconnect(receipt)
+        frame = commands.disconnect(receipt, version=self.version)
         self._receipt(receipt)
         self._state = self.DISCONNECTING
         return frame
@@ -110,7 +110,7 @@ class StompSession(object):
     def send(self, destination, body='', headers=None, receipt=None):
         """Create a **SEND** frame."""
         self.__check('send', [self.CONNECTED])
-        frame = commands.send(destination, body, headers, receipt)
+        frame = commands.send(destination, body, headers, receipt, version=self.version)
         self._receipt(receipt)
         return frame
 
@@ -120,7 +120,7 @@ class StompSession(object):
         :param context: An arbitrary context object which you can use to store any information related to the subscription at hand.
         """
         self.__check('subscribe', [self.CONNECTED])
-        frame, token = commands.subscribe(destination, headers, receipt, self.version)
+        frame, token = commands.subscribe(destination, headers, receipt, version=self.version)
         if token in self._subscriptions:
             raise StompProtocolError('Already subscribed [%s=%s]' % token)
         self._receipt(receipt)
@@ -130,7 +130,7 @@ class StompSession(object):
     def unsubscribe(self, token, receipt=None):
         """Create an **UNSUBSCRIBE** frame and lose track of the subscription assiocated to it."""
         self.__check('unsubscribe', [self.CONNECTED])
-        frame = commands.unsubscribe(token, receipt, self.version)
+        frame = commands.unsubscribe(token, receipt, version=self.version)
         try:
             self._subscriptions.pop(token)
         except KeyError:
@@ -141,14 +141,14 @@ class StompSession(object):
     def ack(self, frame, receipt=None):
         """Create an **ACK** frame for a received **MESSAGE** frame."""
         self.__check('ack', [self.CONNECTED])
-        frame = commands.ack(frame, self._transactions, receipt, self.version)
+        frame = commands.ack(frame, self._transactions, receipt)
         self._receipt(receipt)
         return frame
 
     def nack(self, frame, receipt=None):
         """Create a **NACK** frame for a received **MESSAGE** frame."""
         self.__check('nack', [self.CONNECTED])
-        frame = commands.nack(frame, self._transactions, receipt, self.version)
+        frame = commands.nack(frame, self._transactions, receipt)
         self._receipt(receipt)
         return frame
 
@@ -167,7 +167,7 @@ class StompSession(object):
         .. note :: If you try and begin a pending transaction twice, this will result in a :class:`~.stompest.error.StompProtocolError`.
         """
         self.__check('begin', [self.CONNECTED])
-        frame = commands.begin(transaction, receipt)
+        frame = commands.begin(transaction, receipt, version=self.version)
         if transaction in self._transactions:
             raise StompProtocolError('Transaction already active: %s' % transaction)
         self._transactions.add(transaction)
@@ -182,7 +182,7 @@ class StompSession(object):
         .. note :: If you try and abort a transaction which is not pending, this will result in a :class:`~.stompest.error.StompProtocolError`.
         """
         self.__check('abort', [self.CONNECTED])
-        frame = commands.abort(transaction, receipt)
+        frame = commands.abort(transaction, receipt, version=self.version)
         try:
             self._transactions.remove(transaction)
         except KeyError:
@@ -198,7 +198,7 @@ class StompSession(object):
         .. note :: If you try and commit a transaction which is not pending, this will result in a :class:`~.stompest.error.StompProtocolError`.
         """
         self.__check('commit', [self.CONNECTED])
-        frame = commands.commit(transaction, receipt)
+        frame = commands.commit(transaction, receipt, version=self.version)
         try:
             self._transactions.remove(transaction)
         except KeyError:
@@ -221,7 +221,7 @@ class StompSession(object):
         .. seealso :: The :meth:`subscribe` method.
         """
         self.__check('message', [self.CONNECTED])
-        token = commands.message(frame, self.version)
+        token = commands.message(frame)
         if token not in self._subscriptions:
             raise StompProtocolError('No such subscription [%s=%s]' % token)
         return token
@@ -229,7 +229,7 @@ class StompSession(object):
     def receipt(self, frame):
         """Handle a **RECEIPT** frame. Returns the receipt id which you can use to match this receipt to the command that requested it."""
         self.__check('receipt', [self.CONNECTED, self.DISCONNECTING])
-        receipt = commands.receipt(frame, self.version)
+        receipt = commands.receipt(frame)
         try:
             self._receipts.remove(receipt)
         except KeyError:
@@ -294,7 +294,7 @@ class StompSession(object):
         """The current session state."""
         return self._state
 
-    #subscription replay
+    # subscription replay
 
     def replay(self):
         """Flush all active subscriptions and return an iterator over the :meth:`subscribe` parameters (**destinations**, **header**, **receipt**, **context**) which you can consume to replay the subscriptions upon the next :meth:`connect`."""

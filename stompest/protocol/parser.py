@@ -3,7 +3,6 @@ import cStringIO
 
 from stompest.error import StompFrameError
 
-import commands
 from .frame import StompFrame, StompHeartBeat
 from .spec import StompSpec
 from .util import unescape
@@ -162,4 +161,4 @@ class StompParser(object):
 
     @version.setter
     def version(self, value):
-        self._version = commands.version(value)
+        self._version = StompSpec.version(value)

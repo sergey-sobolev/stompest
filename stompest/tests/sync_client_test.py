@@ -115,11 +115,11 @@ class SimpleStompTest(unittest.TestCase):
         stomp._transport = Mock()
         frame = StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination})
         self.assertRaises(StompProtocolError, stomp.nack, frame)
-        frame = StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination, StompSpec.SUBSCRIPTION_HEADER: '0815'})
+        frame = StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination, StompSpec.SUBSCRIPTION_HEADER: '0815'}, version=StompSpec.VERSION_1_1)
         stomp.nack(frame, receipt='123')
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(commands.nack(frame, receipt='123', version='1.1'), sentFrame)
+        self.assertEquals(commands.nack(frame, receipt='123'), sentFrame)
 
     def test_ack_writes_correct_frame(self):
         id_ = '12345'

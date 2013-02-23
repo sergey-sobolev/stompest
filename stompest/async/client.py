@@ -109,7 +109,6 @@ class Stomp(object):
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.async.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
-        frame.version = self.session.version
         self._protocol.send(frame)
         self.session.sent()
 
@@ -341,7 +340,7 @@ class Stomp(object):
             self._connecting[None].errback(StompProtocolError('While trying to connect, received %s' % frame.info()))
             return
 
-        #Workaround for AMQ < 5.2
+        # Workaround for AMQ < 5.2
         if 'Unexpected ACK received for message-id' in frame.headers.get('message', ''):
             self.log.debug('AMQ brokers < 5.2 do not support client-individual mode')
         else:
@@ -428,7 +427,7 @@ class Stomp(object):
     def _disconnectReason(self, reason):
         if reason:
             self.log.error(str(reason))
-            reason = self._disconnectReason or reason # existing reason wins
+            reason = self._disconnectReason or reason  # existing reason wins
         self.__disconnectReason = reason
 
     #
@@ -450,7 +449,7 @@ class Stomp(object):
             else:
                 self.disconnect(failure=StompConnectionError('Server heart-beat timeout'))
                 return
-        self._heartBeats[which] = reactor.callLater(remaining, self._beat, which) #@UndefinedVariable
+        self._heartBeats[which] = reactor.callLater(remaining, self._beat, which)  # @UndefinedVariable
 
     def _beatRemaining(self, which):
         heartBeat = {'client': self.session.clientHeartBeat, 'server': self.session.serverHeartBeat}[which]
@@ -486,7 +485,7 @@ class Stomp(object):
             self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
             self._disconnected.errback(self._disconnectReason)
         else:
-            #self.log.debug('Calling disconnected deferred callback')
+            # self.log.debug('Calling disconnected deferred callback')
             self._disconnected.callback(None)
         self._disconnecting = False
         self._disconnectReason = None

@@ -1,7 +1,7 @@
 # -*- coding: iso-8859-1 -*-
 """This module implements a low-level and stateless API for all commands of the STOMP protocol version supported by stompest. All STOMP command frames are represented as :class:`~.frame.StompFrame` objects. It forms the basis for :class:`~.session.StompSession` which represents the full state of an abstract STOMP protocol session and (via :class:`~.session.StompSession`) of both high-level STOMP clients. You can use the commands API independently of other stompest modules to roll your own STOMP related functionality.
 
-.. note :: Whenever you have to pass a **version** parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of :attr:`StompSpec.DEFAULT_VERSION`, which is currently :obj:`'1.0'` but may change in upcoming versions of stompest (and by you, if you wish to override it). Any command which does not conform to the STOMP protocol version in question will result in a :class:`~.error.StompProtocolError`.
+.. note :: Whenever you have to pass a **version** parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of :attr:`StompSpec.DEFAULT_VERSION`, which is currently :obj:`'1.0'` but may change in upcoming versions of stompest (and by you, if you wish to override it). Any command which does not conform to the STOMP protocol version in question will result in a :class:`~.error.StompProtocolError`. The **version** parameter will always be the last argument in the signature; since commands signatures may vary with new STOMP protocol version, you are advised to always specify it as a keyword (as opposed to a positional) argument.
 
 Examples:
 
@@ -76,17 +76,17 @@ def connect(login=None, passcode=None, headers=None, versions=None, host=None, h
 
     return StompFrame(StompSpec.CONNECT, headers)
 
-def disconnect(receipt=None):
+def disconnect(receipt=None, version=None):
     """Create a **DISCONNECT** frame.
     
     :param receipt: Add a **receipt** header with this id to request a **RECEIPT** frame from the broker. If :obj:`None`, no such header is added.
     """
     headers = {}
-    frame = StompFrame(StompSpec.DISCONNECT, headers)
+    frame = StompFrame(StompSpec.DISCONNECT, headers, version=version)
     _addReceiptHeader(frame, receipt)
     return frame
 
-def send(destination, body='', headers=None, receipt=None):
+def send(destination, body='', headers=None, receipt=None, version=None):
     """Create a **SEND** frame.
     
     :param destination: Destination for the frame.
@@ -94,7 +94,7 @@ def send(destination, body='', headers=None, receipt=None):
     :param headers: Additional STOMP headers.
     :param receipt: See :func:`disconnect`.
     """
-    frame = StompFrame(StompSpec.SEND, dict(headers or []), body)
+    frame = StompFrame(StompSpec.SEND, dict(headers or []), body, version=version)
     frame.headers[StompSpec.DESTINATION_HEADER] = destination
     _addReceiptHeader(frame, receipt)
     return frame
@@ -107,12 +107,12 @@ def subscribe(destination, headers, receipt=None, version=None):
     :param receipt: See :func:`disconnect`.
     """
     version = _version(version)
-    frame = StompFrame(StompSpec.SUBSCRIBE, dict(headers or []))
+    frame = StompFrame(StompSpec.SUBSCRIBE, dict(headers or []), version=version)
     frame.headers[StompSpec.DESTINATION_HEADER] = destination
     _addReceiptHeader(frame, receipt)
     subscription = None
     try:
-        subscription = _checkHeader(frame, StompSpec.ID_HEADER, version)
+        subscription = _checkHeader(frame, StompSpec.ID_HEADER)
     except StompProtocolError:
         if (version != StompSpec.VERSION_1_0):
             raise
@@ -126,68 +126,68 @@ def unsubscribe(token, receipt=None, version=None):
     :param receipt: See :meth:`disconnect`.
     """
     version = _version(version)
-    frame = StompFrame(StompSpec.UNSUBSCRIBE, dict([token]))
+    frame = StompFrame(StompSpec.UNSUBSCRIBE, dict([token]), version=version)
     _addReceiptHeader(frame, receipt)
     try:
-        _checkHeader(frame, StompSpec.ID_HEADER, version)
+        _checkHeader(frame, StompSpec.ID_HEADER)
     except StompProtocolError:
         if version != StompSpec.VERSION_1_0:
             raise
         _checkHeader(frame, StompSpec.DESTINATION_HEADER)
     return frame
 
-def ack(frame, transactions=None, receipt=None, version=None):
+def ack(frame, transactions=None, receipt=None):
     """Create an **ACK** frame for a received **MESSAGE** frame.
     
     :param frame: The :class:`~.frame.StompFrame` object representing the **MESSAGE** frame we wish to ack.
     :param transactions: The ids of currently active transactions --- only if the **frame** is part of one of these transactions, the **transaction** header is included in the ACK frame.
     :param receipt: See :func:`disconnect`.
     """
-    frame = StompFrame(StompSpec.ACK, _ackHeaders(frame, transactions, version))
+    frame = StompFrame(StompSpec.ACK, _ackHeaders(frame, transactions), version=frame.version)
     _addReceiptHeader(frame, receipt)
     return frame
 
-def nack(frame, transactions=None, receipt=None, version=None):
+def nack(frame, transactions=None, receipt=None):
     """Create a **NACK** frame for a received **MESSAGE** frame.
     
     :param frame: The :class:`~.frame.StompFrame` object representing the **MESSAGE** frame we wish to nack.
     :param transactions: The ids of currently active transactions --- only if the **frame** is part of one of these transactions, the **transaction** header is included in the NACK frame.
     :param receipt: See :func:`disconnect`.
     """
-    version = _version(version)
+    version = frame.version
     if version == StompSpec.VERSION_1_0:
         raise StompProtocolError('%s not supported (version %s)' % (StompSpec.NACK, version))
-    frame = StompFrame(StompSpec.NACK, _ackHeaders(frame, transactions, version))
+    frame = StompFrame(StompSpec.NACK, _ackHeaders(frame, transactions), version=frame.version)
     _addReceiptHeader(frame, receipt)
     return frame
 
-def begin(transaction, receipt=None):
+def begin(transaction, receipt=None, version=None):
     """Create a **BEGIN** frame.
     
     :param transaction: The id of the transaction.
     :param receipt: See :meth:`disconnect`.
     """
-    frame = StompFrame(StompSpec.BEGIN, {StompSpec.TRANSACTION_HEADER: transaction})
+    frame = StompFrame(StompSpec.BEGIN, {StompSpec.TRANSACTION_HEADER: transaction}, version=version)
     _addReceiptHeader(frame, receipt)
     return frame
 
-def abort(transaction, receipt=None):
+def abort(transaction, receipt=None, version=None):
     """Create an **ABORT** frame.
     
     :param transaction: The id of the transaction.
     :param receipt: See :meth:`disconnect`.
     """
-    frame = StompFrame(StompSpec.ABORT, {StompSpec.TRANSACTION_HEADER: transaction})
+    frame = StompFrame(StompSpec.ABORT, {StompSpec.TRANSACTION_HEADER: transaction}, version=version)
     _addReceiptHeader(frame, receipt)
     return frame
 
-def commit(transaction, receipt=None):
+def commit(transaction, receipt=None, version=None):
     """Create a **COMMIT** frame.
     
     :param transaction: The id of the transaction.
     :param receipt: See :meth:`disconnect`.
     """
-    frame = StompFrame(StompSpec.COMMIT, {StompSpec.TRANSACTION_HEADER: transaction})
+    frame = StompFrame(StompSpec.COMMIT, {StompSpec.TRANSACTION_HEADER: transaction}, version=version)
     _addReceiptHeader(frame, receipt)
     return frame
 
@@ -233,77 +233,53 @@ def connected(frame, versions=None):
 
     return version, server, session, heartBeats
 
-def message(frame, version):
+def message(frame):
     """Handle a **MESSAGE** frame. Returns a token which you can use to match this message to its subscription.
     
     .. seealso :: The :func:`subscribe` command.
     """
-    version = _version(version)
     _checkCommand(frame, [StompSpec.MESSAGE])
     _checkHeader(frame, StompSpec.MESSAGE_ID_HEADER)
     destination = _checkHeader(frame, StompSpec.DESTINATION_HEADER)
     subscription = None
     try:
-        subscription = _checkHeader(frame, StompSpec.SUBSCRIPTION_HEADER, version)
+        subscription = _checkHeader(frame, StompSpec.SUBSCRIPTION_HEADER)
     except StompProtocolError:
-        if version != StompSpec.VERSION_1_0:
+        if frame.version != StompSpec.VERSION_1_0:
             raise
     token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
     return token
 
-def receipt(frame, version):
+def receipt(frame):
     """Handle a **RECEIPT** frame. Returns the receipt id which you can use to match this receipt to the command that requested it.
     """
-    version = _version(version)
     _checkCommand(frame, [StompSpec.RECEIPT])
     _checkHeader(frame, StompSpec.RECEIPT_ID_HEADER)
     return frame.headers[StompSpec.RECEIPT_ID_HEADER]
 
-def error(frame, version):
+def error(frame):
     """Handle an **ERROR** frame. Does not really do anything except checking that this is an **ERROR** frame.
     """
-    version = _version(version)
     _checkCommand(frame, [StompSpec.ERROR])
 
-# STOMP protocol version
-
-def version(version=None):
-    """Check whether **version** is a valid STOMP protocol version.
-    
-    :param version: A candidate version, or :obj:`None` (which is equivalent to the value of :attr:`StompSpec.DEFAULT_VERSION`). 
-    """
-    if version is None:
-        version = StompSpec.DEFAULT_VERSION
-    if version not in StompSpec.VERSIONS:
-        raise StompProtocolError('Version is not supported [%s]' % version)
-    return version
-_version = version
-
-def versions(version):
-    """Obtain all versions prior or equal to **version**.
-    """
-    version = _version(version)
-    for v in StompSpec.VERSIONS:
-        yield v
-        if v == version:
-            break
-_versions = versions
+version = _version = StompSpec.version
+versions = _versions = StompSpec.versions
 
 # private helper methods
 
-def _ackHeaders(frame, transactions, version):
-    version = _version(version)
+def _ackHeaders(frame, transactions):
+    version = frame.version
     _checkCommand(frame, [StompSpec.MESSAGE])
-    _checkHeader(frame, StompSpec.MESSAGE_ID_HEADER, version)
+    _checkHeader(frame, StompSpec.MESSAGE_ID_HEADER)
     if version != StompSpec.VERSION_1_0:
-        _checkHeader(frame, StompSpec.SUBSCRIPTION_HEADER, version)
+        _checkHeader(frame, StompSpec.SUBSCRIPTION_HEADER)
     if version in (StompSpec.VERSION_1_0, StompSpec.VERSION_1_1):
         keys = {
             StompSpec.SUBSCRIPTION_HEADER: StompSpec.SUBSCRIPTION_HEADER,
             StompSpec.MESSAGE_ID_HEADER: StompSpec.MESSAGE_ID_HEADER
         }
     else:
-        _checkHeader(frame, StompSpec.ACK_HEADER, version)
+        _checkHeader(frame, StompSpec.ACK_HEADER)
         keys = {StompSpec.ACK_HEADER: StompSpec.ID_HEADER}
     try:
         transaction = frame.headers[StompSpec.TRANSACTION_HEADER]
@@ -325,9 +301,8 @@ def _checkCommand(frame, commands=None):
     if frame.command not in (commands or StompSpec.COMMANDS):
         raise StompProtocolError('Cannot handle command: %s [expected=%s, headers=%s]' % (frame.command, ', '.join(commands), frame.headers))
 
-def _checkHeader(frame, header, version=None):
+def _checkHeader(frame, header):
     try:
         return frame.headers[header]
     except KeyError:
-        version = (' in version %s' % version) if version else ''
-        raise StompProtocolError('Invalid %s frame (%s header mandatory%s) [headers=%s]' % (frame.command, header, version, frame.headers))
+        raise StompProtocolError('Invalid %s frame (%s header mandatory in version %s) [headers=%s]' % (frame.command, header, frame.version, frame.headers))

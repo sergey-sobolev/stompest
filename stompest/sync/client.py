@@ -76,7 +76,7 @@ class Stomp(object):
         
         .. seealso :: The :mod:`.protocol.failover` and :mod:`.protocol.session` modules for the details of subscription replay and failover transport.
         """
-        try: # preserve existing connection
+        try:  # preserve existing connection
             self._transport
         except StompConnectionError:
             pass
@@ -294,7 +294,7 @@ class Stomp(object):
             self.session.received()
             if self.log.isEnabledFor(logging.DEBUG):
                 self.log.debug('Received %s' % frame.info())
-            if frame: # there's a real STOMP frame on the wire, not a heart-beat
+            if frame:  # there's a real STOMP frame on the wire, not a heart-beat
                 self._messages.append(frame)
                 return True
 
@@ -305,7 +305,6 @@ class Stomp(object):
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.sync.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
-        frame.version = self.session.version
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Sending %s' % frame.info())
         self._transport.send(frame)

@@ -126,13 +126,13 @@ class StompSessionTest(unittest.TestCase):
         self.assertEquals((frame, token), commands.subscribe('bla1', headers, '4711', version='1.0'))
 
         self.assertEquals(token, (StompSpec.DESTINATION_HEADER, 'bla1'))
-        self.assertEquals(token, commands.message(StompFrame(StompSpec.MESSAGE, dict([token, (StompSpec.MESSAGE_ID_HEADER, '4711')])), version='1.0'))
+        self.assertEquals(token, commands.message(StompFrame(StompSpec.MESSAGE, dict([token, (StompSpec.MESSAGE_ID_HEADER, '4711')]))))
 
         headersWithId1 = {StompSpec.ID_HEADER: 'bla2', 'bla3': 'bla4'}
         frame, tokenWithId1 = session.subscribe('bla2', headersWithId1)
         self.assertEquals((frame, tokenWithId1), commands.subscribe('bla2', headersWithId1, version='1.0'))
         self.assertEquals(tokenWithId1, (StompSpec.ID_HEADER, 'bla2'))
-        self.assertEquals(tokenWithId1, commands.message(StompFrame(StompSpec.MESSAGE, dict([(StompSpec.SUBSCRIPTION_HEADER, 'bla2'), (StompSpec.DESTINATION_HEADER, 'bla2'), (StompSpec.MESSAGE_ID_HEADER, '4711')])), version='1.0'))
+        self.assertEquals(tokenWithId1, commands.message(StompFrame(StompSpec.MESSAGE, dict([(StompSpec.SUBSCRIPTION_HEADER, 'bla2'), (StompSpec.DESTINATION_HEADER, 'bla2'), (StompSpec.MESSAGE_ID_HEADER, '4711')]))))
 
         headersWithId2 = {StompSpec.ID_HEADER: 'bla3', 'bla4': 'bla5'}
         session.subscribe('bla2', headersWithId2)
@@ -217,15 +217,15 @@ class StompSessionTest(unittest.TestCase):
 
     def test_session_nack(self):
         session = StompSession(version='1.1', check=False)
-        frame_ = lambda h: StompFrame(StompSpec.MESSAGE, h)
+        frame_ = lambda h: StompFrame(StompSpec.MESSAGE, h, version='1.1')
         for headers in [
             {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.SUBSCRIPTION_HEADER: 'bla'},
             {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.SUBSCRIPTION_HEADER: 'bla', 'foo': 'bar'}
         ]:
-            self.assertEquals(session.nack(frame_(headers)), commands.nack(frame_(headers), version='1.1'))
+            self.assertEquals(session.nack(frame_(headers)), commands.nack(frame_(headers)))
 
         headers = {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.SUBSCRIPTION_HEADER: 'bla'}
-        self.assertEquals(session.nack(frame_(headers), receipt='4711'), commands.nack(frame_(headers), receipt='4711', version='1.1'))
+        self.assertEquals(session.nack(frame_(headers), receipt='4711'), commands.nack(frame_(headers), receipt='4711'))
 
         self.assertRaises(StompProtocolError, session.nack, frame_({}))
         self.assertRaises(StompProtocolError, session.nack, frame_({StompSpec.MESSAGE_ID_HEADER: '4711'}))

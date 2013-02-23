@@ -1,4 +1,3 @@
-import commands
 from .spec import StompSpec
 from .util import escape
 
@@ -50,7 +49,7 @@ class StompFrame(object):
 
     @version.setter
     def version(self, value):
-        self._version = commands.version(value)
+        self._version = StompSpec.version(value)
 
     def _encode(self, text):
         return StompSpec.CODECS[self.version].encode(text)[0]

@@ -6,7 +6,7 @@ stomp, stomper, stompest!
 * The synchronous client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.
 * The asynchronous client is based on `Twisted <http://twistedmatrix.com/>`_, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default "poison pill" error handling), concurrent message processing, graceful shutdown, and connect, receipt, and disconnect timeouts.
 
-Both clients make use of a generic set of components in the each of which can be used independently to roll your own STOMP client:
+Both clients make use of a generic set of components each of which you may use independently to roll your own STOMP client:
 
 * a wire-level STOMP frame parser and compiler,
 
@@ -23,8 +23,8 @@ The package is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should 
 Installation
 ============
 
-* If you do not wish to use the asynchronous client (which depends on Twisted), stompest is fully self-contained.
-* Just use the method you like most: ``easy_install stompest``, ``pip install stompest``, or ``python setup.py install``.
+* If you do not wish to use the asynchronous client (which depends on Twisted), stompest is a single, and fully self-contained, plain Python package.
+* You may install stompest using any of the follwoing commands: ``easy_install stompest``, ``pip install stompest``, or ``python setup.py install``.
 
 Documentation & Code Examples
 =============================

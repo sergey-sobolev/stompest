@@ -1,4 +1,5 @@
 import codecs
+from stompest.error import StompProtocolError
 
 class StompSpec(object):
     """This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn't much to document, but you are invited to take a look at all available constants in the source code. Wait a minute ... one attribute is particularly noteworthy, name :attr:`DEFAULT_VERSION` --- which currently is :obj:`'1.0'` (but this may change in upcoming stompest releases, so you're advised to always explicitly define which STOMP protocol version you are going to use).
@@ -57,7 +58,7 @@ class StompSpec(object):
         VERSION_1_2: set([SEND, MESSAGE, ERROR])
     }
 
-    CODECS = { # for command and headers
+    CODECS = {  # for command and headers
         VERSION_1_0: 'ascii'
     }
     CODECS = dict([
@@ -109,3 +110,26 @@ class StompSpec(object):
     CLIENT_ACK_MODES = set([ACK_CLIENT, ACK_CLIENT_INDIVIDUAL])
 
     HEART_BEAT_SEPARATOR = ','
+
+    @classmethod
+    def version(cls, version=None):
+        """Check whether **version** is a valid STOMP protocol version.
+        
+        :param version: A candidate version, or :obj:`None` (which is equivalent to the value of :attr:`StompSpec.DEFAULT_VERSION`). 
+        """
+        if version is None:
+            version = cls.DEFAULT_VERSION
+        if version not in cls.VERSIONS:
+            raise StompProtocolError('Version is not supported [%s]' % version)
+        return version
+
+    @classmethod
+    def versions(cls, version):
+        """Obtain all versions prior or equal to **version**.
+        """
+        version = cls.version(version)
+        for v in cls.VERSIONS:
+            yield v
+            if v == version:
+                break
+
