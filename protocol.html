@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocol Layer &mdash; stompest documentation - v2.0a4</title>
+    <title>Protocol Layer &mdash; stompest documentation - v2.0a5</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a4',
+        VERSION:     '2.0a5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a4" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.0a5" href="index.html" />
     <link rel="next" title="Configuration" href="config.html" />
     <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a4</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a5</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -527,7 +527,7 @@
 <span id="stomp-frame-representation"></span><span id="frame"></span><h2>STOMP Frame Representation<a class="headerlink" href="#module-stompest.protocol.frame" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.protocol.frame.StompFrame">
-<em class="property">class </em><tt class="descclassname">stompest.protocol.frame.</tt><tt class="descname">StompFrame</tt><big>(</big><em>command</em>, <em>headers=None</em>, <em>body=''</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">stompest.protocol.frame.</tt><tt class="descname">StompFrame</tt><big>(</big><em>command</em>, <em>headers=None</em>, <em>body=''</em>, <em>rawHeaders=None</em>, <em>version=None</em><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object represents a STOMP frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -537,6 +537,7 @@
 <li><strong>command</strong> &#8211; A valid STOMP command.</li>
 <li><strong>headers</strong> &#8211; The STOMP headers (represented as a <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt>), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (no headers).</li>
 <li><strong>body</strong> &#8211; The frame body.</li>
+<li><strong>rawHeaders</strong> &#8211; The raw STOMP headers (represented as a collection of (header, value) tuples), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (no raw headers).</li>
 <li><strong>version</strong> &#8211; A valid STOMP protocol version, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (equivalent to the <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> attribute of the <a class="reference internal" href="#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><tt class="xref py py-class docutils literal"><span class="pre">StompSpec</span></tt></a> class).</li>
 </ul>
 </td>
@@ -550,7 +551,13 @@
 <dl class="method">
 <dt id="stompest.protocol.frame.StompFrame.info">
 <tt class="descname">info</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame.info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters.)</p>
+<dd><p>Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.frame.StompFrame.unraw">
+<tt class="descname">unraw</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame.unraw" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the frame has raw headers, copy their deduplicated version to the <tt class="xref py py-attr docutils literal"><span class="pre">headers</span></tt> attribute, and remove the raw headers afterwards.</p>
 </dd></dl>
 
 </dd></dl>
@@ -955,7 +962,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a4</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a5</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

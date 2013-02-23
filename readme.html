@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contents &mdash; stompest documentation - v2.0a5</title>
+    <title>stomp, stomper, stompest! &mdash; stompest documentation - v2.0a4</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a5',
+        VERSION:     '2.0a4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,8 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a5" href="#" />
-    <link rel="next" title="Synchronous Client" href="sync.html" /> 
+    <link rel="top" title="stompest documentation - v2.0a4" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,32 +37,23 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="sync.html" title="Synchronous Client"
-             accesskey="N">next</a> |</li>
-        <li><a href="#">stompest documentation - v2.0a5</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a4</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Contents</a><ul>
-</ul>
-</li>
-<li><a class="reference internal" href="#stomp-stomper-stompest">stomp, stomper, stompest!</a></li>
+<li><a class="reference internal" href="#">stomp, stomper, stompest!</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#documentation-code-examples">Documentation &amp; Code Examples</a></li>
 <li><a class="reference internal" href="#questions-or-suggestions">Questions or Suggestions?</a></li>
 <li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
-<li><a class="reference internal" href="#versions">Versions</a></li>
 </ul>
 
-  <h4>Next topic</h4>
-  <p class="topless"><a href="sync.html"
-                        title="next chapter">Synchronous Client</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
+    <li><a href="_sources/readme.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -87,35 +77,7 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="contents">
-<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="sync.html">Synchronous Client</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#module-stompest.examples">Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sync.html#api">API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="async.html">Asynchronous Client</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="async.html#module-stompest.examples">Examples</a></li>
-<li class="toctree-l2"><a class="reference internal" href="async.html#api">API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="protocol.html">Protocol Layer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.failover">Failover Transport</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.session">Session State</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.frame">STOMP Frame Representation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#commands">Commands</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.spec">STOMP Protocol Specification</a></li>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#module-stompest.protocol.parser">Wire-Level Parser</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="config.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="error.html">Error Codes</a></li>
-</ul>
-</div>
-</div>
-<div class="section" id="stomp-stomper-stompest">
+  <div class="section" id="stomp-stomper-stompest">
 <h1>stomp, stomper, stompest!<a class="headerlink" href="#stomp-stomper-stompest" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference external" href="https://github.com/nikipore/stompest/">stompest</a> is a full-featured implementation of the <a class="reference external" href="http://stomp.github.com/">STOMP</a> protocol (versions <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a>, <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.2.html">1.2</a>) for Python 2.6 (and higher) including both synchronous and asynchronous clients:</p>
 <ul class="simple">
@@ -139,6 +101,10 @@
 <li>You may install stompest using any of the follwoing commands: <tt class="docutils literal"><span class="pre">easy_install</span> <span class="pre">stompest</span></tt>, <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">stompest</span></tt>, or <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt>.</li>
 </ul>
 </div>
+<div class="section" id="documentation-code-examples">
+<h1>Documentation &amp; Code Examples<a class="headerlink" href="#documentation-code-examples" title="Permalink to this headline">¶</a></h1>
+<p>The stompest API is <a class="reference external" href="http://nikipore.github.com/stompest/">fully documented here</a>.</p>
+</div>
 <div class="section" id="questions-or-suggestions">
 <h1>Questions or Suggestions?<a class="headerlink" href="#questions-or-suggestions" title="Permalink to this headline">¶</a></h1>
 <p>Feel free to <a class="reference external" href="https://github.com/nikipore/stompest/issues/">open an issue</a> or post a question on the <a class="reference external" href="http://groups.google.com/group/stompest/">forum</a>.</p>
@@ -149,10 +115,6 @@
 <li>Version 1.x of stompest was written by <a class="reference external" href="http://github.com/theduderog/">Roger Hoover</a> at <a class="reference external" href="http://www.mozes.com/">Mozes</a> and deployed in their production environment.</li>
 <li>Kudos to <a class="reference external" href="https://github.com/oisinmulvihill/">Oisin Mulvihill</a>, the developer of <a class="reference external" href="http://code.google.com/p/stomper/">stomper</a>! The idea of an abstract representation of the STOMP protocol lives on in stompest.</li>
 </ul>
-</div>
-<div class="section" id="versions">
-<h1>Versions<a class="headerlink" href="#versions" title="Permalink to this headline">¶</a></h1>
-<p>This is the latest version of the documentation and is generated from the latest commit on the <a class="reference external" href="https://github.com/nikipore/stompest">main branch</a>. If you are looking for documentation which is consistent to a specific release, you may download the corresponding <a class="reference external" href="https://github.com/nikipore/stompest/tags">tarball</a> for offline browsing. If someone is willing to (teach me how to) set up release specific documentation on PyPI, please go ahead!</p>
 </div>
 
 
@@ -170,10 +132,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="sync.html" title="Synchronous Client"
-             >next</a> |</li>
-        <li><a href="#">stompest documentation - v2.0a5</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.0a4</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
