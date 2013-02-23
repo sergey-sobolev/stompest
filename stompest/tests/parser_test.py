@@ -19,12 +19,25 @@ class StompParserTest(unittest.TestCase):
             'body': 'some stuff\nand more'
         }
         frame = StompFrame(**message)
-        parser = StompParser()
 
+        parser = StompParser()
         parser.add(str(frame))
         self.assertEqual(parser.get(), frame)
         self.assertEqual(parser.get(), None)
+
+    def test_duplicate_headers(self):
+        command = StompSpec.SEND
+        rawFrame = '%s\nfoo:bar1\nfoo:bar2\n\nsome stuff\nand more\x00' % (command,)
+
         parser = StompParser()
+        parser.add(rawFrame)
+        parsedFrame = parser.get()
+        self.assertEquals(parser.get(), None)
+
+        self.assertEquals(parsedFrame.command, command)
+        self.assertEquals(parsedFrame.headers, {'foo': 'bar1'})
+        self.assertEquals(parsedFrame.rawHeaders, (('foo', 'bar1'), ('foo', 'bar2')))
+        self.assertEquals(parsedFrame.body, 'some stuff\nand more')
 
     def test_reset_succeeds(self):
         message = {
@@ -65,10 +78,6 @@ class StompParserTest(unittest.TestCase):
             frames.append(parser.get())
         self.assertEquals(frames, [StompHeartBeat(), disconnect, StompHeartBeat(), StompHeartBeat(), disconnect, StompHeartBeat()])
 
-        #self.assert frames   
-        #StompFrame(command='DISCONNECT', headers={}, body=''), StompFrame(command='DISCONNECT', headers={}, body='')]
-
-        #self.assertEqual(parser.get(), commands.disconnect())
         self.assertEqual(parser.get(), None)
 
     def test_get_returns_None_if_not_done(self):

@@ -108,7 +108,7 @@ class StompParser(object):
         command = self._decode(self._buffer.getvalue())
         if command not in StompSpec.COMMANDS[self.version]:
             self._raise('Invalid command: %s' % repr(command))
-        self._frame = StompFrame(command=command, version=self.version)
+        self._frame = StompFrame(command=command, rawHeaders=[], version=self.version)
         self._transition('headers')
 
     def _parseHeader(self, character):
@@ -121,9 +121,11 @@ class StompParser(object):
                 name, value = header.split(StompSpec.HEADER_SEPARATOR, 1)
             except ValueError:
                 self._raise('No separator in header line: %s' % header)
-            self._frame.headers.setdefault(self._unescape(name), self._unescape(value))
+            header = tuple(map(self._unescape, (name, value)))
+            self._frame.rawHeaders.append(header)
             self._transition('headers')
         else:
+            self._frame.rawHeaders = tuple(self._frame.rawHeaders)
             self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
             self._transition('body')
 

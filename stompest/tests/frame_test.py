@@ -18,9 +18,9 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEquals(eval(repr(frame)), frame)
 
     def test_frame_without_headers_and_body(self):
-        message = {'command': StompSpec.DISCONNECT, 'headers': {}, 'body': ''}
+        message = {'command': StompSpec.DISCONNECT}
         frame = StompFrame(**message)
-        self.assertEquals(message['headers'], frame.headers)
+        self.assertEquals(frame.headers, {})
         self.assertEquals(dict(frame), message)
         self.assertEquals(str(frame), """\
 %s
@@ -32,7 +32,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         key = u'fen\xeatre'
         value = u'\xbfqu\xe9 tal?, s\xfc\xdf'
 
-        message = {'command': 'DISCONNECT', 'headers': {key: value}, 'body': ''}
+        message = {'command': 'DISCONNECT', 'headers': {key: value}, 'version': StompSpec.VERSION_1_1}
         frame = StompFrame(**message)
         self.assertEquals(message['headers'], frame.headers)
         self.assertEquals(dict(frame), message)
@@ -47,12 +47,11 @@ fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
 
 \x00""")
 
-        frame.version = StompSpec.VERSION_1_0
-        self.assertEquals(eval(repr(frame)), frame)
-        self.assertRaises(UnicodeEncodeError, frame.__str__)
-
-        otherFrame = StompFrame(version=StompSpec.VERSION_1_1, **message)
+        otherFrame = StompFrame(**message)
         self.assertEquals(frame, otherFrame)
+
+        frame.version = StompSpec.VERSION_1_0
+        self.assertRaises(UnicodeEncodeError, frame.__str__)
 
     def test_binary_body(self):
         body = binascii.a2b_hex('f0000a09')
@@ -61,13 +60,23 @@ fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
         self.assertEquals(frame.body, body)
         self.assertEquals(str(frame), 'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
 
+    def test_duplicate_headers(self):
+        rawFrame = 'SEND\nfoo:bar1\nfoo:bar2\n\nsome stuff\nand more\x00'
+        message = {
+            'command': 'SEND',
+            'body': 'some stuff\nand more'
+        }
+        frame = StompFrame(**message)
+        frame.rawHeaders = (('foo', 'bar1'), ('foo', 'bar2'))
+        self.assertEquals(str(frame), rawFrame)
+
     def test_non_string_arguments(self):
         message = {'command': 0, 'headers': {123: 456}, 'body': 789}
         frame = StompFrame(**message)
         self.assertEquals(frame.command, 0)
         self.assertEquals(frame.headers, {123: 456})
         self.assertEquals(frame.body, 789)
-        self.assertEquals(dict(frame), {'command': 0, 'headers': {123: 456}, 'body': 789})
+        self.assertEquals(dict(frame), message)
         self.assertEquals(str(frame), """\
 0
 123:456
