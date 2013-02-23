@@ -98,6 +98,7 @@ class StompSpec(object):
     PASSCODE_HEADER = u'passcode'
     RECEIPT_HEADER = u'receipt'
     RECEIPT_ID_HEADER = u'receipt-id'
+    SELECTOR_HEADER = u'selector'
     SESSION_HEADER = u'session'
     SERVER_HEADER = u'server'
     SUBSCRIPTION_HEADER = u'subscription'

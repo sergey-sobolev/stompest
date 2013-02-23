@@ -31,8 +31,8 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
     def test_encoding(self):
         key = u'fen\xeatre'
         value = u'\xbfqu\xe9 tal?, s\xfc\xdf'
-
-        message = {'command': 'DISCONNECT', 'headers': {key: value}, 'version': StompSpec.VERSION_1_1}
+        command = StompSpec.DISCONNECT
+        message = {'command': command, 'headers': {key: value}, 'version': StompSpec.VERSION_1_1}
         frame = StompFrame(**message)
         self.assertEquals(message['headers'], frame.headers)
         self.assertEquals(dict(frame), message)
@@ -42,10 +42,10 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEquals(eval(repr(frame)), frame)
 
         self.assertEquals(str(frame), """\
-DISCONNECT
+%s
 fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
 
-\x00""")
+\x00""" % command)
 
         otherFrame = StompFrame(**message)
         self.assertEquals(frame, otherFrame)

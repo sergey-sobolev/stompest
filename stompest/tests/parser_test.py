@@ -13,12 +13,11 @@ class StompParserTest(unittest.TestCase):
             yield ''
 
     def test_frame_parse_succeeds(self):
-        message = {
-            'command': 'SEND',
-            'headers': {'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
-            'body': 'some stuff\nand more'
-        }
-        frame = StompFrame(**message)
+        frame = StompFrame(
+            StompSpec.SEND,
+            {'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
+            'some stuff\nand more'
+        )
 
         parser = StompParser()
         parser.add(str(frame))
@@ -40,12 +39,11 @@ class StompParserTest(unittest.TestCase):
         self.assertEquals(parsedFrame.body, 'some stuff\nand more')
 
     def test_reset_succeeds(self):
-        message = {
-            'command': 'SEND',
-            'headers': {'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
-            'body': 'some stuff\nand more'
-        }
-        frame = StompFrame(**message)
+        frame = StompFrame(
+            command=StompSpec.SEND,
+            headers={'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
+            body='some stuff\nand more'
+        )
         parser = StompParser()
 
         parser.add(str(frame))
@@ -83,7 +81,7 @@ class StompParserTest(unittest.TestCase):
     def test_get_returns_None_if_not_done(self):
         parser = StompParser()
         self.assertEqual(None, parser.get())
-        parser.add('CONNECT')
+        parser.add(StompSpec.CONNECT)
         self.assertEqual(None, parser.get())
 
     def test_add_throws_FrameError_on_invalid_command(self):
@@ -91,29 +89,29 @@ class StompParserTest(unittest.TestCase):
 
         self.assertRaises(StompFrameError, parser.add, 'HELLO\n')
         self.assertFalse(parser.canRead())
-        parser.add('DISCONNECT\n\n\x00')
-        self.assertEquals(StompFrame('DISCONNECT'), parser.get())
+        parser.add('%s\n\n\x00' % StompSpec.DISCONNECT)
+        self.assertEquals(StompFrame(StompSpec.DISCONNECT), parser.get())
         self.assertFalse(parser.canRead())
 
     def test_add_throws_FrameError_on_header_line_missing_separator(self):
         parser = StompParser()
-        parser.add('SEND\n')
+        parser.add('%s\n' % StompSpec.SEND)
         self.assertRaises(StompFrameError, parser.add, 'no separator\n')
 
     def test_colon_in_header_value(self):
         parser = StompParser()
-        parser.add('DISCONNECT\nheader:with:colon\n\n\x00')
+        parser.add('%s\nheader:with:colon\n\n\x00' % StompSpec.DISCONNECT)
         self.assertEquals(parser.get().headers['header'], 'with:colon')
 
     def test_no_newline(self):
         headers = {'x': 'y'}
         body = 'testing 1 2 3'
-        frameBytes = str(StompFrame('MESSAGE', headers, body))
+        frameBytes = str(StompFrame(StompSpec.MESSAGE, headers, body))
         self.assertTrue(frameBytes.endswith('\x00'))
         parser = StompParser()
         parser.add(self._generate_bytes(frameBytes))
         frame = parser.get()
-        self.assertEquals('MESSAGE', frame.command)
+        self.assertEquals(StompSpec.MESSAGE, frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body, frame.body)
         self.assertEquals(parser.get(), None)
@@ -121,12 +119,12 @@ class StompParserTest(unittest.TestCase):
     def test_binary_body(self):
         body = binascii.a2b_hex('f0000a09')
         headers = {'content-length': str(len(body))}
-        frameBytes = str(StompFrame('MESSAGE', headers, body))
+        frameBytes = str(StompFrame(StompSpec.MESSAGE, headers, body))
         self.assertTrue(frameBytes.endswith('\x00'))
         parser = StompParser()
         parser.add(frameBytes)
         frame = parser.get()
-        self.assertEquals('MESSAGE', frame.command)
+        self.assertEquals(StompSpec.MESSAGE, frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body, frame.body)
 
@@ -154,8 +152,9 @@ class StompParserTest(unittest.TestCase):
                     raise
 
     def test_strip_line_delimiter(self):
-        frame = commands.send('/queue/test')
-        rawFrameReplaced = str(commands.send('/queue/test')).replace('\n', '\r\n')
+        queue = '/queue/test'
+        frame = commands.send(queue)
+        rawFrameReplaced = str(commands.send(queue)).replace('\n', '\r\n')
         for (version, replace) in [
             (StompSpec.VERSION_1_0, False),
             (StompSpec.VERSION_1_1, False),
@@ -168,7 +167,7 @@ class StompParserTest(unittest.TestCase):
             else:
                 self.assertRaises(StompFrameError, StompParser(version).add, rawFrameReplaced)
         textWithCarriageReturn = 'there\rfolks'
-        frame = commands.send('/queue/test', headers={'hi': textWithCarriageReturn})
+        frame = commands.send(queue, headers={'hi': textWithCarriageReturn})
         parser = StompParser(StompSpec.VERSION_1_2)
         parser.add(str(frame))
         self.assertEquals(parser.get().headers['hi'], textWithCarriageReturn)
@@ -177,17 +176,17 @@ class StompParserTest(unittest.TestCase):
         body1 = 'boo'
         body2 = 'hoo'
         headers = {'x': 'y'}
-        frameBytes = str(StompFrame('MESSAGE', headers, body1)) + str(StompFrame('MESSAGE', headers, body2))
+        frameBytes = str(StompFrame(StompSpec.MESSAGE, headers, body1)) + str(StompFrame(StompSpec.MESSAGE, headers, body2))
         parser = StompParser()
         parser.add(frameBytes)
 
         frame = parser.get()
-        self.assertEquals('MESSAGE', frame.command)
+        self.assertEquals(StompSpec.MESSAGE, frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body1, frame.body)
 
         frame = parser.get()
-        self.assertEquals('MESSAGE', frame.command)
+        self.assertEquals(StompSpec.MESSAGE, frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body2, frame.body)
 
@@ -248,11 +247,11 @@ class StompParserTest(unittest.TestCase):
     def test_keep_first_of_repeated_headers(self):
         parser = StompParser()
         parser.add("""
-CONNECT
+%s
 repeat:1
 repeat:2
 
-\x00""")
+\x00""" % StompSpec.CONNECT)
         frame = parser.get()
         self.assertEquals(frame.headers['repeat'], '1')
 

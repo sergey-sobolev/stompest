@@ -6,7 +6,7 @@ import unittest
 from mock import Mock
 
 from stompest.error import StompConnectionError
-from stompest.protocol import StompFrame
+from stompest.protocol import StompFrame, StompSpec
 from stompest.sync.transport import StompFrameTransport
 
 logging.basicConfig(level=logging.DEBUG)
@@ -38,7 +38,7 @@ class StompFrameTransportTest(unittest.TestCase):
         return transport
 
     def test_send(self):
-        frame = StompFrame('MESSAGE')
+        frame = StompFrame(StompSpec.MESSAGE)
 
         transport = self._get_send_mock()
         transport.send(frame)
@@ -47,7 +47,7 @@ class StompFrameTransportTest(unittest.TestCase):
         self.assertEquals(str(frame), args[0])
 
     def test_send_not_connected_raises(self):
-        frame = StompFrame('MESSAGE')
+        frame = StompFrame(StompSpec.MESSAGE)
 
         transport = self._get_send_mock()
         transport._connected.return_value = False
@@ -57,7 +57,7 @@ class StompFrameTransportTest(unittest.TestCase):
     def test_receive(self):
         headers = {'x': 'y'}
         body = 'testing 1 2 3'
-        frame = StompFrame('MESSAGE', headers, body)
+        frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
         transport = self._get_receive_mock(str(frame))
         frame_ = transport.receive()
@@ -76,7 +76,7 @@ class StompFrameTransportTest(unittest.TestCase):
     def test_receive_multiple_frames_extra_newlines(self):
         headers = {'x': 'y'}
         body = 'testing 1 2 3'
-        frame = StompFrame('MESSAGE', headers, body)
+        frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
         transport = self._get_receive_mock('\n\n%s\n%s\n' % (frame, frame))
         frame_ = transport.receive()
@@ -90,8 +90,8 @@ class StompFrameTransportTest(unittest.TestCase):
 
     def test_receive_binary(self):
         body = binascii.a2b_hex('f0000a09')
-        headers = {'content-length': str(len(body))}
-        frame = StompFrame('MESSAGE', headers, body)
+        headers = {StompSpec.CONTENT_LENGTH_HEADER: str(len(body))}
+        frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
         transport = self._get_receive_mock(str(frame))
         frame_ = transport.receive()
@@ -105,18 +105,18 @@ class StompFrameTransportTest(unittest.TestCase):
         body1 = 'boo'
         body2 = 'hoo'
         headers = {'x': 'y'}
-        frameBytes = str(StompFrame('MESSAGE', headers, body1)) + str(StompFrame('MESSAGE', headers, body2))
+        frameBytes = str(StompFrame(StompSpec.MESSAGE, headers, body1)) + str(StompFrame(StompSpec.MESSAGE, headers, body2))
 
         transport = self._get_receive_mock(frameBytes)
 
         frame = transport.receive()
-        self.assertEquals('MESSAGE', frame.command)
+        self.assertEquals(StompSpec.MESSAGE, frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body1, frame.body)
         self.assertEquals(1, transport._socket.recv.call_count)
 
         frame = transport.receive()
-        self.assertEquals('MESSAGE', frame.command)
+        self.assertEquals(StompSpec.MESSAGE, frame.command)
         self.assertEquals(headers, frame.headers)
         self.assertEquals(body2, frame.body)
         self.assertEquals(1, transport._socket.recv.call_count)

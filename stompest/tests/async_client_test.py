@@ -10,6 +10,7 @@ from stompest.config import StompConfig
 from stompest.error import StompCancelledError, StompConnectionError, StompConnectTimeout, StompProtocolError
 
 from stompest.tests.broker_simulator import BlackHoleStompServer, ErrorOnConnectStompServer, ErrorOnSendStompServer, RemoteControlViaFrameStompServer
+from stompest.protocol.spec import StompSpec
 
 observer = log.PythonLoggingObserver()
 observer.start()
@@ -105,12 +106,13 @@ class AsyncClientFailoverOnDisconnectTestCase(AsyncClientBaseTestCase):
 
         yield client.connect()
         self.connections[0].stopListening()
-        client.send('/queue/fake', 'shutdown')
+        queue = '/queue/fake'
+        client.send(queue, 'shutdown')
         try:
             client = yield client.disconnected
         except StompConnectionError:
             yield client.connect()
-        client.send('/queue/fake', 'fake message')
+        client.send(queue, 'fake message')
 
         try:
             yield client.disconnected
@@ -125,8 +127,9 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
         ports = tuple(c.getHost().port for c in self.connections)
         config = StompConfig(uri='failover:(tcp://localhost:%d)?startupMaxReconnectAttempts=0,initialReconnectDelay=0,maxReconnectAttempts=1' % ports)
         client = Stomp(config)
+        queue = '/queue/bla'
         try:
-            client.subscribe('/queue/bla', self._on_message)  # client is not connected, so it won't accept subscriptions
+            client.subscribe(queue, self._on_message)  # client is not connected, so it won't accept subscriptions
         except StompConnectionError:
             pass
         else:
@@ -136,7 +139,7 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
         yield client.connect()
 
         self.shutdown = True  # the callback handler will kill the broker connection ...
-        client.subscribe('/queue/bla', self._on_message)
+        client.subscribe(queue, self._on_message)
         try:
             client = yield client.disconnected  # the callback handler has killed the broker connection
         except StompConnectionError:
@@ -174,7 +177,7 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         client = Stomp(config)
         yield client.connect()
         self._got_message = defer.Deferred()
-        client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False)  # we're acking the frames ourselves
+        client.subscribe('/queue/bla', self._on_message, headers={StompSpec.ID_HEADER: 4711}, ack=False)  # we're acking the frames ourselves
         yield self._got_message
         try:
             yield client.disconnect(timeout=0.02)
@@ -193,7 +196,7 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         yield client.connect()
 
         self._got_message = defer.Deferred()
-        client.subscribe('/queue/bla', self._on_message, headers={'id': 4711}, ack=False)  # we're acking the frames ourselves
+        client.subscribe('/queue/bla', self._on_message, headers={StompSpec.ID_HEADER: 4711}, ack=False)  # we're acking the frames ourselves
         yield self._got_message
 
         disconnected = client.disconnected
