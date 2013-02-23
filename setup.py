@@ -2,6 +2,7 @@ import os
 import sys
 
 from setuptools import setup, find_packages
+from stompest import FULL_VERSION
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -9,10 +10,13 @@ def read(fname):
 if sys.version_info[:2] < (2, 6):
     print 'stompest requires Python version 2.6 or later (%s detected).' % '.'.join(sys.version_info[:2])
     sys.exit(-1)
+if sys.version_info[:2] >= (3, 0):
+    print 'stompest is not yet compatible with Python 3 (%s detected).' % '.'.join(sys.version_info[:2])
+    sys.exit(-1)
 
 setup(
     name='stompest',
-    version='2.0a4',
+    version=FULL_VERSION,
     author='Jan Mueller',
     author_email='nikipore@gmail.com',
     description='STOMP client library for Python including both synchronous and Twisted clients.',
