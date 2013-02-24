@@ -548,6 +548,42 @@
 <p class="first admonition-title">Note</p>
 <p class="last">The frame&#8217;s attributes are internally stored as arbitrary Python objects. The frame&#8217;s <tt class="xref py py-attr docutils literal"><span class="pre">version</span></tt> attribute controls the wire-level encoding of its <tt class="xref py py-attr docutils literal"><span class="pre">command</span></tt> and <tt class="xref py py-attr docutils literal"><span class="pre">headers</span></tt> (depending on STOMP protocol version, this may be ASCII or UTF-8), while its <tt class="xref py py-attr docutils literal"><span class="pre">body</span></tt> is not encoded at all (it&#8217;s just cast as a <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt>).</p>
 </div>
+<p><strong>Example</strong>:</p>
+<div class="highlight-python"><pre>&gt;&gt;&gt; from stompest.protocol import StompFrame, StompSpec
+&gt;&gt;&gt; frame = StompFrame(StompSpec.SEND, rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
+&gt;&gt;&gt; frame
+StompFrame(command=u'SEND', rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
+&gt;&gt;&gt; str(frame)
+'SEND\nfoo:bar1\nfoo:bar2\n\n\x00'
+&gt;&gt;&gt; dict(frame)
+{'command': u'SEND', 'rawHeaders': [('foo', 'bar1'), ('foo', 'bar2')]}
+&gt;&gt;&gt; str(frame)
+'SEND\nfoo:bar1\nfoo:bar2\n\n\x00'
+&gt;&gt;&gt; frame.headers
+{'foo': 'bar1'}
+&gt;&gt;&gt; frame.headers = {'foo': 'bar3'}
+&gt;&gt;&gt; frame.headers
+{'foo': 'bar1'}
+&gt;&gt;&gt; frame
+StompFrame(command=u'SEND', headers={'foo': 'bar1'})
+&gt;&gt;&gt; str(frame)
+'SEND\nfoo:bar1\n\n\x00'
+&gt;&gt;&gt; frame.headers = {'foo': 'bar4'}
+&gt;&gt;&gt; frame.headers
+{'foo': 'bar4'}
+&gt;&gt;&gt; frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', u'fen\xeatre')], version=StompSpec.VERSION_1_0)
+&gt;&gt;&gt; str(frame)
+Traceback (most recent call last):
+[...]        
+UnicodeEncodeError: 'ascii' codec can't encode character u'\xea' in position 3: ordinal not in range(128)
+&gt;&gt;&gt; frame.version = StompSpec.VERSION_1_1
+&gt;&gt;&gt; str(frame)
+'SEND\nsome french:fen\xc3\xaatre\n\n\x00'
+&gt;&gt;&gt; import codecs
+&gt;&gt;&gt; c = codecs.lookup('utf-8')
+&gt;&gt;&gt; c.decode(str(frame))
+(u'SEND\nsome french:fen\xeatre\n\n\x00', 28)</pre>
+</div>
 <dl class="method">
 <dt id="stompest.protocol.frame.StompFrame.info">
 <tt class="descname">info</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.protocol.frame.StompFrame.info" title="Permalink to this definition">¶</a></dt>
