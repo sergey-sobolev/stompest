@@ -11,6 +11,44 @@ class StompFrame(object):
     :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
         
     .. note :: The frame's attributes are internally stored as arbitrary Python objects. The frame's :attr:`version` attribute controls the wire-level encoding of its :attr:`command` and :attr:`headers` (depending on STOMP protocol version, this may be ASCII or UTF-8), while its :attr:`body` is not encoded at all (it's just cast as a :class:`str`).
+    
+    **Example**:
+    
+    >>> from stompest.protocol import StompFrame, StompSpec
+    >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
+    >>> frame
+    StompFrame(command=u'SEND', rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
+    >>> str(frame)
+    'SEND\\nfoo:bar1\\nfoo:bar2\\n\\n\\x00'
+    >>> dict(frame)
+    {'command': u'SEND', 'rawHeaders': [('foo', 'bar1'), ('foo', 'bar2')]}
+    >>> str(frame)
+    'SEND\\nfoo:bar1\\nfoo:bar2\\n\\n\\x00'
+    >>> frame.headers
+    {'foo': 'bar1'}
+    >>> frame.headers = {'foo': 'bar3'}
+    >>> frame.headers
+    {'foo': 'bar1'}
+    >>> frame
+    StompFrame(command=u'SEND', headers={'foo': 'bar1'})
+    >>> str(frame)
+    'SEND\\nfoo:bar1\\n\\n\\x00'
+    >>> frame.headers = {'foo': 'bar4'}
+    >>> frame.headers
+    {'foo': 'bar4'}
+    >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', u'fen\\xeatre')], version=StompSpec.VERSION_1_0)
+    >>> str(frame)
+    Traceback (most recent call last):
+    [...]        
+    UnicodeEncodeError: 'ascii' codec can't encode character u'\\xea' in position 3: ordinal not in range(128)
+    >>> frame.version = StompSpec.VERSION_1_1
+    >>> str(frame)
+    'SEND\\nsome french:fen\\xc3\\xaatre\\n\\n\\x00'
+    >>> import codecs
+    >>> c = codecs.lookup('utf-8')
+    >>> c.decode(str(frame))
+    (u'SEND\\nsome french:fen\\xeatre\\n\\n\\x00', 28)
+
     """
     INFO_LENGTH = 20
     _KEYWORDS_AND_FIELDS = [('headers', '_headers', {}), ('body', 'body', ''), ('rawHeaders', 'rawHeaders', None), ('version', 'version', StompSpec.DEFAULT_VERSION)]
@@ -36,9 +74,8 @@ class StompFrame(object):
 
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, ', '.join(
-            ('%s=%s' % (keyword, repr(getattr(self, field))))
-            for (keyword, field)
-            in ([('command', 'command')] + [(k, f) for (k, f, _) in self._KEYWORDS_AND_FIELDS])
+            ('%s=%s' % (keyword, repr(value)))
+            for (keyword, value) in self
         ))
 
     def __str__(self):
