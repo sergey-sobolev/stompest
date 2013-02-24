@@ -60,12 +60,11 @@ class Stomp(object):
         
         **Example:**
         
-        >>> client = Stomp(StompConfig('tcp://localhost:61613', version='1.1'))
+        >>> client = Stomp(StompConfig('tcp://localhost:61613', version=StompSpec.VERSION_1_1))
         >>> client.connect()
         >>> client.session.version
         '1.1'
         >>> client.disconnect()
-        >>> from stompest.protocol import StompSpec
         >>> client.connect(versions=[StompSpec.VERSION_1_0])
         >>> client.session.version
         '1.0'
@@ -353,9 +352,7 @@ class Stomp(object):
         
         >>> # you might want to enable logging to trace the wire-level traffic
         ... import time
-        >>> from stompest.config import StompConfig
-        >>> from stompest.sync import Stomp
-        >>> client = Stomp(StompConfig('tcp://localhost:61612', version='1.1'))
+        >>> client = Stomp(StompConfig('tcp://localhost:61612', version=StompSpec.VERSION_1_1))
         >>> client.connect(heartBeats=(100, 100))
         >>> start = time.time()
         >>> elapsed = lambda t = None: (t or time.time()) - start
@@ -376,9 +373,6 @@ class Stomp(object):
         >>> client.canRead() # server will disconnect us because we're not heart-beating any more
         Traceback (most recent call last):
           File "<stdin>", line 1, in <module>
-          File "build/bdist.macosx-10.7-x86_64/egg/stompest/util.py", line 16, in __checkattr
-          File "build/bdist.macosx-10.7-x86_64/egg/stompest/sync/client.py", line 293, in canRead
-          File "build/bdist.macosx-10.7-x86_64/egg/stompest/sync/transport.py", line 63, in receive
         stompest.error.StompConnectionError: Connection closed [No more data]
         >>> print times()
         elapsed: 0.50, last received: 0.50, last sent: 0.25
