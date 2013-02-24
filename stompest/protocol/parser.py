@@ -15,24 +15,24 @@ class StompParser(object):
     Example:
 
     >>> from stompest.protocol import StompParser
-    >>> messages = ['RECEIPT\\nreceipt-id:message-12345\\n\\n\\x00', 'NACK\\nsubscription:0\\nmessage-id:007\\n\\n\\x00']
     >>> parser = StompParser('1.0') # STOMP 1.0 does not support the NACK command.
+    >>> messages = ['RECEIPT\\nreceipt-id:message-12345\\n\\n\\x00', 'NACK\\nsubscription:0\\nmessage-id:007\\n\\n\\x00']
     >>> for message in messages:
     ...     parser.add(message)
     ... 
     Traceback (most recent call last):
-      File "<stdin>", line 2, in <module>
+      File "<stdin>", line 1, in <module>
     stompest.error.StompFrameError: Invalid command: u'NACK'
-    >>> print repr(parser.get())
-    StompFrame(command='RECEIPT', headers={u'receipt-id': u'message-12345'}, body='')
-    >>> print parser.canRead()
+    >>> parser.get()
+    StompFrame(command=u'RECEIPT', rawHeaders=[(u'receipt-id', u'message-12345')])
+    >>> parser.canRead()
     False
-    >>> print parser.get()
+    >>> parser.get()
     None
     >>> parser = StompParser('1.1')
     >>> parser.add(messages[1])
-    >>> print repr(parser.get())
-    StompFrame(command=u'NACK', headers={u'message-id': u'007', u'subscription': u'0'}, body='')
+    >>> parser.get()
+    StompFrame(command=u'NACK', rawHeaders=[(u'subscription', u'0'), (u'message-id', u'007')], version='1.1')    
     
     """
     def __init__(self, version=None):
@@ -125,7 +125,6 @@ class StompParser(object):
             self._frame.rawHeaders.append(header)
             self._transition('headers')
         else:
-            self._frame.rawHeaders = tuple(self._frame.rawHeaders)
             self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
             self._transition('body')
 

@@ -7,16 +7,16 @@
 Example:
 
 >>> from stompest.protocol import StompFrame, StompSession, StompSpec
->>> session = StompSession('1.1')
+>>> session = StompSession(StompSpec.VERSION_1_1)
 >>> session.connect(login='', passcode='')
-StompFrame(command=u'CONNECT', headers={u'passcode': '', u'login': '', u'host': '', u'accept-version': '1.0,1.1'}, body='')
+StompFrame(command=u'CONNECT', headers={u'passcode': '', u'login': '', u'host': '', u'accept-version': '1.0,1.1'})
 >>> print session.version, session.state
 1.1 connecting
 >>> session.connected(StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'tete-a-tete'})) # The broker only understands STOMP 1.0.
 >>> print session.version, session.state
 1.0 connected
 >>> session.disconnect()
-StompFrame(command=u'DISCONNECT', headers={}, body='')
+StompFrame(command=u'DISCONNECT')
 >>> print session.version, session.state
 1.0 disconnecting
 >>> session.close()

@@ -7,7 +7,7 @@ class StompFrame(object):
     :param command: A valid STOMP command.
     :param headers: The STOMP headers (represented as a :class:`dict`), or :obj:`None` (no headers).
     :param body: The frame body.
-    :param rawHeaders: The raw STOMP headers (represented as a collection of (header, value) tuples), or :obj:`None` (no raw headers).
+    :param rawHeaders: The raw STOMP headers (represented as a collection of (header, value) pairs), or :obj:`None` (no raw headers).
     :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
         
     .. note :: The frame's attributes are internally stored as arbitrary Python objects. The frame's :attr:`version` attribute controls the wire-level encoding of its :attr:`command` and :attr:`headers` (depending on STOMP protocol version, this may be ASCII or UTF-8), while its :attr:`body` is not encoded at all (it's just cast as a :class:`str`).
@@ -39,7 +39,7 @@ class StompFrame(object):
     >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', u'fen\\xeatre')], version=StompSpec.VERSION_1_0)
     >>> str(frame)
     Traceback (most recent call last):
-    [...]        
+      File "<stdin>", line 1, in <module>
     UnicodeEncodeError: 'ascii' codec can't encode character u'\\xea' in position 3: ordinal not in range(128)
     >>> frame.version = StompSpec.VERSION_1_1
     >>> str(frame)

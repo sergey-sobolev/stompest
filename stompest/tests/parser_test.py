@@ -35,8 +35,20 @@ class StompParserTest(unittest.TestCase):
 
         self.assertEquals(parsedFrame.command, command)
         self.assertEquals(parsedFrame.headers, {'foo': 'bar1'})
-        self.assertEquals(parsedFrame.rawHeaders, (('foo', 'bar1'), ('foo', 'bar2')))
+        self.assertEquals(parsedFrame.rawHeaders, [('foo', 'bar1'), ('foo', 'bar2')])
         self.assertEquals(parsedFrame.body, 'some stuff\nand more')
+
+    def test_invalid_command(self):
+        messages = ['RECEIPT\nreceipt-id:message-12345\n\n\x00', 'NACK\nsubscription:0\nmessage-id:007\n\n\x00']
+        parser = StompParser('1.0')
+        parser.add(messages[0])
+        self.assertRaises(StompFrameError, parser.add, messages[1])
+        self.assertEquals(parser.get(), StompFrame(StompSpec.RECEIPT, rawHeaders=((u'receipt-id', u'message-12345'),)))
+        self.assertFalse(parser.canRead())
+        self.assertEquals(parser.get(), None)
+        parser = StompParser('1.1')
+        parser.add(messages[1])
+        self.assertEquals(parser.get(), StompFrame(command=u'NACK', rawHeaders=((u'subscription', u'0'), (u'message-id', u'007'))))
 
     def test_reset_succeeds(self):
         frame = StompFrame(
