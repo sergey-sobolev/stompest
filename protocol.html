@@ -261,16 +261,16 @@
 </div>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSession</span><span class="p">,</span> <span class="n">StompSpec</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">StompSession</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">StompSession</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">login</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">passcode</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
-<span class="go">StompFrame(command=u&#39;CONNECT&#39;, headers={u&#39;passcode&#39;: &#39;&#39;, u&#39;login&#39;: &#39;&#39;, u&#39;host&#39;: &#39;&#39;, u&#39;accept-version&#39;: &#39;1.0,1.1&#39;}, body=&#39;&#39;)</span>
+<span class="go">StompFrame(command=u&#39;CONNECT&#39;, headers={u&#39;passcode&#39;: &#39;&#39;, u&#39;login&#39;: &#39;&#39;, u&#39;host&#39;: &#39;&#39;, u&#39;accept-version&#39;: &#39;1.0,1.1&#39;})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
 <span class="go">1.1 connecting</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connected</span><span class="p">(</span><span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">CONNECTED</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SESSION_HEADER</span><span class="p">:</span> <span class="s">&#39;tete-a-tete&#39;</span><span class="p">}))</span> <span class="c"># The broker only understands STOMP 1.0.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
 <span class="go">1.0 connected</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-<span class="go">StompFrame(command=u&#39;DISCONNECT&#39;, headers={}, body=&#39;&#39;)</span>
+<span class="go">StompFrame(command=u&#39;DISCONNECT&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span>
 <span class="go">1.0 disconnecting</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -537,7 +537,7 @@
 <li><strong>command</strong> &#8211; A valid STOMP command.</li>
 <li><strong>headers</strong> &#8211; The STOMP headers (represented as a <tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt>), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (no headers).</li>
 <li><strong>body</strong> &#8211; The frame body.</li>
-<li><strong>rawHeaders</strong> &#8211; The raw STOMP headers (represented as a collection of (header, value) tuples), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (no raw headers).</li>
+<li><strong>rawHeaders</strong> &#8211; The raw STOMP headers (represented as a collection of (header, value) pairs), or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (no raw headers).</li>
 <li><strong>version</strong> &#8211; A valid STOMP protocol version, or <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt> (equivalent to the <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> attribute of the <a class="reference internal" href="#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><tt class="xref py py-class docutils literal"><span class="pre">StompSpec</span></tt></a> class).</li>
 </ul>
 </td>
@@ -549,40 +549,41 @@
 <p class="last">The frame&#8217;s attributes are internally stored as arbitrary Python objects. The frame&#8217;s <tt class="xref py py-attr docutils literal"><span class="pre">version</span></tt> attribute controls the wire-level encoding of its <tt class="xref py py-attr docutils literal"><span class="pre">command</span></tt> and <tt class="xref py py-attr docutils literal"><span class="pre">headers</span></tt> (depending on STOMP protocol version, this may be ASCII or UTF-8), while its <tt class="xref py py-attr docutils literal"><span class="pre">body</span></tt> is not encoded at all (it&#8217;s just cast as a <tt class="xref py py-class docutils literal"><span class="pre">str</span></tt>).</p>
 </div>
 <p><strong>Example</strong>:</p>
-<div class="highlight-python"><pre>&gt;&gt;&gt; from stompest.protocol import StompFrame, StompSpec
-&gt;&gt;&gt; frame = StompFrame(StompSpec.SEND, rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
-&gt;&gt;&gt; frame
-StompFrame(command=u'SEND', rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
-&gt;&gt;&gt; str(frame)
-'SEND\nfoo:bar1\nfoo:bar2\n\n\x00'
-&gt;&gt;&gt; dict(frame)
-{'command': u'SEND', 'rawHeaders': [('foo', 'bar1'), ('foo', 'bar2')]}
-&gt;&gt;&gt; str(frame)
-'SEND\nfoo:bar1\nfoo:bar2\n\n\x00'
-&gt;&gt;&gt; frame.headers
-{'foo': 'bar1'}
-&gt;&gt;&gt; frame.headers = {'foo': 'bar3'}
-&gt;&gt;&gt; frame.headers
-{'foo': 'bar1'}
-&gt;&gt;&gt; frame
-StompFrame(command=u'SEND', headers={'foo': 'bar1'})
-&gt;&gt;&gt; str(frame)
-'SEND\nfoo:bar1\n\n\x00'
-&gt;&gt;&gt; frame.headers = {'foo': 'bar4'}
-&gt;&gt;&gt; frame.headers
-{'foo': 'bar4'}
-&gt;&gt;&gt; frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', u'fen\xeatre')], version=StompSpec.VERSION_1_0)
-&gt;&gt;&gt; str(frame)
-Traceback (most recent call last):
-[...]        
-UnicodeEncodeError: 'ascii' codec can't encode character u'\xea' in position 3: ordinal not in range(128)
-&gt;&gt;&gt; frame.version = StompSpec.VERSION_1_1
-&gt;&gt;&gt; str(frame)
-'SEND\nsome french:fen\xc3\xaatre\n\n\x00'
-&gt;&gt;&gt; import codecs
-&gt;&gt;&gt; c = codecs.lookup('utf-8')
-&gt;&gt;&gt; c.decode(str(frame))
-(u'SEND\nsome french:fen\xeatre\n\n\x00', 28)</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar2&#39;</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span>
+<span class="go">StompFrame(command=u&#39;SEND&#39;, rawHeaders=[(&#39;foo&#39;, &#39;bar1&#39;), (&#39;foo&#39;, &#39;bar2&#39;)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">&#39;SEND\nfoo:bar1\nfoo:bar2\n\n\x00&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">dict</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">{&#39;command&#39;: u&#39;SEND&#39;, &#39;rawHeaders&#39;: [(&#39;foo&#39;, &#39;bar1&#39;), (&#39;foo&#39;, &#39;bar2&#39;)]}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">&#39;SEND\nfoo:bar1\nfoo:bar2\n\n\x00&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
+<span class="go">{&#39;foo&#39;: &#39;bar1&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;foo&#39;</span><span class="p">:</span> <span class="s">&#39;bar3&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
+<span class="go">{&#39;foo&#39;: &#39;bar1&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span>
+<span class="go">StompFrame(command=u&#39;SEND&#39;, headers={&#39;foo&#39;: &#39;bar1&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">&#39;SEND\nfoo:bar1\n\n\x00&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;foo&#39;</span><span class="p">:</span> <span class="s">&#39;bar4&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
+<span class="go">{&#39;foo&#39;: &#39;bar4&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s">&#39;some french&#39;</span><span class="p">,</span> <span class="s">u&#39;fen</span><span class="se">\xea</span><span class="s">tre&#39;</span><span class="p">)],</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+<span class="gr">UnicodeEncodeError: &#39;ascii&#39; codec can&#39;t encode character u&#39;\xea&#39; in position 3</span>: <span class="n">ordinal not in range(128)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">&#39;SEND\nsome french:fen\xc3\xaatre\n\n\x00&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">codecs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">))</span>
+<span class="go">(u&#39;SEND\nsome french:fen\xeatre\n\n\x00&#39;, 28)</span>
+</pre></div>
 </div>
 <dl class="method">
 <dt id="stompest.protocol.frame.StompFrame.info">
@@ -614,23 +615,26 @@ UnicodeEncodeError: 'ascii' codec can't encode character u'\xea' in position 3: 
 </div>
 <p>Examples:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">commands</span><span class="p">,</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">versions</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">versions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">versions</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span>
 <span class="go">[&#39;1.0&#39;, &#39;1.1&#39;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">versions</span><span class="o">=</span><span class="n">versions</span><span class="p">))</span>
-<span class="go">StompFrame(command=u&#39;CONNECT&#39;, headers={u&#39;host&#39;: &#39;&#39;, u&#39;accept-version&#39;: &#39;1.0,1.1&#39;}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">versions</span><span class="o">=</span><span class="n">versions</span><span class="p">)</span>
+<span class="go">StompFrame(command=u&#39;CONNECT&#39;, headers={u&#39;host&#39;: &#39;&#39;, u&#39;accept-version&#39;: &#39;1.0,1.1&#39;})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="p">,</span> <span class="n">token</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">,</span> <span class="s">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s">&#39;100&#39;</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">DESTINATION_HEADER</span><span class="p">:</span> <span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">MESSAGE_ID_HEADER</span><span class="p">:</span> <span class="s">&#39;007&#39;</span><span class="p">},</span> <span class="s">&#39;hello&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span>
 <span class="go">StompFrame(command=u&#39;MESSAGE&#39;, headers={u&#39;destination&#39;: &#39;/queue/test&#39;, u&#39;message-id&#39;: &#39;007&#39;}, body=&#39;hello&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.0&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">token</span> <span class="c"># This message matches your subscription.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">==</span> <span class="n">token</span> <span class="c"># This message matches your subscription.</span>
 <span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="go">(u&#39;destination&#39;, &#39;/queue/test&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={&#39;destination&#39;: &#39;/queue/test&#39;, &#39;message-id&#39;</span>: <span class="n">&#39;007&#39;}]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-12345&#39;</span><span class="p">))</span>
-<span class="go">StompFrame(command=u&#39;DISCONNECT&#39;, headers={u&#39;receipt&#39;: &#39;message-12345&#39;}, body=&#39;&#39;)</span>
+<span class="gr">stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={u&#39;destination&#39;: &#39;/queue/test&#39;, u&#39;message-id&#39;</span>: <span class="n">&#39;007&#39;}]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-12345&#39;</span><span class="p">)</span>
+<span class="go">StompFrame(command=u&#39;DISCONNECT&#39;, headers={u&#39;receipt&#39;: &#39;message-12345&#39;})</span>
 </pre></div>
 </div>
 <div class="admonition-see-also admonition seealso">
@@ -920,24 +924,24 @@ UnicodeEncodeError: 'ascii' codec can't encode character u'\xea' in position 3: 
 </table>
 <p>Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompParser</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;RECEIPT</span><span class="se">\n</span><span class="s">receipt-id:message-12345</span><span class="se">\n\n\x00</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;NACK</span><span class="se">\n</span><span class="s">subscription:0</span><span class="se">\n</span><span class="s">message-id:007</span><span class="se">\n\n\x00</span><span class="s">&#39;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">StompParser</span><span class="p">(</span><span class="s">&#39;1.0&#39;</span><span class="p">)</span> <span class="c"># STOMP 1.0 does not support the NACK command.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;RECEIPT</span><span class="se">\n</span><span class="s">receipt-id:message-12345</span><span class="se">\n\n\x00</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;NACK</span><span class="se">\n</span><span class="s">subscription:0</span><span class="se">\n</span><span class="s">message-id:007</span><span class="se">\n\n\x00</span><span class="s">&#39;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">parser</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 <span class="gp">... </span>
 <span class="gt">Traceback (most recent call last):</span>
-  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">2</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
 <span class="gr">stompest.error.StompFrameError: Invalid command</span>: <span class="n">u&#39;NACK&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
-<span class="go">StompFrame(command=&#39;RECEIPT&#39;, headers={u&#39;receipt-id&#39;: u&#39;message-12345&#39;}, body=&#39;&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">parser</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="go">StompFrame(command=u&#39;RECEIPT&#39;, rawHeaders=[(u&#39;receipt-id&#39;, u&#39;message-12345&#39;)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 <span class="go">None</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">StompParser</span><span class="p">(</span><span class="s">&#39;1.1&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">messages</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="nb">repr</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
-<span class="go">StompFrame(command=u&#39;NACK&#39;, headers={u&#39;message-id&#39;: u&#39;007&#39;, u&#39;subscription&#39;: u&#39;0&#39;}, body=&#39;&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="go">StompFrame(command=u&#39;NACK&#39;, rawHeaders=[(u&#39;subscription&#39;, u&#39;0&#39;), (u&#39;message-id&#39;, u&#39;007&#39;)], version=&#39;1.1&#39;)    </span>
 </pre></div>
 </div>
 <dl class="method">

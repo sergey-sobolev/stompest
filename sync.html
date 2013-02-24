@@ -187,9 +187,7 @@
 <p><strong>Example</strong>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># you might want to enable logging to trace the wire-level traffic</span>
 <span class="gp">... </span><span class="kn">import</span> <span class="nn">time</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61612&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.1&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61612&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">heartBeats</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">elapsed</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">None</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">start</span>
@@ -210,9 +208,6 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span> <span class="c"># server will disconnect us because we&#39;re not heart-beating any more</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-  File <span class="nb">&quot;build/bdist.macosx-10.7-x86_64/egg/stompest/util.py&quot;</span>, line <span class="m">16</span>, in <span class="n">__checkattr</span>
-  File <span class="nb">&quot;build/bdist.macosx-10.7-x86_64/egg/stompest/sync/client.py&quot;</span>, line <span class="m">293</span>, in <span class="n">canRead</span>
-  File <span class="nb">&quot;build/bdist.macosx-10.7-x86_64/egg/stompest/sync/transport.py&quot;</span>, line <span class="m">63</span>, in <span class="n">receive</span>
 <span class="gr">stompest.error.StompConnectionError</span>: <span class="n">Connection closed [No more data]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">times</span><span class="p">()</span>
 <span class="go">elapsed: 0.50, last received: 0.50, last sent: 0.25</span>
@@ -292,12 +287,11 @@
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.1&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">version</span>
 <span class="go">&#39;1.1&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">versions</span><span class="o">=</span><span class="p">[</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_0</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">version</span>
 <span class="go">&#39;1.0&#39;</span>
