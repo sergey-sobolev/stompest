@@ -9,7 +9,7 @@ from stompest.async import Stomp
 from stompest.config import StompConfig
 from stompest.error import StompCancelledError, StompConnectionError, StompConnectTimeout, StompProtocolError
 
-from stompest.tests.broker_simulator import BlackHoleStompServer, ErrorOnConnectStompServer, ErrorOnSendStompServer, RemoteControlViaFrameStompServer
+from .broker_simulator import BlackHoleStompServer, ErrorOnConnectStompServer, ErrorOnSendStompServer, RemoteControlViaFrameStompServer
 from stompest.protocol.spec import StompSpec
 
 observer = log.PythonLoggingObserver()

@@ -5,23 +5,23 @@
 Examples
 --------
 
-.. automodule:: stompest.examples
+.. automodule:: stompest.async.examples
     :members:
 
 Producer
 ^^^^^^^^
 
-.. literalinclude:: ../../stompest/examples/async/producer.py
+.. literalinclude:: ../../src/async/stompest/async/examples/producer.py
 
 Transformer
 ^^^^^^^^^^^
 
-.. literalinclude:: ../../stompest/examples/async/transformer.py
+.. literalinclude:: ../../src/async/stompest/async/examples/transformer.py
 
 Consumer
 ^^^^^^^^
 
-.. literalinclude:: ../../stompest/examples/async/consumer.py
+.. literalinclude:: ../../src/async/stompest/async/examples/consumer.py
 
 API
 ---

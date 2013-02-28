@@ -12,13 +12,14 @@
 # serve to show the default.
 
 import os, sys
-sys.path.insert(0, '../..')
+for path in ('async', 'core'):
+    sys.path.insert(0, os.path.join('../../src', path))
 
 import stompest
 import stompest.sync
-import stompest.examples.sync
+import stompest.sync.examples
 import stompest.async
-import stompest.examples.async
+import stompest.async.examples
 import stompest.config
 import stompest.protocol
 import stompest.error
@@ -194,7 +195,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index', 'stompest.tex', u'stompest Documentation',
-   u'Roger Hoover, Jan Müller', 'manual'),
+   u'Jan Müller, Roger Hoover', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

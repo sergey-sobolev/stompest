@@ -23,5 +23,5 @@ check:
 
 clean:
 	$(PYTHON) setup.py clean
-	rm -rf dist/ readme.html stompest.egg-info/
+	rm -rf build/ dist/ readme.html *.egg-info/
 	find . -name '*.pyc' -delete

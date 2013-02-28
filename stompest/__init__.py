@@ -1,2 +1,0 @@
-VERSION = '2.0'
-FULL_VERSION = '2.0a5'

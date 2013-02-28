@@ -3,18 +3,18 @@
 Examples
 --------
 
-.. automodule:: stompest.examples
+.. automodule:: stompest.sync.examples
     :members:
 
 Producer
 ^^^^^^^^
 
-.. literalinclude:: ../../stompest/examples/sync/producer.py
+.. literalinclude:: ../../src/core/stompest/sync/examples/producer.py
 
 Consumer
 ^^^^^^^^
 
-.. literalinclude:: ../../stompest/examples/sync/consumer.py
+.. literalinclude:: ../../src/core/stompest/sync/examples/consumer.py
 
 API
 ---
