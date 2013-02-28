@@ -25,3 +25,5 @@ clean:
 	$(PYTHON) setup.py clean
 	rm -rf build/ dist/ readme.html *.egg-info/
 	find . -name '*.pyc' -delete
+	find . -name '.DS_Store' -delete
+	
