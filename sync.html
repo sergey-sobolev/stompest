@@ -53,7 +53,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Synchronous Client</a><ul>
-<li><a class="reference internal" href="#module-stompest.examples">Examples</a><ul>
+<li><a class="reference internal" href="#module-stompest.sync.examples">Examples</a><ul>
 <li><a class="reference internal" href="#producer">Producer</a></li>
 <li><a class="reference internal" href="#consumer">Consumer</a></li>
 </ul>
@@ -98,8 +98,8 @@
   <div class="section" id="module-stompest.sync.client">
 <span id="synchronous-client"></span><span id="sync"></span><h1>Synchronous Client<a class="headerlink" href="#module-stompest.sync.client" title="Permalink to this headline">¶</a></h1>
 <p>The synchronous client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.</p>
-<div class="section" id="module-stompest.examples">
-<span id="examples"></span><h2>Examples<a class="headerlink" href="#module-stompest.examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-stompest.sync.examples">
+<span id="examples"></span><h2>Examples<a class="headerlink" href="#module-stompest.sync.examples" title="Permalink to this headline">¶</a></h2>
 <p>If you use ActiveMQ to run these examples, make sure you enable the STOMP connector, (see <a class="reference external" href="http://activemq.apache.org/stomp.html">here</a> for details):</p>
 <div class="highlight-xml"><div class="highlight"><pre><span class="c">&lt;!-- add this to the config file &quot;activemq.xml&quot; --&gt;</span>
 <span class="nt">&lt;transportConnector</span> <span class="na">name=</span><span class="s">&quot;stomp&quot;</span> <span class="na">uri=</span><span class="s">&quot;stomp://0.0.0.0:61613&quot;</span><span class="nt">/&gt;</span>

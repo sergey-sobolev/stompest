@@ -53,7 +53,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Asynchronous Client</a><ul>
-<li><a class="reference internal" href="#module-stompest.examples">Examples</a><ul>
+<li><a class="reference internal" href="#module-stompest.async.examples">Examples</a><ul>
 <li><a class="reference internal" href="#producer">Producer</a></li>
 <li><a class="reference internal" href="#transformer">Transformer</a></li>
 <li><a class="reference internal" href="#consumer">Consumer</a></li>
@@ -103,19 +103,8 @@
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference external" href="http://stomp.github.com/">STOMP protocol specification</a>, <a class="reference external" href="http://twistedmatrix.com/documents/current/api/">Twisted API documentation</a>, <a class="reference external" href="http://activemq.apache.org/stomp.html">Apache ActiveMQ - Stomp</a></p>
 </div>
-<div class="section" id="module-stompest.examples">
-<span id="examples"></span><h2>Examples<a class="headerlink" href="#module-stompest.examples" title="Permalink to this headline">¶</a></h2>
-<p>If you use ActiveMQ to run these examples, make sure you enable the STOMP connector, (see <a class="reference external" href="http://activemq.apache.org/stomp.html">here</a> for details):</p>
-<div class="highlight-xml"><div class="highlight"><pre><span class="c">&lt;!-- add this to the config file &quot;activemq.xml&quot; --&gt;</span>
-<span class="nt">&lt;transportConnector</span> <span class="na">name=</span><span class="s">&quot;stomp&quot;</span> <span class="na">uri=</span><span class="s">&quot;stomp://0.0.0.0:61613&quot;</span><span class="nt">/&gt;</span>
-</pre></div>
-</div>
-<p>For debugging purposes, it is highly recommended to turn on the logger on level <tt class="xref py py-attr docutils literal"><span class="pre">DEBUG</span></tt>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
-<span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="section" id="module-stompest.async.examples">
+<span id="examples"></span><h2>Examples<a class="headerlink" href="#module-stompest.async.examples" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="producer">
 <h3>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">json</span>
