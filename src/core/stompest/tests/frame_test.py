@@ -2,6 +2,7 @@ import binascii
 import unittest
 
 from stompest.protocol import StompFrame, StompSpec
+import codecs
 
 class StompFrameTest(unittest.TestCase):
     def test_frame(self):
@@ -40,12 +41,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEquals(eval(repr(frame)), frame)
         frame.version = StompSpec.VERSION_1_1
         self.assertEquals(eval(repr(frame)), frame)
-
-        self.assertEquals(str(frame), """\
-%s
-fen\xc3\xaatre:\xc2\xbfqu\xc3\xa9 tal?, s\xc3\xbc\xc3\x9f
-
-\x00""" % command)
+        self.assertEquals(str(frame), codecs.lookup('utf-8').encode(command + u'\n' + key + u':' + value + u'\n\n\x00')[0])
 
         otherFrame = StompFrame(**message)
         self.assertEquals(frame, otherFrame)
