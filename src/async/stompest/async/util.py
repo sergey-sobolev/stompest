@@ -36,7 +36,7 @@ class InFlightOperations(collections.MutableMapping):
 
     @contextlib.contextmanager
     def __call__(self, key, log=None):
-        self[key] = waiting = defer.Deferred()
+        self[key] = waiting = WaitingDeferred()
         info = self.info(key)
         log and log.debug('%s started.' % info)
         try:
@@ -55,16 +55,17 @@ class InFlightOperations(collections.MutableMapping):
     def info(self, key):
         return ' '.join(map(str, filter(None, (self._info, key))))
 
-@defer.inlineCallbacks
-def wait(deferred, timeout=None, fail=None):
-    if timeout is not None:
-        timeout = reactor.callLater(timeout, deferred.errback, fail) #@UndefinedVariable
-    try:
-        result = yield deferred
-    finally:
-        if timeout and not timeout.called:
-            timeout.cancel()
-    defer.returnValue(result)
+class WaitingDeferred(defer.Deferred):
+    @defer.inlineCallbacks
+    def wait(self, timeout=None, fail=None):
+        if timeout is not None:
+            timeout = reactor.callLater(timeout, self.errback, fail)  # @UndefinedVariable
+        try:
+            result = yield self
+        finally:
+            if timeout and not timeout.called:
+                timeout.cancel()
+        defer.returnValue(result)
 
 def exclusive(f):
     @functools.wraps(f)

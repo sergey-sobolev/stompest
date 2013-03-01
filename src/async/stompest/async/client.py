@@ -38,7 +38,7 @@ from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr, cloneFrame
 
 from .protocol import StompProtocolCreator
-from .util import InFlightOperations, exclusive, wait
+from .util import InFlightOperations, exclusive
 
 LOG_CATEGORY = __name__
 
@@ -151,7 +151,7 @@ class Stomp(object):
         try:
             with self._connecting(None, self.log) as connected:
                 self.sendFrame(frame)
-                yield wait(connected, connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % connectedTimeout))
+                yield connected.wait(connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % connectedTimeout))
         except Exception as e:
             self.log.error('Could not establish STOMP session. Disconnecting ...')
             yield self.disconnect(failure=e)
@@ -189,7 +189,7 @@ class Stomp(object):
             if self._messages:
                 self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)
                 try:
-                    yield task.cooperate(iter([wait(handler, timeout, StompCancelledError('Going down to disconnect now')) for handler in self._messages.values()])).whenDone()
+                    yield task.cooperate(iter([handler.wait(timeout, StompCancelledError('Going down to disconnect now')) for handler in self._messages.values()])).whenDone()
                 except StompCancelledError as e:
                     self._disconnectReason = StompCancelledError('Handlers did not finish in time.')
                 else:
@@ -503,4 +503,4 @@ class Stomp(object):
             defer.returnValue(None)
         with self._receipts(receipt, self.log) as receiptArrived:
             timeout = self._receiptTimeout
-            yield wait(receiptArrived, timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, timeout)))
+            yield receiptArrived.wait(timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, timeout)))

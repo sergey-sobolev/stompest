@@ -4,7 +4,7 @@ from twisted.internet import defer, reactor, task
 from twisted.internet.defer import CancelledError
 from twisted.trial import unittest
 
-from stompest.async.util import exclusive, InFlightOperations, wait
+from stompest.async.util import exclusive, InFlightOperations
 from stompest.error import StompAlreadyRunningError, StompCancelledError
 
 logging.basicConfig(level=logging.DEBUG)
@@ -94,8 +94,8 @@ class InFlightOperationsTest(unittest.TestCase):
 
         try:
             with op(None, logging.getLogger(LOG_CATEGORY)) as w:
-                reactor.callLater(0, w.cancel) #@UndefinedVariable
-                yield wait(w, timeout=None, fail=None)
+                reactor.callLater(0, w.cancel)  # @UndefinedVariable
+                yield w.wait(timeout=None, fail=None)
         except CancelledError:
             pass
         else:
@@ -104,8 +104,8 @@ class InFlightOperationsTest(unittest.TestCase):
 
         try:
             with op(None, logging.getLogger(LOG_CATEGORY)) as w:
-                reactor.callLater(0, w.errback, StompCancelledError('4711')) #@UndefinedVariable
-                yield wait(w)
+                reactor.callLater(0, w.errback, StompCancelledError('4711'))  # @UndefinedVariable
+                yield w.wait()
         except StompCancelledError as e:
             self.assertEquals(str(e), '4711')
         else:
@@ -113,8 +113,8 @@ class InFlightOperationsTest(unittest.TestCase):
         self.assertEquals(list(op), [])
 
         with op(None, logging.getLogger(LOG_CATEGORY)) as w:
-            reactor.callLater(0, w.callback, 4711) #@UndefinedVariable
-            result = yield wait(w)
+            reactor.callLater(0, w.callback, 4711)  # @UndefinedVariable
+            result = yield w.wait()
             self.assertEquals(result, 4711)
         self.assertEquals(list(op), [])
 
@@ -133,7 +133,7 @@ class InFlightOperationsTest(unittest.TestCase):
 
         try:
             with op(None) as w:
-                d = wait(w)
+                d = w.wait()
                 raise RuntimeError('hi')
         except RuntimeError:
             pass
@@ -150,7 +150,7 @@ class InFlightOperationsTest(unittest.TestCase):
         op = InFlightOperations('test')
         with op(None) as w:
             try:
-                yield wait(w, timeout=0, fail=RuntimeError('hi'))
+                yield w.wait(timeout=0, fail=RuntimeError('hi'))
             except RuntimeError as e:
                 self.assertEquals(str(e), 'hi')
             else:
