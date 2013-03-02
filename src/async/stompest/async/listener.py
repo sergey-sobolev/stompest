@@ -78,10 +78,17 @@ class SubscriptionListener(Listener):
     def onUnsubscribe(self, connection, frame, context): # @UnusedVariable
         """onUnsubscribe(connection, frame, context)
         
-        Forget everything about this listener's subscription."""
+        Forget everything about this listener's subscription and unregister from the **connection**."""
         if context is not self:
             return
         self._headers = None
+        connection.remove(self)
+
+    def onConnectionLost(self, connection, reason): # @UnusedVariable
+        """onConnectionLost(connection, reason)
+        
+        Forget everything about this listener's subscription and unregister from the **connection**."""
+        self.onUnsubscribe(connection, None, self)
 
 class HeartBeatListener(Listener):
     """Add this event handler to a :class:`~.async.client.Stomp` connection to automatically handle heart-beating.
