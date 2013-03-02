@@ -34,10 +34,13 @@ class Listener(object):
 class SubscriptionListener(Listener):
     """This event handler corresponds to a STOMP subscription.
     
-    :param handler: A callable :obj:`f(client, frame)` which accepts a :class:`~.async.Stomp` connection and the received :class:`~.StompFrame`.
-    :param ack: Check this option if you wish to automatically ack MESSAGE frames after they were handled (successfully or not).
+    :param handler: A callable :obj:`f(client, frame)` which accepts a :class:`~.async.client.Stomp` connection and the received :class:`~.StompFrame`.
+    :param ack: Check this option if you wish to automatically ack **MESSAGE** frames after they were handled (successfully or not).
     :param errorDestination: If a frame was not handled successfully, forward a copy of the offending frame to this destination. Example: ``errorDestination='/queue/back-to-square-one'``
     :param onMessageFailed: You can specify a custom error handler which must be a callable with signature :obj:`f(connection, failure, frame, errorDestination)`. Note that a non-trivial choice of this error handler overrides the default behavior (forward frame to error destination and ack it).
+    
+    .. seealso :: The unit tests in the module :mod:`.tests.async_client_integration_test` cover a couple of usage scenarios.
+
     """
     DEFAULT_ACK_MODE = 'client-individual'
 
@@ -50,19 +53,11 @@ class SubscriptionListener(Listener):
         self._onMessageFailed = onMessageFailed or sendToErrorDestination
         self._headers = None
 
-    def onSubscribe(self, connection, frame, context): # @UnusedVariable
-        if context is not self:
-            return
-        frame.headers.setdefault(StompSpec.ACK_HEADER, self.DEFAULT_ACK_MODE)
-        self._headers = frame.headers
-
-    def onUnsubscribe(self, connection, frame, context): # @UnusedVariable
-        if context is not self:
-            return
-        self._headers = None
-
     @defer.inlineCallbacks
     def onMessage(self, connection, frame, context):
+        """onMessage(connection, frame, context)
+        
+        Handle a message originating from this listener's subscription."""
         if context is not self:
             return
         try:
@@ -73,13 +68,35 @@ class SubscriptionListener(Listener):
             if self._ack and (self._headers[StompSpec.ACK_HEADER] in StompSpec.CLIENT_ACK_MODES):
                 connection.ack(frame)
 
+    def onSubscribe(self, connection, frame, context): # @UnusedVariable
+        """Set the **ack** header of the **SUBSCRIBE** frame initiating this listener's subscription to the value of the class atrribute :attr:`DEFAULT_ACK_MODE` (if it isn't set already). Keep a copy of the headers for handling messages originating from this subscription."""
+        if context is not self:
+            return
+        frame.headers.setdefault(StompSpec.ACK_HEADER, self.DEFAULT_ACK_MODE)
+        self._headers = frame.headers
+
+    def onUnsubscribe(self, connection, frame, context): # @UnusedVariable
+        """onUnsubscribe(connection, frame, context)
+        
+        Forget everything about this listener's subscription."""
+        if context is not self:
+            return
+        self._headers = None
+
 class HeartBeatListener(Listener):
+    """Add this event handler to a :class:`~.async.client.Stomp` connection to automatically handle heart-beating.
+    
+    :param thresholds: tolerance thresholds (relative to the negotiated heart-beat periods). The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: ``{'client': 0.6, 'server' 2.5}`` means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.
+
+    **Example**:
+    
+    >>> client.add(HeartBeatListener())
+    >>> client.connect(heartBeats=(250, 250))
+
+    """
     DEFAULT_THRESHOLDS = {'client': 0.8, 'server': 2.0}
 
     def __init__(self, thresholds=None):
-        """
-        :param thresholds: tolerance thresholds (relative to the negotiated heart-beat periods). The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: ``{'client': 0.6, 'server' 2.5}`` means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.
-        """
         self._thresholds = thresholds or self.DEFAULT_THRESHOLDS
         self._heartBeats = {}
 

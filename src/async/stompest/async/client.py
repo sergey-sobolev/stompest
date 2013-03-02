@@ -35,7 +35,6 @@ from stompest.error import StompCancelledError, StompConnectionError, StompFrame
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
-from .listener import HeartBeatListener
 from .protocol import StompProtocolCreator
 from .util import InFlightOperations, exclusive
 
@@ -50,7 +49,6 @@ class Stomp(object):
 
     :param config: A :class:`~.StompConfig` object.
     :param receiptTimeout: When a STOMP frame was sent to the broker and a **RECEIPT** frame was requested, this is the time (in seconds) to wait for the **RECEIPT** frame to arrive. If :obj:`None`, we will wait indefinitely.
-    :param heartBeatThresholds: tolerance thresholds (relative to the negotiated heart-beat periods). The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: ``{'client': 0.6, 'server' 2.5}`` means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.
     
     .. note :: All API methods which may request a **RECEIPT** frame from the broker -- which is indicated by the **receipt** parameter -- will wait for the **RECEIPT** response until this client's **receiptTimeout**. Here, "wait" is to be understood in the asynchronous sense that the method's :class:`twisted.internet.defer.Deferred` result will only call back then. If **receipt** is :obj:`None`, no such header is sent, and the callback will be triggered earlier.
 
@@ -58,7 +56,7 @@ class Stomp(object):
     """
     _protocolCreatorFactory = StompProtocolCreator
 
-    def __init__(self, config, receiptTimeout=None, heartBeatThresholds=None):
+    def __init__(self, config, receiptTimeout=None):
         self._config = config
         self._receiptTimeout = receiptTimeout
 
@@ -84,7 +82,6 @@ class Stomp(object):
         }
 
         self._listeners = []
-        self.add(HeartBeatListener(heartBeatThresholds))
 
     def add(self, listener):
         if listener not in self._listeners:
@@ -285,7 +282,7 @@ class Stomp(object):
     def subscribe(self, destination, headers=None, receipt=None, listener=None):
         """subscribe(destination, headers=None, receipt=None, listener=None)
 
-        :param listener: An optional :class:`~.Listener` object which handles events associated to this subscription.
+        :param listener: An optional :class:`~.Listener` object which will be added to this connection to handle events associated to this subscription.
         
         Send a **SUBSCRIBE** frame to subscribe to a STOMP destination. This method returns a :class:`twisted.internet.defer.Deferred` object which will fire with a token when a possibly requested **RECEIPT** frame has arrived. The callback value is a token which is used internally to match incoming **MESSAGE** frames and must be kept if you wish to :meth:`~.async.client.Stomp.unsubscribe` later.
         """

@@ -4,7 +4,7 @@
 
 .. seealso :: The stateless API in the module :mod:`.protocol.commands` for all API command parameters which are not documented here.
 
-Example:
+**Example**:
 
 >>> from stompest.protocol import StompFrame, StompSession, StompSpec
 >>> session = StompSession(StompSpec.VERSION_1_1)
