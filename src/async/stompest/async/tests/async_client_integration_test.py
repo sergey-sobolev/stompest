@@ -72,7 +72,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
         self.errorQueueFrame = frame
         client.disconnect()
 
-    def _eatFrame(self, client, frame):
+    def _eatFrame(self, client, frame): # @UnusedVariable
         self.log.debug('Eat message')
         self.consumedFrame = frame
         self.framesHandled += 1
@@ -141,7 +141,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         else:
             raise
 
-        client = async.Stomp(config)  # take a fresh client to prevent replay (we were disconnected by an error)
+        client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
 
         # reconnect and subscribe again - consuming second message then disconnecting
         client = yield client.connect(host=VIRTUALHOST)
@@ -219,7 +219,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
             raise
 
         # reconnect and subscribe again - consuming retried message and disconnecting
-        client = async.Stomp(config)  # take a fresh client to prevent replay (we were disconnected by an error)
+        client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
         client = yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
 
@@ -252,7 +252,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         # reconnect and subscribe again to make sure that all messages in the queue were ack'ed
         client = yield client.connect(host=VIRTUALHOST)
         self.timeExpired = False
-        self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client)  # @UndefinedVariable
+        self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client) # @UndefinedVariable
         client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
 
         # wait for disconnect
@@ -265,7 +265,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         self.msgCount += 1
         if self.msgCount < self.numMsgs:
             d = defer.Deferred()
-            reactor.callLater(1, d.callback, None)  # @UndefinedVariable
+            reactor.callLater(1, d.callback, None) # @UndefinedVariable
             return d
         else:
             client.disconnect(receipt='bye-bye')
@@ -445,5 +445,5 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
 if __name__ == '__main__':
     import sys
     from twisted.scripts import trial
-    sys.argv.extend([sys.argv[0]])
+    sys.argv.extend([sys.argv[0]]) # @UndefinedVariable
     trial.run()

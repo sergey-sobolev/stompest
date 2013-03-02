@@ -6,6 +6,9 @@ from twisted.internet import defer, reactor, task
 from twisted.internet.endpoints import clientFromString
 
 from stompest.error import StompAlreadyRunningError, StompNotRunningError
+from stompest.util import cloneFrame
+
+MESSAGE_FAILED_HEADER = 'message-failed'
 
 class InFlightOperations(collections.MutableMapping):
     def __init__(self, info):
@@ -59,7 +62,7 @@ class WaitingDeferred(defer.Deferred):
     @defer.inlineCallbacks
     def wait(self, timeout=None, fail=None):
         if timeout is not None:
-            timeout = reactor.callLater(timeout, self.errback, fail)  # @UndefinedVariable
+            timeout = reactor.callLater(timeout, self.errback, fail) # @UndefinedVariable
         try:
             result = yield self
         finally:
@@ -89,6 +92,19 @@ def endpointFactory(broker, timeout=None):
     locals().update(broker)
     return clientFromString(reactor, '%(protocol)s:host=%(host)s:port=%(port)d%(timeout)s' % locals())
 
+def sendToErrorDestination(connection, failure, frame, errorDestination):
+    """sendToErrorDestination(failure, frame, errorDestination)
+
+    This is the default error handler for failed **MESSAGE** handlers: forward the offending frame to the error destination (if given) and ack the frame. As opposed to earlier versions, It may be used as a building block for custom error handlers.
+
+    .. seealso :: The **onMessageFailed** argument of the :meth:`~.async.client.Stomp.subscribe` method.
+    """
+    if not errorDestination:
+        return
+    errorFrame = cloneFrame(frame, persistent=True)
+    errorFrame.headers.setdefault(MESSAGE_FAILED_HEADER, str(failure))
+    connection.send(errorDestination, errorFrame.body, errorFrame.headers)
+
 def sendToErrorDestinationAndRaise(client, failure, frame, errorDestination):
-    client.sendToErrorDestination(failure, frame, errorDestination)
+    sendToErrorDestination(client, failure, frame, errorDestination)
     raise failure
