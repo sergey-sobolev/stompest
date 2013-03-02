@@ -4,8 +4,10 @@ import logging
 from twisted.internet import reactor, defer
 
 from stompest.async import Stomp
+from stompest.async.listener import SubscriptionListener
 from stompest.config import StompConfig
 from stompest.protocol import StompSpec
+
 
 class Consumer(object):
     QUEUE = '/queue/testOut'
@@ -26,7 +28,7 @@ class Consumer(object):
             # the maximal number of messages the broker will let you work on at the same time
             'activemq.prefetchSize': '100',
         }
-        stomp.subscribe(self.QUEUE, self.consume, headers, errorDestination=self.ERROR_QUEUE)
+        stomp.subscribe(self.QUEUE, headers, listener=SubscriptionListener(self.consume, errorDestination=self.ERROR_QUEUE))
 
     def consume(self, client, frame):
         """

@@ -141,8 +141,9 @@ class StompSessionTest(unittest.TestCase):
         self.assertEquals(subscriptions, [('bla1', headers, '4711', None), ('bla2', headersWithId1, None, None), ('bla2', headersWithId2, None, None)])
         self.assertEquals(list(session.replay()), [])
 
-        session.subscribe('bla2', headersWithId2)
-        self.assertEquals(list(session.replay()), [('bla2', headersWithId2, None, None)])
+        context = object()
+        session.subscribe('bla2', headersWithId2, context=context)
+        self.assertEquals(list(session.replay()), [('bla2', headersWithId2, None, context)])
         session.subscribe('bla2', headersWithId2)
         self.assertRaises(StompProtocolError, session.subscribe, 'bla2', headersWithId2)
         self.assertEquals(list(session.replay()), [('bla2', headersWithId2, None, None)])

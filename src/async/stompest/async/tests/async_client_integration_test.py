@@ -8,6 +8,7 @@ from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import StompSpec
+from stompest.async.listener import SubscriptionListener
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
@@ -131,7 +132,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         # use selector to guarantee message order.  AMQ doesn't guarantee order by default
         headers = {StompSpec.SELECTOR_HEADER: "food='barf'"}
         headers.update(defaultHeaders)
-        client.subscribe(self.queue, self._saveFrameAndBarf, headers, errorDestination=self.errorQueue, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
+        client.subscribe(self.queue, headers, listener=SubscriptionListener(self._saveFrameAndBarf, errorDestination=self.errorQueue, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise))
 
         # client disconnected and returned error
         try:
@@ -146,14 +147,14 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         # reconnect and subscribe again - consuming second message then disconnecting
         client = yield client.connect(host=VIRTUALHOST)
         headers.pop('selector')
-        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, headers, errorDestination=self.errorQueue)
+        client.subscribe(self.queue, headers, listener=SubscriptionListener(self._eatOneFrameAndDisconnect, errorDestination=self.errorQueue))
 
         # client disconnects without error
         yield client.disconnected
 
         # reconnect and subscribe to error queue
         client = yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, defaultHeaders)
+        client.subscribe(self.errorQueue, defaultHeaders, listener=SubscriptionListener(self._saveErrorFrameAndDisconnect))
 
         # wait for disconnect
         yield client.disconnected
@@ -181,14 +182,14 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client.send(self.queue, self.frame2)
 
         # barf on first frame, disconnect on second frame
-        client.subscribe(self.queue, self._barfOneEatOneAndDisonnect, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, errorDestination=self.errorQueue)
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._barfOneEatOneAndDisonnect, errorDestination=self.errorQueue))
 
         # client disconnects without error
         yield client.disconnected
 
         # reconnect and subscribe to error queue
         client = yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.errorQueue, self._saveErrorFrameAndDisconnect, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        client.subscribe(self.errorQueue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._saveErrorFrameAndDisconnect))
 
         # wait for disconnect
         yield client.disconnected
@@ -208,7 +209,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         yield client.connect(host=VIRTUALHOST)
         # barf on first frame (implicit disconnect)
-        client.subscribe(self.queue, self._saveFrameAndBarf, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, ack=False, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise)
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._saveFrameAndBarf, ack=False, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise))
 
         # client disconnected and returned error
         try:
@@ -221,7 +222,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         # reconnect and subscribe again - consuming retried message and disconnecting
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
         client = yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatOneFrameAndDisconnect))
 
         # client disconnects without error
         yield client.disconnected
@@ -244,7 +245,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         # connect
         client = yield client.connect(host=VIRTUALHOST)
         yield task.cooperate(iter([client.send(self.queue, self.frame, receipt='message-%d' % j) for j in xrange(self.numMsgs)])).whenDone()
-        client.subscribe(self.queue, self._frameHandler, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._frameHandler))
 
         # wait for disconnect
         yield client.disconnected
@@ -253,7 +254,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         client = yield client.connect(host=VIRTUALHOST)
         self.timeExpired = False
         self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client) # @UndefinedVariable
-        client.subscribe(self.queue, self._eatOneFrameAndDisconnect, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatOneFrameAndDisconnect))
 
         # wait for disconnect
         yield client.disconnected
@@ -286,7 +287,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
 
         client = yield client.connect(host=VIRTUALHOST)
 
-        token = yield client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        token = yield client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatFrame))
         client.send(self.queue, self.frame)
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -296,7 +297,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         yield task.deferLater(reactor, 0.2, lambda: None)
         self.assertEquals(self.framesHandled, 1)
 
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatFrame))
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
         yield client.disconnect()
@@ -307,7 +308,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
 
         client = async.Stomp(config)
         client = yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatFrame))
         client.send(self.queue, self.frame)
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -354,7 +355,7 @@ class NackTestCase(AsyncClientBaseTestCase):
             print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (version, e)
             defer.returnValue(None)
 
-        client.subscribe(self.queue, self._nackFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, ack=False)
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._nackFrame, ack=False))
         client.send(self.queue, self.frame)
         while not self.framesHandled:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -367,7 +368,7 @@ class NackTestCase(AsyncClientBaseTestCase):
 
         self.framesHandled = 0
         client = yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, ack=True)
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, SubscriptionListener(self._eatFrame, ack=True))
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
@@ -382,7 +383,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
         yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, ack=True)
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._eatFrame, ack=True))
 
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
@@ -403,7 +404,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
         yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.queue, self._eatFrame, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, ack=True)
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._eatFrame, ack=True))
 
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)

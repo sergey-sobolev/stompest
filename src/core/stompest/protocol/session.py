@@ -303,6 +303,13 @@ class StompSession(object):
         for (_, destination, headers, receipt, context) in sorted(subscriptions.itervalues()):
             yield destination, headers, receipt, context
 
+    def subscription(self, token):
+        """For a given subscription token, obtain the corresponding subscription context.
+        
+        :param token: The result of the :meth:`subscribe` method call which you used to initiate the subscription in question.
+        """
+        return self._subscriptions[token][-1]
+
     # helpers
 
     def _flush(self):

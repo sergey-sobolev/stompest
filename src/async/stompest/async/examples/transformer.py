@@ -4,6 +4,7 @@ import logging
 from twisted.internet import reactor, defer
 
 from stompest.async import Stomp
+from stompest.async.listener import SubscriptionListener
 from stompest.config import StompConfig
 from stompest.protocol import StompSpec
 
@@ -27,7 +28,7 @@ class IncrementTransformer(object):
             # the maximal number of messages the broker will let you work on at the same time
             'activemq.prefetchSize': '100',
         }
-        client.subscribe(self.IN_QUEUE, self.addOne, headers, errorDestination=self.ERROR_QUEUE)
+        client.subscribe(self.IN_QUEUE, headers, listener=SubscriptionListener(self.addOne, errorDestination=self.ERROR_QUEUE))
 
     def addOne(self, client, frame):
         """

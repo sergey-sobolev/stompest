@@ -27,17 +27,17 @@ API
 ---
 """
 import logging
-import time
 
-from twisted.internet import defer, task, reactor
+from twisted.internet import defer, task
 
 from stompest.error import StompCancelledError, StompConnectionError, StompFrameError, StompProtocolError, \
     StompAlreadyRunningError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
+from .listener import HeartBeatListener
 from .protocol import StompProtocolCreator
-from .util import InFlightOperations, exclusive, sendToErrorDestination
+from .util import InFlightOperations, exclusive
 
 LOG_CATEGORY = __name__
 
@@ -84,9 +84,7 @@ class Stomp(object):
         }
 
         self._listeners = []
-
-        for listener in [HeartBeatListener(heartBeatThresholds), SubscriptionListener()]:
-            self.add(listener)
+        self.add(HeartBeatListener(heartBeatThresholds))
 
     def add(self, listener):
         if listener not in self._listeners:
@@ -284,23 +282,18 @@ class Stomp(object):
 
     @connected
     @defer.inlineCallbacks
-    def subscribe(self, destination, handler, headers=None, receipt=None, ack=True, errorDestination=None, onMessageFailed=None):
-        """subscribe(destination, handler, headers=None, receipt=None, ack=True, errorDestination=None, onMessageFailed=None)
+    def subscribe(self, destination, headers=None, receipt=None, listener=None):
+        """subscribe(destination, headers=None, receipt=None, listener=None)
 
+        :param listener: An optional :class:`~.Listener` object which handles events associated to this subscription.
+        
         Send a **SUBSCRIBE** frame to subscribe to a STOMP destination. This method returns a :class:`twisted.internet.defer.Deferred` object which will fire with a token when a possibly requested **RECEIPT** frame has arrived. The callback value is a token which is used internally to match incoming **MESSAGE** frames and must be kept if you wish to :meth:`~.async.client.Stomp.unsubscribe` later.
-
-        :param handler: A callable :obj:`f(client, frame)` which accepts this client and the received :class:`~.StompFrame`.
-        :param ack: Check this option if you wish the client to automatically ack MESSAGE frames when the were handled (successfully or not).
-        :param errorDestination: If a frame was not handled successfully, forward a copy of the offending frame to this destination. Example: ``errorDestination='/queue/back-to-square-one'``
-        :param onMessageFailed: You can specify a custom error handler which must be a callable with signature :obj:`f(self, failure, frame, errorDestination)`. Note that a non-trivial choice of this error handler overrides the default behavior (forward frame to error destination and ack it).
-
-        .. note :: As opposed to the behavior of stompest 1.x, the client will not disconnect when a message could not be handled. Rather, a disconnect will only be triggered in a "panic" situation when also the error handler failed. The automatic disconnect was partly a substitute for the missing NACK command in STOMP 1.0. If you wish to automatically disconnect, you have to implement the **onMessageFailed** hook.
         """
-        if not callable(handler):
-            raise ValueError('Cannot subscribe (handler is missing): %s' % handler)
-        frame, token = self.session.subscribe(destination, headers, receipt, {'handler': handler, 'errorDestination': errorDestination, 'onMessageFailed': onMessageFailed})
+        frame, token = self.session.subscribe(destination, headers, receipt, listener)
+        if listener:
+            self.add(listener)
         for listener in self._listeners:
-            listener.onSubscribe(self, frame, token, destination, handler, ack, errorDestination, onMessageFailed)
+            listener.onSubscribe(self, frame, listener)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
         defer.returnValue(token)
@@ -314,9 +307,10 @@ class Stomp(object):
 
         :param token: The result of the :meth:`~.async.client.Stomp.subscribe` command which initiated the subscription in question.
         """
+        context = self.session.subscription(token)
         frame = self.session.unsubscribe(token, receipt)
         for listener in self._listeners:
-            listener.onUnsubscribe(self, frame, token)
+            listener.onUnsubscribe(self, frame, context)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
 
@@ -373,11 +367,12 @@ class Stomp(object):
         except:
             self.log.error('[%s] Ignoring message (no handler found): %s' % (messageId, frame.info()))
             defer.returnValue(None)
+        context = self.session.subscription(token)
 
         with self._messages(messageId, self.log):
             try:
                 for listener in self._listeners:
-                    yield listener.onMessage(self, frame, token)
+                    yield listener.onMessage(self, frame, context)
             except Exception as e:
                 if not self._disconnecting:
                     self.disconnect(failure=e)
@@ -441,7 +436,7 @@ class Stomp(object):
     def _replay(self):
         for (destination, headers, receipt, context) in self.session.replay():
             self.log.info('Replaying subscription: %s' % headers)
-            self.subscribe(destination, headers=headers, receipt=receipt, **context)
+            self.subscribe(destination, headers=headers, receipt=receipt, listener=context)
 
     @defer.inlineCallbacks
     def _waitForReceipt(self, receipt):
@@ -450,120 +445,4 @@ class Stomp(object):
         with self._receipts(receipt, self.log) as receiptArrived:
             timeout = self._receiptTimeout
             yield receiptArrived.wait(timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, timeout)))
-
-class Listener(object):
-    # TODO: add more events to this interface
-
-    def onConnected(self, connection, frame):
-        pass
-
-    def onConnectionLost(self, connection, reason):
-        pass
-
-    def onFrame(self, connection, frame): # @UnusedVariable
-        pass
-
-    def onMessage(self, connection, frame, token): # @UnusedVariable
-        pass
-
-    def onSend(self, connection, frame):
-        pass
-
-    def onSubscribe(self, connection, frame, token, destination, handler, ack, errorDestination, onMessageFailed):
-        pass
-
-    def onUnsubscribe(self, connection, frame, token): # @UnusedVariable
-        pass
-
-class SubscriptionListener(Listener):
-    DEFAULT_ACK_MODE = 'client-individual'
-
-    def __init__(self):
-        self._subscriptions = {}
-
-    def onSubscribe(self, connection, frame, token, destination, handler, ack, errorDestination, onMessageFailed): # @UnusedVariable
-        ack = ack and (frame.headers.setdefault(StompSpec.ACK_HEADER, self.DEFAULT_ACK_MODE) in StompSpec.CLIENT_ACK_MODES)
-        self._subscriptions[token] = {'destination': destination, 'handler': handler, 'ack': ack, 'errorDestination': errorDestination, 'onMessageFailed': onMessageFailed}
-
-    def onUnsubscribe(self, connection, frame, token): # @UnusedVariable
-        try:
-            self._subscriptions.pop(token)
-        except KeyError:
-            self.log.warning('Cannot unsubscribe (subscription id unknown): %s=%s' % token)
-            raise
-
-    @defer.inlineCallbacks
-    def onMessage(self, connection, frame, token):
-        try:
-            subscription = self._subscriptions[token]
-        except KeyError:
-            messageId = frame.headers[StompSpec.MESSAGE_ID_HEADER]
-            self.log.error('[%s] Ignoring message (no handler found): %s' % (messageId, frame.info()))
-            defer.returnValue(None)
-
-        try:
-            yield subscription['handler'](connection, frame)
-        except Exception as e:
-            yield self._onMessageFailed(connection, e, frame, subscription)
-        finally:
-            if subscription['ack']:
-                connection.ack(frame)
-
-    #
-    # hook for MESSAGE frame error handling
-    #
-    def _onMessageFailed(self, connection, failure, frame, subscription):
-        onMessageFailed = subscription['onMessageFailed'] or sendToErrorDestination
-        return onMessageFailed(connection, failure, frame, subscription['errorDestination'])
-
-class HeartBeatListener(Listener):
-    DEFAULT_THRESHOLDS = {'client': 0.8, 'server': 2.0}
-
-    def __init__(self, thresholds=None):
-        """
-        :param thresholds: tolerance thresholds (relative to the negotiated heart-beat periods). The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: ``{'client': 0.6, 'server' 2.5}`` means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.
-        """
-        self._thresholds = thresholds or self.DEFAULT_THRESHOLDS
-        self._heartBeats = {}
-
-    def onConnected(self, connection, frame): # @UnusedVariable
-        self._beats(connection)
-
-    def onConnectionLost(self, connection, reason): # @UnusedVariable
-        self._beats(connection)
-
-    def onFrame(self, connection, frame): # @UnusedVariable
-        connection.session.received()
-
-    def onSend(self, connection, frame): # @UnusedVariable
-        connection.session.sent()
-
-    def _beats(self, connection):
-        for which in ('client', 'server'):
-            self._beat(connection, which)
-
-    def _beat(self, connection, which):
-        try:
-            self._heartBeats.pop(which).cancel()
-        except:
-            pass
-        remaining = self._beatRemaining(connection.session, which)
-        if remaining < 0:
-            return
-        if not remaining:
-            if which == 'client':
-                connection.sendFrame(connection.session.beat())
-                remaining = self._beatRemaining(connection.session, which)
-            else:
-                connection.disconnect(failure=StompConnectionError('Server heart-beat timeout'))
-                return
-        self._heartBeats[which] = reactor.callLater(remaining, self._beat, connection, which) # @UndefinedVariable
-
-    def _beatRemaining(self, session, which):
-        heartBeat = {'client': session.clientHeartBeat, 'server': session.serverHeartBeat}[which]
-        if not heartBeat:
-            return -1
-        last = {'client': session.lastSent, 'server': session.lastReceived}[which]
-        elapsed = time.time() - last
-        return max((self._thresholds[which] * heartBeat / 1000.0) - elapsed, 0)
 
