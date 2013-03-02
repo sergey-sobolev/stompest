@@ -61,12 +61,10 @@ class Stomp(object):
 
     DEFAULT_ACK_MODE = 'client-individual'
     MESSAGE_FAILED_HEADER = 'message-failed'
-    DEFAULT_HEART_BEAT_THRESHOLDS = {'client': 0.8, 'server': 2.0}
 
     def __init__(self, config, receiptTimeout=None, heartBeatThresholds=None):
         self._config = config
         self._receiptTimeout = receiptTimeout
-        self._heartBeatThresholds = heartBeatThresholds or self.DEFAULT_HEART_BEAT_THRESHOLDS
 
         self._session = StompSession(self._config.version, self._config.check)
         self._protocol = None
@@ -90,7 +88,15 @@ class Stomp(object):
         }
         self._subscriptions = {}
 
-        self._heartBeats = {}
+        self._listeners = []
+        self._listeners.append(HeartBeatListener(heartBeatThresholds))
+
+    def add(self, listener):
+        if listener not in self._listeners:
+            self._listeners.append(listener)
+
+    def remove(self, listener):
+        self._listeners.remove(listener)
 
     @property
     def disconnected(self):
@@ -109,8 +115,9 @@ class Stomp(object):
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.async.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
+        for listener in self._listeners:
+            listener.onSend(self, frame)
         self._protocol.send(frame)
-        self.session.sent()
 
     #
     # STOMP commands
@@ -320,7 +327,8 @@ class Stomp(object):
     # callbacks for received STOMP frames
     #
     def _onFrame(self, frame):
-        self.session.received()
+        for listener in self._listeners:
+            listener.onFrame(self, frame)
         if not frame:
             return
         try:
@@ -329,11 +337,13 @@ class Stomp(object):
             raise StompFrameError('Unknown STOMP command: %s' % repr(frame))
         handler(frame)
 
+    @defer.inlineCallbacks
     def _onConnected(self, frame):
         self.session.connected(frame)
         self.log.info('Connected to stomp broker [session=%s, version=%s]' % (self.session.id, self.session.version))
         self._protocol.setVersion(self.session.version)
-        self._beats()
+        for listener in self._listeners:
+            yield listener.onConnected(self, frame)
         self._connecting[None].callback(None)
 
     def _onError(self, frame):
@@ -428,41 +438,12 @@ class Stomp(object):
     def _disconnectReason(self, reason):
         if reason:
             self.log.error(str(reason))
-            reason = self._disconnectReason or reason  # existing reason wins
+            reason = self._disconnectReason or reason # existing reason wins
         self.__disconnectReason = reason
 
     #
     # private helpers
     #
-
-    def _beat(self, which):
-        try:
-            self._heartBeats.pop(which).cancel()
-        except:
-            pass
-        remaining = self._beatRemaining(which)
-        if remaining < 0:
-            return
-        if not remaining:
-            if which == 'client':
-                self.sendFrame(self.session.beat())
-                remaining = self._beatRemaining(which)
-            else:
-                self.disconnect(failure=StompConnectionError('Server heart-beat timeout'))
-                return
-        self._heartBeats[which] = reactor.callLater(remaining, self._beat, which)  # @UndefinedVariable
-
-    def _beatRemaining(self, which):
-        heartBeat = {'client': self.session.clientHeartBeat, 'server': self.session.serverHeartBeat}[which]
-        if not heartBeat:
-            return -1
-        last = {'client': self.session.lastSent, 'server': self.session.lastReceived}[which]
-        elapsed = time.time() - last
-        return max((self._heartBeatThresholds[which] * heartBeat / 1000.0) - elapsed, 0)
-
-    def _beats(self):
-        for which in ('client', 'server'):
-            self._beat(which)
 
     def _createHandler(self, handler):
         @functools.wraps(handler)
@@ -476,7 +457,8 @@ class Stomp(object):
         if not self._disconnecting:
             self._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
         self.session.close(flush=not self._disconnectReason)
-        self._beats()
+        for listener in self._listeners:
+            listener.onConnectionLost(self, reason)
         for operations in (self._connecting, self._messages, self._receipts):
             for waiting in operations.values():
                 if not waiting.called:
@@ -504,3 +486,70 @@ class Stomp(object):
         with self._receipts(receipt, self.log) as receiptArrived:
             timeout = self._receiptTimeout
             yield receiptArrived.wait(timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, timeout)))
+
+class Listener(object):
+    # TODO: add more events to this interface
+
+    def onConnected(self, connection, frame):
+        pass
+
+    def onConnectionLost(self, connection, reason):
+        pass
+
+    def onFrame(self, connection, frame):
+        pass
+
+    def onSend(self, connection, frame):
+        pass
+
+class HeartBeatListener(object):
+    DEFAULT_THRESHOLDS = {'client': 0.8, 'server': 2.0}
+
+    def __init__(self, thresholds=None):
+        """
+        :param thresholds: tolerance thresholds (relative to the negotiated heart-beat periods). The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: ``{'client': 0.6, 'server' 2.5}`` means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.
+        """
+        self._thresholds = thresholds or self.DEFAULT_THRESHOLDS
+        self._heartBeats = {}
+
+    def onConnected(self, connection, frame): # @UnusedVariable
+        self._beats(connection)
+
+    def onConnectionLost(self, connection, reason): # @UnusedVariable
+        self._beats(connection)
+
+    def onFrame(self, connection, frame): # @UnusedVariable
+        connection.session.received()
+
+    def onSend(self, connection, frame): # @UnusedVariable
+        connection.session.sent()
+
+    def _beats(self, connection):
+        for which in ('client', 'server'):
+            self._beat(connection, which)
+
+    def _beat(self, connection, which):
+        try:
+            self._heartBeats.pop(which).cancel()
+        except:
+            pass
+        remaining = self._beatRemaining(connection.session, which)
+        if remaining < 0:
+            return
+        if not remaining:
+            if which == 'client':
+                connection.sendFrame(connection.session.beat())
+                remaining = self._beatRemaining(connection.session, which)
+            else:
+                connection.disconnect(failure=StompConnectionError('Server heart-beat timeout'))
+                return
+        self._heartBeats[which] = reactor.callLater(remaining, self._beat, connection, which) # @UndefinedVariable
+
+    def _beatRemaining(self, session, which):
+        heartBeat = {'client': session.clientHeartBeat, 'server': session.serverHeartBeat}[which]
+        if not heartBeat:
+            return -1
+        last = {'client': session.lastSent, 'server': session.lastReceived}[which]
+        elapsed = time.time() - last
+        return max((self._thresholds[which] * heartBeat / 1000.0) - elapsed, 0)
+
