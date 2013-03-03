@@ -34,7 +34,7 @@ from stompest.error import StompCancelledError, StompConnectionError, StompFrame
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
-from .listener import ConnectListener
+from .listener import ConnectListener, DisconnectListener
 from .protocol import StompProtocolCreator
 from .util import InFlightOperations, exclusive
 
@@ -142,10 +142,9 @@ class Stomp(object):
             self.log.error('Endpoint connect failed')
             raise
 
-        self._disconnected = defer.Deferred()
-        self._disconnectReason = None
-
-        self.add(ConnectListener(connectedTimeout)) # TODO: replace connectedTimeout parameter by ConnectListener parameter
+        # disconnect listener must be added first (it must handle connect errors)
+        self.add(DisconnectListener()) # TODO: pass DisconnectListener parameter to self.connect()
+        self.add(ConnectListener(connectedTimeout)) # TODO: pass ConnectListener parameter to self.connect()
         try:
             self.sendFrame(frame)
             for listener in list(self._listeners):
@@ -195,11 +194,10 @@ class Stomp(object):
                     yield self._waitForReceipt(receipt)
                 except StompCancelledError:
                     self._disconnectReason = StompCancelledError('Receipt for disconnect command did not arrive on time.')
-
-            protocol.loseConnection()
-
         except Exception as e:
             self._disconnectReason = e
+        finally:
+            protocol.loseConnection()
 
     @connected
     @defer.inlineCallbacks
@@ -346,10 +344,7 @@ class Stomp(object):
                 for listener in list(self._listeners):
                     yield listener.onMessage(self, frame, context)
             except Exception as e:
-                try:
-                    self.disconnect(failure=e)
-                except:
-                    self.log.exception('')
+                self.disconnect(failure=e)
 
     def _onReceipt(self, frame):
         receipt = self.session.receipt(frame)
@@ -386,22 +381,13 @@ class Stomp(object):
 
     def _onConnectionLost(self, reason):
         self._protocol = None
-        for listener in list(self._listeners):
-            listener.onConnectionLost(self, reason)
-        self.session.close(flush=not self._disconnectReason)
         for operations in (self._messages, self._receipts):
             for waiting in operations.values():
                 if not waiting.called:
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
                     waiting.addErrback(lambda _: None)
-        if self._disconnectReason:
-            self.log.debug('Calling disconnected errback: %s' % self._disconnectReason)
-            self._disconnected.errback(self._disconnectReason)
-        else:
-            self.log.debug('Calling disconnected callback')
-            self._disconnected.callback(None)
-        self._disconnectReason = None
-        self._disconnected = None
+        for listener in list(self._listeners):
+            listener.onConnectionLost(self, reason)
 
     def _replay(self):
         for (destination, headers, receipt, context) in self.session.replay():

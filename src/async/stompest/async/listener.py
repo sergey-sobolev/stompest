@@ -50,7 +50,6 @@ class ConnectListener(Listener):
 
     @defer.inlineCallbacks
     def onConnect(self, connection, frame): # @UnusedVariable
-        connection.add(DisconnectListener())
         self._waiting = WaitingDeferred()
         yield self._waiting.wait(self._connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % self._connectedTimeout))
 
@@ -79,12 +78,26 @@ class DisconnectListener(Listener):
         self._disconnecting = False
         self.log = logging.getLogger(LOG_CATEGORY)
 
-    def onConnectionLost(self, connection, reason): # @UnusedVariable
+    def onConnect(self, connection, frame): # @UnusedVariable
+        connection._disconnectReason = None
+        connection._disconnected = defer.Deferred()
+
+    def onConnectionLost(self, connection, reason):
         self.log.info('Disconnected: %s' % reason.getErrorMessage())
-        connection.remove(self)
         if not self._disconnecting:
             connection._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
+        connection.session.close(flush=not connection._disconnectReason)
+        connection.remove(self)
         self._disconnecting = False
+
+        if connection._disconnectReason:
+            # self.log.debug('Calling disconnected errback: %s' % self._disconnectReason)
+            connection._disconnected.errback(connection._disconnectReason)
+        else:
+            # self.log.debug('Calling disconnected callback')
+            connection._disconnected.callback(None)
+        connection._disconnectReason = None
+        connection._disconnected = None
 
     def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
         if self._disconnecting:
