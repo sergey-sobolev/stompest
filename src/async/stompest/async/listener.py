@@ -1,13 +1,15 @@
+import logging
 import time
 
 from twisted.internet import defer, reactor
 
-from stompest.error import StompConnectionError, StompCancelledError, \
-    StompProtocolError
-from stompest.protocol.spec import StompSpec
+from stompest.error import StompAlreadyRunningError, StompConnectionError, StompCancelledError, StompProtocolError
+from stompest.protocol import StompSpec
 
 from .util import sendToErrorDestination
 from stompest.async.util import WaitingDeferred
+
+LOG_CATEGORY = __name__
 
 class Listener(object):
     # TODO: add more events to this interface
@@ -19,6 +21,9 @@ class Listener(object):
         pass
 
     def onConnectionLost(self, connection, reason):
+        pass
+
+    def onDisconnect(self, connection, failure, timeout):
         pass
 
     def onError(self, connection, frame):
@@ -45,6 +50,7 @@ class ConnectListener(Listener):
 
     @defer.inlineCallbacks
     def onConnect(self, connection, frame): # @UnusedVariable
+        connection.add(DisconnectListener())
         self._waiting = WaitingDeferred()
         yield self._waiting.wait(self._connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % self._connectedTimeout))
 
@@ -68,6 +74,37 @@ class ErrorListener(Listener):
     def onConnectionLost(self, connection, reason): # @UnusedVariable
         connection.remove(self)
 
+class DisconnectListener(Listener):
+    def __init__(self):
+        self._disconnecting = False
+        self.log = logging.getLogger(LOG_CATEGORY)
+
+    def onConnectionLost(self, connection, reason): # @UnusedVariable
+        self.log.info('Disconnected: %s' % reason.getErrorMessage())
+        connection.remove(self)
+        if not self._disconnecting:
+            connection._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
+        self._disconnecting = False
+
+    def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
+        if self._disconnecting:
+            raise StompAlreadyRunningError('Already disconnecting')
+        self._disconnecting = True
+        if failure:
+            connection._disconnectReason = failure
+        self.log.info('Disconnecting ...%s' % ('' if (not failure) else  ('[reason=%s]' % failure)))
+
+    @defer.inlineCallbacks
+    def onMessage(self, connection, frame, context): # @UnusedVariable
+        if not self._disconnecting:
+            defer.returnValue(None)
+        self.log.info('[%s] Ignoring message (disconnecting)' % frame[StompSpec.MESSAGE_ID_HEADER])
+        try:
+            yield connection.nack(frame)
+        except StompProtocolError:
+            pass
+        defer.returnValue(None)
+
 class SubscriptionListener(Listener):
     """This event handler corresponds to a STOMP subscription.
     
@@ -89,6 +126,9 @@ class SubscriptionListener(Listener):
         self._errorDestination = errorDestination
         self._onMessageFailed = onMessageFailed or sendToErrorDestination
         self._headers = None
+
+    def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
+        connection.remove(self)
 
     @defer.inlineCallbacks
     def onMessage(self, connection, frame, context):
@@ -143,11 +183,14 @@ class HeartBeatListener(Listener):
     def __init__(self, thresholds=None):
         self._thresholds = thresholds or self.DEFAULT_THRESHOLDS
         self._heartBeats = {}
+        self._connected = False
 
     def onConnected(self, connection, frame): # @UnusedVariable
+        self._connected = True
         self._beats(connection)
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
+        self._connected = False
         self._beats(connection)
 
     def onFrame(self, connection, frame): # @UnusedVariable
@@ -165,6 +208,8 @@ class HeartBeatListener(Listener):
             self._heartBeats.pop(which).cancel()
         except:
             pass
+        if not self._connected:
+            return
         remaining = self._beatRemaining(connection.session, which)
         if remaining < 0:
             return

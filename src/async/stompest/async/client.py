@@ -30,8 +30,7 @@ import logging
 
 from twisted.internet import defer, task
 
-from stompest.error import StompCancelledError, StompConnectionError, StompFrameError, StompProtocolError, \
-    StompAlreadyRunningError
+from stompest.error import StompCancelledError, StompConnectionError, StompFrameError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
@@ -106,7 +105,7 @@ class Stomp(object):
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.async.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             listener.onSend(self, frame)
         self._protocol.send(frame)
 
@@ -149,10 +148,9 @@ class Stomp(object):
         self.add(ConnectListener(connectedTimeout)) # TODO: replace connectedTimeout parameter by ConnectListener parameter
         try:
             self.sendFrame(frame)
-            for listener in self._listeners:
+            for listener in list(self._listeners):
                 yield listener.onConnect(self, frame)
         except Exception as e:
-            self.log.error('Could not establish STOMP session. Disconnecting ...')
             yield self.disconnect(failure=e)
 
         self._replay()
@@ -170,18 +168,13 @@ class Stomp(object):
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. Only one disconnect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
-        if self._disconnecting:
-            raise StompAlreadyRunningError('Already disconnecting')
-        self._disconnecting = True
         self._disconnect(receipt, failure, timeout)
         return self.disconnected
 
     @defer.inlineCallbacks
     def _disconnect(self, receipt, failure, timeout):
-        if failure:
-            self._disconnectReason = failure
-
-        self.log.info('Disconnecting ...%s' % ('' if (not failure) else  ('[reason=%s]' % failure)))
+        for listener in list(self._listeners):
+            yield listener.onDisconnect(self, failure, timeout)
         protocol = self._protocol
         try:
             # notify that we are ready to disconnect after outstanding messages are ack'ed
@@ -289,7 +282,7 @@ class Stomp(object):
         frame, token = self.session.subscribe(destination, headers, receipt, listener)
         if listener:
             self.add(listener)
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             listener.onSubscribe(self, frame, listener)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
@@ -306,7 +299,7 @@ class Stomp(object):
         """
         context = self.session.subscription(token)
         frame = self.session.unsubscribe(token, receipt)
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             listener.onUnsubscribe(self, frame, context)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
@@ -316,7 +309,7 @@ class Stomp(object):
     #
     @defer.inlineCallbacks
     def _onFrame(self, frame):
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             yield listener.onFrame(self, frame)
         if not frame:
             return
@@ -331,26 +324,18 @@ class Stomp(object):
         self.session.connected(frame)
         self.log.info('Connected to stomp broker [session=%s, version=%s]' % (self.session.id, self.session.version))
         self._protocol.setVersion(self.session.version)
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             yield listener.onConnected(self, frame)
 
     @defer.inlineCallbacks
     def _onError(self, frame):
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             yield listener.onError(self, frame)
 
     @defer.inlineCallbacks
     def _onMessage(self, frame):
         headers = frame.headers
         messageId = headers[StompSpec.MESSAGE_ID_HEADER]
-
-        if self._disconnecting:
-            self.log.info('[%s] Ignoring message (disconnecting)' % messageId)
-            try:
-                yield self.nack(frame)
-            except StompProtocolError:
-                pass
-            defer.returnValue(None)
 
         try:
             token = self.session.message(frame)
@@ -361,11 +346,13 @@ class Stomp(object):
 
         with self._messages(messageId, self.log):
             try:
-                for listener in self._listeners:
+                for listener in list(self._listeners):
                     yield listener.onMessage(self, frame, context)
             except Exception as e:
-                if not self._disconnecting:
+                try:
                     self.disconnect(failure=e)
+                except:
+                    self.log.exception('')
 
     def _onReceipt(self, frame):
         receipt = self.session.receipt(frame)
@@ -402,24 +389,20 @@ class Stomp(object):
 
     def _onConnectionLost(self, reason):
         self._protocol = None
-        self.log.info('Disconnected: %s' % reason.getErrorMessage())
-        if not self._disconnecting:
-            self._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
-        self.session.close(flush=not self._disconnectReason)
-        for listener in self._listeners:
+        for listener in list(self._listeners):
             listener.onConnectionLost(self, reason)
+        self.session.close(flush=not self._disconnectReason)
         for operations in (self._messages, self._receipts):
             for waiting in operations.values():
                 if not waiting.called:
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
                     waiting.addErrback(lambda _: None)
         if self._disconnectReason:
-            # self.log.debug('Calling disconnected deferred errback: %s' % self._disconnectReason)
+            self.log.debug('Calling disconnected errback: %s' % self._disconnectReason)
             self._disconnected.errback(self._disconnectReason)
         else:
-            # self.log.debug('Calling disconnected deferred callback')
+            self.log.debug('Calling disconnected callback')
             self._disconnected.callback(None)
-        self._disconnecting = False
         self._disconnectReason = None
         self._disconnected = None
 
