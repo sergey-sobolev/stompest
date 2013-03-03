@@ -37,6 +37,7 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
     protocols = [BlackHoleStompServer]
     TIMEOUT = 0.02
 
+    @defer.inlineCallbacks
     def test_connection_timeout(self):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='tcp://localhost:%d' % port)
@@ -48,6 +49,7 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
         else:
             raise
 
+    @defer.inlineCallbacks
     def test_connection_timeout_after_failover(self):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='failover:(tcp://nosuchhost:65535,tcp://localhost:%d)?startupMaxReconnectAttempts=2,initialReconnectDelay=0,randomize=false' % port)

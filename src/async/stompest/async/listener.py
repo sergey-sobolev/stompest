@@ -2,18 +2,26 @@ import time
 
 from twisted.internet import defer, reactor
 
-from stompest.error import StompConnectionError
+from stompest.error import StompConnectionError, StompCancelledError, \
+    StompProtocolError
 from stompest.protocol.spec import StompSpec
 
 from .util import sendToErrorDestination
+from stompest.async.util import WaitingDeferred
 
 class Listener(object):
     # TODO: add more events to this interface
+
+    def onConnect(self, connection, frame):
+        pass
 
     def onConnected(self, connection, frame):
         pass
 
     def onConnectionLost(self, connection, reason):
+        pass
+
+    def onError(self, connection, frame):
         pass
 
     def onFrame(self, connection, frame):
@@ -30,6 +38,35 @@ class Listener(object):
 
     def onUnsubscribe(self, connection, frame, context):
         pass
+
+class ConnectListener(Listener):
+    def __init__(self, connectedTimeout=None):
+        self._connectedTimeout = connectedTimeout
+
+    @defer.inlineCallbacks
+    def onConnect(self, connection, frame): # @UnusedVariable
+        self._waiting = WaitingDeferred()
+        yield self._waiting.wait(self._connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % self._connectedTimeout))
+
+    def onConnected(self, connection, frame): # @UnusedVariable
+        connection.remove(self)
+        connection.add(ErrorListener())
+        self._waiting.callback(None)
+
+    def onConnectionLost(self, connection, reason):
+        connection.remove(self)
+        if not self._waiting.called:
+            self._waiting.errback(reason)
+
+    def onError(self, connection, frame):
+        self.onConnectionLost(connection, StompProtocolError('While trying to connect, received %s' % frame.info()))
+
+class ErrorListener(Listener):
+    def onError(self, connection, frame):
+        connection.disconnect(failure=StompProtocolError('Received %s' % frame.info()))
+
+    def onConnectionLost(self, connection, reason): # @UnusedVariable
+        connection.remove(self)
 
 class SubscriptionListener(Listener):
     """This event handler corresponds to a STOMP subscription.

@@ -35,6 +35,7 @@ from stompest.error import StompCancelledError, StompConnectionError, StompFrame
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
+from .listener import ConnectListener
 from .protocol import StompProtocolCreator
 from .util import InFlightOperations, exclusive
 
@@ -66,8 +67,6 @@ class Stomp(object):
 
         self.log = logging.getLogger(LOG_CATEGORY)
 
-        # wait for CONNECTED frame
-        self._connecting = InFlightOperations('STOMP session negotiation')
         self._disconnecting = False
 
         # keep track of active handlers for graceful disconnect
@@ -147,10 +146,11 @@ class Stomp(object):
         self._disconnected = defer.Deferred()
         self._disconnectReason = None
 
+        self.add(ConnectListener(connectedTimeout)) # TODO: replace connectedTimeout parameter by ConnectListener parameter
         try:
-            with self._connecting(None, self.log) as connected:
-                self.sendFrame(frame)
-                yield connected.wait(connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % connectedTimeout))
+            self.sendFrame(frame)
+            for listener in self._listeners:
+                yield listener.onConnect(self, frame)
         except Exception as e:
             self.log.error('Could not establish STOMP session. Disconnecting ...')
             yield self.disconnect(failure=e)
@@ -333,18 +333,11 @@ class Stomp(object):
         self._protocol.setVersion(self.session.version)
         for listener in self._listeners:
             yield listener.onConnected(self, frame)
-        self._connecting[None].callback(None)
 
+    @defer.inlineCallbacks
     def _onError(self, frame):
-        if self._connecting:
-            self._connecting[None].errback(StompProtocolError('While trying to connect, received %s' % frame.info()))
-            return
-
-        # Workaround for AMQ < 5.2
-        if 'Unexpected ACK received for message-id' in frame.headers.get('message', ''):
-            self.log.debug('AMQ brokers < 5.2 do not support client-individual mode')
-        else:
-            self.disconnect(failure=StompProtocolError('Received %s' % frame.info()))
+        for listener in self._listeners:
+            yield listener.onError(self, frame)
 
     @defer.inlineCallbacks
     def _onMessage(self, frame):
@@ -415,7 +408,7 @@ class Stomp(object):
         self.session.close(flush=not self._disconnectReason)
         for listener in self._listeners:
             listener.onConnectionLost(self, reason)
-        for operations in (self._connecting, self._messages, self._receipts):
+        for operations in (self._messages, self._receipts):
             for waiting in operations.values():
                 if not waiting.called:
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
