@@ -69,7 +69,6 @@ class Stomp(object):
         self._disconnecting = False
 
         # keep track of active handlers for graceful disconnect
-        self._messages = InFlightOperations('Handler for message')
         self._receipts = InFlightOperations('Waiting for receipt')
 
         self._handlers = {
@@ -142,13 +141,14 @@ class Stomp(object):
             self.log.error('Endpoint connect failed')
             raise
 
-        # disconnect listener must be added first (it must handle connect errors)
+        # TODO: catch repeated calls of self.connect() -> broken
+        # disconnect listener must be added first (it must handle disconnect reasons)
         self.add(DisconnectListener()) # TODO: pass DisconnectListener parameter to self.connect()
         self.add(ConnectListener(connectedTimeout)) # TODO: pass ConnectListener parameter to self.connect()
         try:
             self.sendFrame(frame)
-            for listener in list(self._listeners):
-                yield listener.onConnect(self, frame)
+            yield self._notify(lambda l: l.onConnect(self, frame))
+
         except Exception as e:
             yield self.disconnect(failure=e)
             yield self.disconnected
@@ -167,22 +167,11 @@ class Stomp(object):
         :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
         :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If receipt is :obj:`None`, we will wait indefinitely.
 
-        .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. Only one disconnect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
+        .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
-        for listener in list(self._listeners):
-            yield listener.onDisconnect(self, failure, timeout)
+        yield self._notify(lambda l: l.onDisconnect(self, failure, timeout))
         protocol = self._protocol
         try:
-            # notify that we are ready to disconnect after outstanding messages are ack'ed
-            if self._messages:
-                self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)
-                try:
-                    yield task.cooperate(iter([handler.wait(timeout, StompCancelledError('Going down to disconnect now')) for handler in self._messages.values()])).whenDone()
-                except StompCancelledError as e:
-                    self._disconnectReason = StompCancelledError('Handlers did not finish in time.')
-                else:
-                    self.log.info('All handlers complete. Resuming disconnect ...')
-
             if self.session.state == self.session.CONNECTED:
                 frame = self.session.disconnect(receipt)
                 try:
@@ -277,8 +266,7 @@ class Stomp(object):
         frame, token = self.session.subscribe(destination, headers, receipt, listener)
         if listener:
             self.add(listener)
-        for listener in list(self._listeners):
-            listener.onSubscribe(self, frame, listener)
+        yield self._notify(lambda l: l.onSubscribe(self, frame, l))
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
         defer.returnValue(token)
@@ -294,18 +282,16 @@ class Stomp(object):
         """
         context = self.session.subscription(token)
         frame = self.session.unsubscribe(token, receipt)
-        for listener in list(self._listeners):
-            listener.onUnsubscribe(self, frame, context)
         self.sendFrame(frame)
         yield self._waitForReceipt(receipt)
+        yield self._notify(lambda l: l.onUnsubscribe(self, frame, context))
 
     #
     # callbacks for received STOMP frames
     #
     @defer.inlineCallbacks
     def _onFrame(self, frame):
-        for listener in list(self._listeners):
-            yield listener.onFrame(self, frame)
+        yield self._notify(lambda l: l.onFrame(self, frame))
         if not frame:
             return
         try:
@@ -319,13 +305,11 @@ class Stomp(object):
         self.session.connected(frame)
         self.log.info('Connected to stomp broker [session=%s, version=%s]' % (self.session.id, self.session.version))
         self._protocol.setVersion(self.session.version)
-        for listener in list(self._listeners):
-            yield listener.onConnected(self, frame)
+        yield self._notify(lambda l: l.onConnected(self, frame))
 
     @defer.inlineCallbacks
     def _onError(self, frame):
-        for listener in list(self._listeners):
-            yield listener.onError(self, frame)
+        yield self._notify(lambda l: l.onError(self, frame))
 
     @defer.inlineCallbacks
     def _onMessage(self, frame):
@@ -335,16 +319,15 @@ class Stomp(object):
         try:
             token = self.session.message(frame)
         except:
-            self.log.error('[%s] Ignoring message (no handler found): %s' % (messageId, frame.info()))
+            self.log.error('Ignoring message (no handler found): %s [%s]' % (messageId, frame.info()))
             defer.returnValue(None)
         context = self.session.subscription(token)
 
-        with self._messages(messageId, self.log):
-            try:
-                for listener in list(self._listeners):
-                    yield listener.onMessage(self, frame, context)
-            except Exception as e:
-                self.disconnect(failure=e)
+        try:
+            yield self._notify(lambda l: l.onMessage(self, frame, context))
+        except Exception as e:
+            self.log.error('Disconnecting (error in message handler): %s [%s]' % (messageId, frame.info()))
+            self.disconnect(failure=e)
 
     def _onReceipt(self, frame):
         receipt = self.session.receipt(frame)
@@ -379,9 +362,12 @@ class Stomp(object):
     # private helpers
     #
 
+    def _notify(self, notify):
+        return task.cooperate(notify(listener) for listener in list(self._listeners)).whenDone()
+
     def _onConnectionLost(self, reason):
         self._protocol = None
-        for operations in (self._messages, self._receipts):
+        for operations in (self._receipts,):
             for waiting in operations.values():
                 if not waiting.called:
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
@@ -401,4 +387,3 @@ class Stomp(object):
         with self._receipts(receipt, self.log) as receiptArrived:
             timeout = self._receiptTimeout
             yield receiptArrived.wait(timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, timeout)))
-

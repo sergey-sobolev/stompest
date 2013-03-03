@@ -1,19 +1,17 @@
 import logging
 import time
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer, reactor, task
 
-from stompest.error import StompAlreadyRunningError, StompConnectionError, StompCancelledError, StompProtocolError
+from stompest.error import StompConnectionError, StompCancelledError, StompProtocolError
 from stompest.protocol import StompSpec
 
 from .util import sendToErrorDestination
-from stompest.async.util import WaitingDeferred
+from stompest.async.util import WaitingDeferred, InFlightOperations
 
 LOG_CATEGORY = __name__
 
 class Listener(object):
-    # TODO: add more events to this interface
-
     def onConnect(self, connection, frame):
         pass
 
@@ -101,7 +99,7 @@ class DisconnectListener(Listener):
 
     def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
         if self._disconnecting:
-            raise StompAlreadyRunningError('Already disconnecting')
+            return
         self._disconnecting = True
         if failure:
             connection._disconnectReason = failure
@@ -134,9 +132,21 @@ class SubscriptionListener(Listener):
         self._errorDestination = errorDestination
         self._onMessageFailed = onMessageFailed or sendToErrorDestination
         self._headers = None
+        self._messages = InFlightOperations('Handler for message')
+        self.log = logging.getLogger(LOG_CATEGORY)
 
+    @defer.inlineCallbacks
     def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
         connection.remove(self)
+        if not self._messages:
+            defer.returnValue(None)
+        self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)
+        try:
+            yield task.cooperate(handler.wait(timeout, StompCancelledError('Handlers did not finish in time.')) for handler in self._messages.values()).whenDone()
+        except Exception as e:
+            connection._disconnectReason = e
+        else:
+            self.log.info('All handlers complete. Resuming disconnect ...')
 
     @defer.inlineCallbacks
     def onMessage(self, connection, frame, context):
@@ -145,13 +155,16 @@ class SubscriptionListener(Listener):
         Handle a message originating from this listener's subscription."""
         if context is not self:
             return
-        try:
-            yield self._handler(connection, frame)
-        except Exception as e:
-            yield self._onMessageFailed(connection, e, frame, self._errorDestination)
-        finally:
-            if self._ack and (self._headers[StompSpec.ACK_HEADER] in StompSpec.CLIENT_ACK_MODES):
-                connection.ack(frame)
+        with self._messages(frame.headers[StompSpec.MESSAGE_ID_HEADER], self.log) as waiting:
+            try:
+                yield self._handler(connection, frame)
+            except Exception as e:
+                yield self._onMessageFailed(connection, e, frame, self._errorDestination)
+            finally:
+                if self._ack and (self._headers[StompSpec.ACK_HEADER] in StompSpec.CLIENT_ACK_MODES):
+                    connection.ack(frame)
+                if not waiting.called:
+                    waiting.callback(None)
 
     def onSubscribe(self, connection, frame, context): # @UnusedVariable
         """Set the **ack** header of the **SUBSCRIBE** frame initiating this listener's subscription to the value of the class atrribute :attr:`DEFAULT_ACK_MODE` (if it isn't set already). Keep a copy of the headers for handling messages originating from this subscription."""

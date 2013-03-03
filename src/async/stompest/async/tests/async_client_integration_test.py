@@ -7,7 +7,7 @@ from stompest import async, sync
 from stompest.async.listener import SubscriptionListener, HeartBeatListener
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
-from stompest.error import StompConnectionError, StompProtocolError, StompAlreadyRunningError
+from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import StompSpec
 
 logging.basicConfig(level=logging.DEBUG)
@@ -206,12 +206,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         yield client.connect(host=VIRTUALHOST)
         client.send(self.queue, self.frame1, self.msg1Hdrs)
         disconnecting = client.disconnect()
-        try:
-            yield client.disconnect()
-        except StompAlreadyRunningError:
-            pass
-        else:
-            raise
+        yield client.disconnect()
         yield disconnecting
         yield client.disconnected
         yield client.connect(host=VIRTUALHOST)
