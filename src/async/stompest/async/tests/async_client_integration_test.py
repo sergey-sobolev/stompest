@@ -7,7 +7,7 @@ from stompest import async, sync
 from stompest.async.listener import SubscriptionListener, HeartBeatListener
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
-from stompest.error import StompConnectionError, StompProtocolError
+from stompest.error import StompConnectionError, StompProtocolError, StompAlreadyRunningError
 from stompest.protocol import StompSpec
 
 logging.basicConfig(level=logging.DEBUG)
@@ -205,8 +205,15 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         yield client.connect(host=VIRTUALHOST)
         client.send(self.queue, self.frame1, self.msg1Hdrs)
-        yield client.disconnect()
-
+        disconnecting = client.disconnect()
+        try:
+            yield client.disconnect()
+        except StompAlreadyRunningError:
+            pass
+        else:
+            raise
+        yield disconnecting
+        yield client.disconnected
         yield client.connect(host=VIRTUALHOST)
         # barf on first frame (implicit disconnect)
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._saveFrameAndBarf, ack=False, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise))
@@ -322,8 +329,9 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
+        yield client.disconnect(failure=RuntimeError('Hi'))
         try:
-            yield client.disconnect(failure=RuntimeError('Hi'))
+            yield client.disconnected
         except RuntimeError as e:
             self.assertEquals(str(e), 'Hi')
 
@@ -333,6 +341,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
             yield task.deferLater(reactor, 0.01, lambda: None)
 
         yield client.disconnect()
+        yield client.disconnected
 
 class NackTestCase(AsyncClientBaseTestCase):
     frame = 'test'
@@ -361,6 +370,7 @@ class NackTestCase(AsyncClientBaseTestCase):
             yield task.deferLater(reactor, 0.01, lambda: None)
 
         yield client.disconnect()
+        yield client.disconnected
 
         if BROKER == 'activemq':
             print 'Broker %s by default does not redeliver messages. Will not try and harvest the NACKed message.' % BROKER
@@ -373,6 +383,7 @@ class NackTestCase(AsyncClientBaseTestCase):
             yield task.deferLater(reactor, 0.01, lambda: None)
 
         yield client.disconnect()
+        yield client.disconnected
 
 class TransactionTestCase(AsyncClientBaseTestCase):
     frame = 'test'
@@ -398,6 +409,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
             yield task.deferLater(reactor, 0.01, lambda: None)
         self.assertEquals(self.consumedFrame.body, 'test message with transaction')
         yield client.disconnect()
+        yield client.disconnected
 
     @defer.inlineCallbacks
     def test_transaction_abort(self):

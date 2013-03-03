@@ -94,16 +94,11 @@ class DisconnectListener(Listener):
             connection._disconnectReason = failure
         self.log.info('Disconnecting ...%s' % ('' if (not failure) else  ('[reason=%s]' % failure)))
 
-    @defer.inlineCallbacks
     def onMessage(self, connection, frame, context): # @UnusedVariable
         if not self._disconnecting:
-            defer.returnValue(None)
+            return
         self.log.info('[%s] Ignoring message (disconnecting)' % frame[StompSpec.MESSAGE_ID_HEADER])
-        try:
-            yield connection.nack(frame)
-        except StompProtocolError:
-            pass
-        defer.returnValue(None)
+        connection.nack(frame).addBoth(lambda _: None)
 
 class SubscriptionListener(Listener):
     """This event handler corresponds to a STOMP subscription.

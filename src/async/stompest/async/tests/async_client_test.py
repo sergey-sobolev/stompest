@@ -74,11 +74,17 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
 class AsyncClientConnectErrorTestCase(AsyncClientBaseTestCase):
     protocols = [ErrorOnConnectStompServer]
 
+    @defer.inlineCallbacks
     def test_stomp_protocol_error_on_connect(self):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='tcp://localhost:%d' % port)
         client = Stomp(config)
-        return self.assertFailure(client.connect(), StompProtocolError)
+        try:
+            yield client.connect()
+        except StompProtocolError:
+            pass
+        else:
+            raise
 
 class AsyncClientErrorAfterConnectedTestCase(AsyncClientBaseTestCase):
     protocols = [ErrorOnSendStompServer]
@@ -160,6 +166,7 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
         self.assertEquals(result, None) # ... and the message comes back
 
         yield client.disconnect()
+        yield client.disconnected
         self.assertEquals(list(client.session.replay()), []) # after a clean disconnect, the subscriptions are forgotten.
 
     def _on_message(self, client, msg):
@@ -182,8 +189,9 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         self._got_message = defer.Deferred()
         client.subscribe('/queue/bla', headers={StompSpec.ID_HEADER: 4711}, listener=SubscriptionListener(self._on_message, ack=False)) # we're acking the frames ourselves
         yield self._got_message
+        yield client.disconnect(timeout=0.02)
         try:
-            yield client.disconnect(timeout=0.02)
+            yield client.disconnected
         except StompCancelledError:
             pass
         else:

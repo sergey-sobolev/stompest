@@ -152,27 +152,24 @@ class Stomp(object):
                 yield listener.onConnect(self, frame)
         except Exception as e:
             yield self.disconnect(failure=e)
+            yield self.disconnected
 
         self._replay()
 
         defer.returnValue(self)
 
     @connected
+    @defer.inlineCallbacks
     def disconnect(self, receipt=None, failure=None, timeout=None):
         """disconnect(self, receipt=None, failure=None, timeout=None)
         
-        Send a **DISCONNECT** frame and terminate the STOMP connection. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`None` when the STOMP connection has been closed. In case of a failure, it will err back with the failure reason.
+        Send a **DISCONNECT** frame and terminate the STOMP connection.
 
         :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
         :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If receipt is :obj:`None`, we will wait indefinitely.
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. Only one disconnect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
-        self._disconnect(receipt, failure, timeout)
-        return self.disconnected
-
-    @defer.inlineCallbacks
-    def _disconnect(self, receipt, failure, timeout):
         for listener in list(self._listeners):
             yield listener.onDisconnect(self, failure, timeout)
         protocol = self._protocol
