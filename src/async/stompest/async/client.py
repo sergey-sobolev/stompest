@@ -42,8 +42,6 @@ LOG_CATEGORY = __name__
 
 connected = checkattr('_protocol')
 
-# TODO: is it ensured that the DISCONNECT frame is the last frame we send?
-
 class Stomp(object):
     """An asynchronous STOMP client for the Twisted framework.
 
@@ -169,14 +167,18 @@ class Stomp(object):
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
-        protocol = self._protocol
         try:
             yield self._notify(lambda l: l.onDisconnecting(self, failure, timeout))
+        except Exception as e:
+            self.disconnect(failure=e)
+
+        protocol = self._protocol
+        try:
             if (self.session.state == self.session.CONNECTED):
                 self.sendFrame(self.session.disconnect(receipt))
                 yield self._notify(lambda l: l.onDisconnect(self, failure, receipt, timeout))
         except Exception as e:
-            self.disconnect(e)
+            self.disconnect(failure=e)
         finally:
             protocol.loseConnection()
 
@@ -338,17 +340,6 @@ class Stomp(object):
     @_protocol.setter
     def _protocol(self, protocol):
         self.__protocol = protocol
-
-    @property
-    def disconnectReason(self):
-        return self._disconnectReason
-
-    @disconnectReason.setter
-    def disconnectReason(self, reason):
-        if reason:
-            self.log.error(str(reason))
-            reason = self.disconnectReason or reason # existing reason wins
-        self._disconnectReason = reason
 
     #
     # private helpers

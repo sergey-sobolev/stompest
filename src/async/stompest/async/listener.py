@@ -77,41 +77,42 @@ class ErrorListener(Listener):
 class DisconnectListener(Listener):
     def __init__(self):
         self._disconnecting = False
+        self._disconnectReason = None
         self.log = logging.getLogger(LOG_CATEGORY)
 
     def onConnect(self, connection, frame): # @UnusedVariable
-        connection.disconnectReason = None
+        self.disconnectReason = None
         connection._disconnected = defer.Deferred()
 
     def onConnectionLost(self, connection, reason):
         self.log.info('Disconnected: %s' % reason.getErrorMessage())
         if not self._disconnecting:
-            connection.disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
-        connection.session.close(flush=not connection.disconnectReason)
+            self.disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
+        connection.session.close(flush=not self.disconnectReason)
         connection.remove(self)
         self._disconnecting = False
 
-        if connection.disconnectReason:
-            # self.log.debug('Calling disconnected errback: %s' % self.disconnectReason)
-            connection._disconnected.errback(connection.disconnectReason)
+        if self.disconnectReason:
+            self.log.debug('Calling disconnected errback: %s' % self.disconnectReason)
+            connection._disconnected.errback(self.disconnectReason)
         else:
-            # self.log.debug('Calling disconnected callback')
+            self.log.debug('Calling disconnected callback')
             connection._disconnected.callback(None)
-        connection.disconnectReason = None
+        self.disconnectReason = None
         connection._disconnected = None
 
     def onDisconnect(self, connection, failure, receipt, timeout): # @UnusedVariable
         try:
             yield self._waitForReceipt(receipt, timeout)
         except StompCancelledError:
-            connection.disconnectReason = StompCancelledError('Receipt for disconnect command did not arrive on time.')
+            self.disconnectReason = StompCancelledError('Receipt for disconnect command did not arrive on time.')
 
     def onDisconnecting(self, connection, failure, timeout): # @UnusedVariable
+        if failure:
+            self.disconnectReason = failure
         if self._disconnecting:
             return
         self._disconnecting = True
-        if failure:
-            connection.disconnectReason = failure
         self.log.info('Disconnecting ...%s' % ('' if (not failure) else  ('[reason=%s]' % failure)))
 
     def onMessage(self, connection, frame, context): # @UnusedVariable
@@ -119,6 +120,17 @@ class DisconnectListener(Listener):
             return
         self.log.info('[%s] Ignoring message (disconnecting)' % frame[StompSpec.MESSAGE_ID_HEADER])
         connection.nack(frame).addBoth(lambda _: None)
+
+    @property
+    def disconnectReason(self):
+        return self._disconnectReason
+
+    @disconnectReason.setter
+    def disconnectReason(self, reason):
+        if reason:
+            self.log.error(str(reason))
+            reason = self.disconnectReason or reason # existing reason wins
+        self._disconnectReason = reason
 
 class SubscriptionListener(Listener):
     """This event handler corresponds to a STOMP subscription.
@@ -150,12 +162,8 @@ class SubscriptionListener(Listener):
         if not self._messages:
             defer.returnValue(None)
         self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)
-        try:
-            yield self._waitForMessages(timeout)
-        except Exception as e:
-            connection.disconnectReason = e
-        else:
-            self.log.info('All handlers complete. Resuming disconnect ...')
+        yield self._waitForMessages(timeout)
+        self.log.info('All handlers complete. Resuming disconnect ...')
 
     @defer.inlineCallbacks
     def onMessage(self, connection, frame, context):
