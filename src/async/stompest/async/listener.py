@@ -76,11 +76,10 @@ class ErrorListener(Listener):
 
 class DisconnectListener(Listener):
     def __init__(self):
-        self._disconnecting = False
-        self._disconnectReason = None
         self.log = logging.getLogger(LOG_CATEGORY)
 
     def onConnect(self, connection, frame): # @UnusedVariable
+        self._disconnecting = False
         self.disconnectReason = None
         connection._disconnected = defer.Deferred()
 
@@ -90,15 +89,13 @@ class DisconnectListener(Listener):
             self.disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
         connection.session.close(flush=not self.disconnectReason)
         connection.remove(self)
-        self._disconnecting = False
 
         if self.disconnectReason:
-            self.log.debug('Calling disconnected errback: %s' % self.disconnectReason)
+            # self.log.debug('Calling disconnected errback: %s' % self.disconnectReason)
             connection._disconnected.errback(self.disconnectReason)
         else:
-            self.log.debug('Calling disconnected callback')
+            # self.log.debug('Calling disconnected callback')
             connection._disconnected.callback(None)
-        self.disconnectReason = None
         connection._disconnected = None
 
     def onDisconnect(self, connection, failure, receipt, timeout): # @UnusedVariable
@@ -118,7 +115,7 @@ class DisconnectListener(Listener):
     def onMessage(self, connection, frame, context): # @UnusedVariable
         if not self._disconnecting:
             return
-        self.log.info('[%s] Ignoring message (disconnecting)' % frame[StompSpec.MESSAGE_ID_HEADER])
+        self.log.info('Ignoring message (disconnecting): %s [%s]' % (frame[StompSpec.MESSAGE_ID_HEADER], frame.info()))
         connection.nack(frame).addBoth(lambda _: None)
 
     @property
@@ -128,7 +125,7 @@ class DisconnectListener(Listener):
     @disconnectReason.setter
     def disconnectReason(self, reason):
         if reason:
-            self.log.error(str(reason))
+            self.log.error('Disconnect failure: %s' % reason)
             reason = self.disconnectReason or reason # existing reason wins
         self._disconnectReason = reason
 

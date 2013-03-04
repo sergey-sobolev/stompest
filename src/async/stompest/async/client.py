@@ -348,6 +348,7 @@ class Stomp(object):
     def _notify(self, notify):
         return task.cooperate(notify(listener) for listener in list(self._listeners)).whenDone()
 
+    @defer.inlineCallbacks
     def _onConnectionLost(self, reason):
         self._protocol = None
         for operations in (self._receipts,):
@@ -355,8 +356,7 @@ class Stomp(object):
                 if not waiting.called:
                     waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
                     waiting.addErrback(lambda _: None)
-        for listener in list(self._listeners):
-            listener.onConnectionLost(self, reason)
+        yield self._notify(lambda l: l.onConnectionLost(self, reason))
 
     def _replay(self):
         for (destination, headers, receipt, context) in self.session.replay():
