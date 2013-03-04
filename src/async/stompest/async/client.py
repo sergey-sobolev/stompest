@@ -30,13 +30,14 @@ import logging
 
 from twisted.internet import defer, task
 
-from stompest.error import StompCancelledError, StompConnectionError, StompFrameError
+from stompest.error import StompConnectionError, StompFrameError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
 from .listener import ConnectListener, DisconnectListener
 from .protocol import StompProtocolCreator
-from .util import InFlightOperations, exclusive
+from .util import exclusive
+from stompest.async.listener import ReceiptListener
 
 LOG_CATEGORY = __name__
 
@@ -56,7 +57,6 @@ class Stomp(object):
 
     def __init__(self, config, receiptTimeout=None):
         self._config = config
-        self._receiptTimeout = receiptTimeout
 
         self._session = StompSession(self._config.version, self._config.check)
         self._protocol = None
@@ -66,9 +66,6 @@ class Stomp(object):
 
         self._disconnecting = False
 
-        # keep track of active handlers for graceful disconnect
-        self._receipts = InFlightOperations('Waiting for receipt')
-
         self._handlers = {
             'MESSAGE': self._onMessage,
             'CONNECTED': self._onConnected,
@@ -77,6 +74,7 @@ class Stomp(object):
         }
 
         self._listeners = []
+        self.add(ReceiptListener(receiptTimeout))
 
     def add(self, listener):
         if listener not in self._listeners:
@@ -97,14 +95,14 @@ class Stomp(object):
         """
         return self._session
 
+    @defer.inlineCallbacks
     def sendFrame(self, frame):
         """Send a raw STOMP frame.
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.async.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
-        for listener in list(self._listeners):
-            listener.onSend(self, frame)
         self._protocol.send(frame)
+        yield self._notify(lambda l: l.onSend(self, frame))
 
     #
     # STOMP commands
@@ -139,7 +137,6 @@ class Stomp(object):
             self.log.error('Endpoint connect failed')
             raise
 
-        # TODO: catch repeated calls of self.connect() -> broken
         # disconnect listener must be added first (it must handle disconnect reasons)
         self.add(DisconnectListener()) # TODO: pass DisconnectListener parameter to self.connect()
         self.add(ConnectListener(connectedTimeout)) # TODO: pass ConnectListener parameter to self.connect()
@@ -168,15 +165,14 @@ class Stomp(object):
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
         try:
-            yield self._notify(lambda l: l.onDisconnecting(self, failure, timeout))
+            yield self._notify(lambda l: l.onDisconnect(self, failure, timeout))
         except Exception as e:
             self.disconnect(failure=e)
 
         protocol = self._protocol
         try:
             if (self.session.state == self.session.CONNECTED):
-                self.sendFrame(self.session.disconnect(receipt))
-                yield self._notify(lambda l: l.onDisconnect(self, failure, receipt, timeout))
+                yield self.sendFrame(self.session.disconnect(receipt))
         except Exception as e:
             self.disconnect(failure=e)
         finally:
@@ -190,8 +186,7 @@ class Stomp(object):
         Send a **SEND** frame.
         """
         frame = self.session.send(destination, body, headers, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -201,8 +196,7 @@ class Stomp(object):
         Send an **ACK** frame for a received **MESSAGE** frame.
         """
         frame = self.session.ack(frame, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -212,8 +206,7 @@ class Stomp(object):
         Send a **NACK** frame for a received **MESSAGE** frame.
         """
         frame = self.session.nack(frame, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -223,8 +216,7 @@ class Stomp(object):
         Send a **BEGIN** frame to begin a STOMP transaction.
         """
         frame = self.session.begin(transaction, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -234,8 +226,7 @@ class Stomp(object):
         Send an **ABORT** frame to abort a STOMP transaction.
         """
         frame = self.session.abort(transaction, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -245,8 +236,7 @@ class Stomp(object):
         Send a **COMMIT** frame to commit a STOMP transaction.
         """
         frame = self.session.commit(transaction, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -261,8 +251,7 @@ class Stomp(object):
         if listener:
             self.add(listener)
         yield self._notify(lambda l: l.onSubscribe(self, frame, l))
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
         defer.returnValue(token)
 
     @connected
@@ -276,8 +265,7 @@ class Stomp(object):
         """
         context = self.session.subscription(token)
         frame = self.session.unsubscribe(token, receipt)
-        self.sendFrame(frame)
-        yield self._waitForReceipt(receipt)
+        yield self.sendFrame(frame)
         yield self._notify(lambda l: l.onUnsubscribe(self, frame, context))
 
     #
@@ -323,9 +311,10 @@ class Stomp(object):
             self.log.error('Disconnecting (error in message handler): %s [%s]' % (messageId, frame.info()))
             self.disconnect(failure=e)
 
+    @defer.inlineCallbacks
     def _onReceipt(self, frame):
         receipt = self.session.receipt(frame)
-        self._receipts[receipt].callback(None)
+        yield self._notify(lambda l: l.onReceipt(self, frame, receipt))
 
     #
     # private properties
@@ -351,22 +340,12 @@ class Stomp(object):
     @defer.inlineCallbacks
     def _onConnectionLost(self, reason):
         self._protocol = None
-        for operations in (self._receipts,):
-            for waiting in operations.values():
-                if not waiting.called:
-                    waiting.errback(StompCancelledError('In-flight operation cancelled (connection lost)'))
-                    waiting.addErrback(lambda _: None)
-        yield self._notify(lambda l: l.onConnectionLost(self, reason))
+        try:
+            yield self._notify(lambda l: l.onConnectionLost(self, reason))
+        finally:
+            yield self._notify(lambda l: l.onCleanup(self))
 
     def _replay(self):
         for (destination, headers, receipt, context) in self.session.replay():
             self.log.info('Replaying subscription: %s' % headers)
             self.subscribe(destination, headers=headers, receipt=receipt, listener=context)
-
-    @defer.inlineCallbacks
-    def _waitForReceipt(self, receipt):
-        if receipt is None:
-            defer.returnValue(None)
-        with self._receipts(receipt, self.log) as receiptArrived:
-            timeout = self._receiptTimeout
-            yield receiptArrived.wait(timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, timeout)))

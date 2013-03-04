@@ -21,10 +21,10 @@ class Listener(object):
     def onConnectionLost(self, connection, reason):
         pass
 
-    def onDisconnect(self, connection, failure, receipt, timeout):
+    def onCleanup(self, connection):
         pass
 
-    def onDisconnecting(self, connection, failure, timeout):
+    def onDisconnect(self, connection, failure, timeout):
         pass
 
     def onError(self, connection, frame):
@@ -34,6 +34,9 @@ class Listener(object):
         pass
 
     def onMessage(self, connection, frame, context):
+        pass
+
+    def onReceipt(self, connection, frame, receipt):
         pass
 
     def onSend(self, connection, frame):
@@ -83,10 +86,12 @@ class DisconnectListener(Listener):
         self.disconnectReason = None
         connection._disconnected = defer.Deferred()
 
-    def onConnectionLost(self, connection, reason):
+    def onConnectionLost(self, connection, reason): # @UnusedVariable
         self.log.info('Disconnected: %s' % reason.getErrorMessage())
         if not self._disconnecting:
             self.disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
+
+    def onCleanup(self, connection):
         connection.session.close(flush=not self.disconnectReason)
         connection.remove(self)
 
@@ -98,13 +103,7 @@ class DisconnectListener(Listener):
             connection._disconnected.callback(None)
         connection._disconnected = None
 
-    def onDisconnect(self, connection, failure, receipt, timeout): # @UnusedVariable
-        try:
-            yield self._waitForReceipt(receipt, timeout)
-        except StompCancelledError:
-            self.disconnectReason = StompCancelledError('Receipt for disconnect command did not arrive on time.')
-
-    def onDisconnecting(self, connection, failure, timeout): # @UnusedVariable
+    def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
         if failure:
             self.disconnectReason = failure
         if self._disconnecting:
@@ -128,6 +127,31 @@ class DisconnectListener(Listener):
             self.log.error('Disconnect failure: %s' % reason)
             reason = self.disconnectReason or reason # existing reason wins
         self._disconnectReason = reason
+
+class ReceiptListener(Listener):
+    def __init__(self, timeout):
+        self._timeout = timeout
+        self._receipts = InFlightOperations('Waiting for receipt')
+        self.log = logging.getLogger(LOG_CATEGORY)
+
+    def onConnectionLost(self, connection, reason): # @UnusedVariable
+        for waiting in self._receipts.values():
+            if waiting.called:
+                continue
+            waiting.errback(StompCancelledError('Receipt did not arrive (connection lost)'))
+
+    @defer.inlineCallbacks
+    def onSend(self, connection, frame): # @UnusedVariable
+        if not frame:
+            defer.returnValue(None)
+        receipt = frame.headers.get(StompSpec.RECEIPT_HEADER)
+        if receipt is None:
+            defer.returnValue(None)
+        with self._receipts(receipt, self.log) as receiptArrived:
+            yield receiptArrived.wait(self._timeout, StompCancelledError('Receipt did not arrive on time: %s [timeout=%s]' % (receipt, self._timeout)))
+
+    def onReceipt(self, connection, frame, receipt): # @UnusedVariable
+        self._receipts[receipt].callback(None)
 
 class SubscriptionListener(Listener):
     """This event handler corresponds to a STOMP subscription.
@@ -154,7 +178,7 @@ class SubscriptionListener(Listener):
         self.log = logging.getLogger(LOG_CATEGORY)
 
     @defer.inlineCallbacks
-    def onDisconnecting(self, connection, failure, timeout): # @UnusedVariable
+    def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
         connection.remove(self)
         if not self._messages:
             defer.returnValue(None)
