@@ -147,7 +147,7 @@ class Stomp(object):
         self.add(ConnectListener(connectedTimeout)) # TODO: pass ConnectListener parameter to self.connect()
         try:
             self.sendFrame(frame)
-            yield self._notify(lambda l: l.onConnect(self, frame))
+            yield self._notify(lambda l: l.onConnect(self, frame)) # TODO: split up in onConnecting and onConnect
 
         except Exception as e:
             yield self.disconnect(failure=e)

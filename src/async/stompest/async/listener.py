@@ -142,7 +142,7 @@ class SubscriptionListener(Listener):
             defer.returnValue(None)
         self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)
         try:
-            yield task.cooperate(handler.wait(timeout, StompCancelledError('Handlers did not finish in time.')) for handler in self._messages.values()).whenDone()
+            yield self._waitForMessages(timeout)
         except Exception as e:
             connection._disconnectReason = e
         else:
@@ -173,20 +173,24 @@ class SubscriptionListener(Listener):
         frame.headers.setdefault(StompSpec.ACK_HEADER, self.DEFAULT_ACK_MODE)
         self._headers = frame.headers
 
+    @defer.inlineCallbacks
     def onUnsubscribe(self, connection, frame, context): # @UnusedVariable
         """onUnsubscribe(connection, frame, context)
         
         Forget everything about this listener's subscription and unregister from the **connection**."""
         if context is not self:
             return
-        self._headers = None
+        yield self._waitForMessages(None)
         connection.remove(self)
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
         """onConnectionLost(connection, reason)
         
         Forget everything about this listener's subscription and unregister from the **connection**."""
-        self.onUnsubscribe(connection, None, self)
+        connection.remove(self)
+
+    def _waitForMessages(self, timeout):
+        return task.cooperate(handler.wait(timeout, StompCancelledError('Handlers did not finish in time.')) for handler in self._messages.values()).whenDone()
 
 class HeartBeatListener(Listener):
     """Add this event handler to a :class:`~.async.client.Stomp` connection to automatically handle heart-beating.
