@@ -169,22 +169,14 @@ class Stomp(object):
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
-        yield self._notify(lambda l: l.onDisconnect(self, failure, timeout))
         protocol = self._protocol
         try:
-            if self.session.state == self.session.CONNECTED:
-                frame = self.session.disconnect(receipt)
-                try:
-                    self.sendFrame(frame)
-                except Exception as e:
-                    self._disconnectReason = StompConnectionError('Could not send %s. [%s]' % (frame.info(), e))
-
-                try:
-                    yield self._waitForReceipt(receipt)
-                except StompCancelledError:
-                    self._disconnectReason = StompCancelledError('Receipt for disconnect command did not arrive on time.')
+            yield self._notify(lambda l: l.onDisconnecting(self, failure, timeout))
+            if (self.session.state == self.session.CONNECTED):
+                self.sendFrame(self.session.disconnect(receipt))
+                yield self._notify(lambda l: l.onDisconnect(self, failure, receipt, timeout))
         except Exception as e:
-            self._disconnectReason = e
+            self.disconnect(e)
         finally:
             protocol.loseConnection()
 
@@ -348,15 +340,15 @@ class Stomp(object):
         self.__protocol = protocol
 
     @property
-    def _disconnectReason(self):
-        return self.__disconnectReason
+    def disconnectReason(self):
+        return self._disconnectReason
 
-    @_disconnectReason.setter
-    def _disconnectReason(self, reason):
+    @disconnectReason.setter
+    def disconnectReason(self, reason):
         if reason:
             self.log.error(str(reason))
-            reason = self._disconnectReason or reason # existing reason wins
-        self.__disconnectReason = reason
+            reason = self.disconnectReason or reason # existing reason wins
+        self._disconnectReason = reason
 
     #
     # private helpers
