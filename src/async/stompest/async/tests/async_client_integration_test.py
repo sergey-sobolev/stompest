@@ -4,7 +4,7 @@ from twisted.internet import reactor, defer, task
 from twisted.trial import unittest
 
 from stompest import async, sync
-from stompest.async.listener import SubscriptionListener, HeartBeatListener
+from stompest.async.listener import SubscriptionListener, HeartBeatListener, ReceiptListener
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
@@ -242,7 +242,8 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
     @defer.inlineCallbacks
     def test_onDisconnect_waitForOutstandingMessagesToFinish(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
-        client = async.Stomp(config, receiptTimeout=1.0)
+        client = async.Stomp(config)
+        client.add(ReceiptListener(1.0))
 
         # connect
         client = yield client.connect(host=VIRTUALHOST)
@@ -388,6 +389,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
     def test_transaction_commit(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
+        client.add(ReceiptListener())
         yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._eatFrame, ack=True))
 
@@ -410,6 +412,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
     def test_transaction_abort(self):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
+        client.add(ReceiptListener())
         yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._eatFrame, ack=True))
 
