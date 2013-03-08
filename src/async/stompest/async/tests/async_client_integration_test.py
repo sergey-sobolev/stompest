@@ -4,7 +4,7 @@ from twisted.internet import reactor, defer, task
 from twisted.trial import unittest
 
 from stompest import async, sync
-from stompest.async.listener import SubscriptionListener, HeartBeatListener, ReceiptListener
+from stompest.async.listener import SubscriptionListener, ReceiptListener
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
@@ -441,7 +441,6 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
         port = 61612 if (BROKER == 'activemq') else PORT
         config = self.getConfig(StompSpec.VERSION_1_1, port)
         client = async.Stomp(config)
-        client.add(HeartBeatListener())
         yield client.connect(host=VIRTUALHOST, heartBeats=(250, 250))
         disconnected = client.disconnected
 

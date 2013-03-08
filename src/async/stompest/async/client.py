@@ -34,7 +34,7 @@ from stompest.error import StompConnectionError, StompFrameError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
-from .listener import ConnectListener, DisconnectListener
+from .listener import defaultListeners
 from .protocol import StompProtocolCreator
 from .util import exclusive
 
@@ -51,18 +51,21 @@ class Stomp(object):
 
     .. seealso :: :class:`~.StompConfig` for how to set configuration options, :class:`~.StompSession` for session state, :mod:`.protocol.commands` for all API options which are documented here.
     """
-    _protocolCreatorFactory = StompProtocolCreator
+    protocolCreatorFactory = StompProtocolCreator
+
+    @classmethod
+    def defaultListeners(cls):
+        """The listeners which this method produces will be added to the connection by default each time :meth:`~.async.client.Stomp.connect` is called.
+        """
+        return defaultListeners()
 
     def __init__(self, config):
         self._config = config
 
         self._session = StompSession(self._config.version, self._config.check)
-        self._protocol = None
-        self._protocolCreator = self._protocolCreatorFactory(self._config.uri)
+        self._protocolCreator = self.protocolCreatorFactory(self._config.uri)
 
         self.log = logging.getLogger(LOG_CATEGORY)
-
-        self._disconnecting = False
 
         self._handlers = {
             'MESSAGE': self._onMessage,
@@ -73,11 +76,19 @@ class Stomp(object):
 
         self._listeners = []
 
+    #
+    # interface
+    #
     def add(self, listener):
+        """Add a listener to this client. For the interface definition, cf. :class:`~.async.listener.Listener`. 
+        """
         if listener not in self._listeners:
             self._listeners.append(listener)
+            listener.onAdd(self)
 
     def remove(self, listener):
+        """Remove a listener from this client. 
+        """
         self._listeners.remove(listener)
 
     @property
@@ -86,11 +97,24 @@ class Stomp(object):
         """
         return self._disconnected
 
+    @disconnected.setter
+    def disconnected(self, value):
+        self._disconnected = value
+
     @property
-    def session(self):
-        """The :class:`~.StompSession` associated to this client.
-        """
-        return self._session
+    def _protocol(self):
+        try:
+            protocol = self.__protocol
+        except AttributeError:
+            self._protocol = None
+            return self._protocol
+        if not protocol:
+            raise StompConnectionError('Not connected')
+        return protocol
+
+    @_protocol.setter
+    def _protocol(self, protocol):
+        self.__protocol = protocol
 
     def sendFrame(self, frame):
         """Send a raw STOMP frame.
@@ -100,12 +124,18 @@ class Stomp(object):
         self._protocol.send(frame)
         return self._notify(lambda l: l.onSend(self, frame))
 
+    @property
+    def session(self):
+        """The :class:`~.StompSession` associated to this client.
+        """
+        return self._session
+
     #
     # STOMP commands
     #
     @exclusive
     @defer.inlineCallbacks
-    def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None):
+    def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None, listeners=None):
         """connect(headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None)
 
         Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.async.client.Stomp.session`, replay them when the STOMP connection is established. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`self` when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.
@@ -113,6 +143,7 @@ class Stomp(object):
         :param versions: The STOMP protocol versions we wish to support. The default behavior (:obj:`None`) is the same as for the :func:`~.commands.connect` function of the commands API, but the highest supported version will be the one you specified in the :class:`~.StompConfig` object. The version which is valid for the connection about to be initiated will be stored in the :attr:`~.async.client.Stomp.session`.
         :param connectTimeout: This is the time (in seconds) to wait for the wire-level connection to be established. If :obj:`None`, we will wait indefinitely.
         :param connectedTimeout: This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker's **CONNECTED** frame to arrive). If :obj:`None`, we will wait indefinitely.
+        :param listeners: These listeners will handle the connection. The default behavior (:obj:`None`) is to add the listeners which the class method :meth:`~.async.client.Stomp.defaultListeners` returns.
 
         .. note :: Only one connect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`.
 
@@ -127,18 +158,18 @@ class Stomp(object):
         else:
             raise StompConnectionError('Already connected')
 
+        for listener in (self.defaultListeners() if (listeners is None) else listeners):
+            self.add(listener)
+
         try:
             self._protocol = yield self._protocolCreator.connect(connectTimeout, self._onFrame, self._onConnectionLost)
         except Exception as e:
             self.log.error('Endpoint connect failed')
             raise
 
-        # disconnect listener must be added first (it must handle disconnect reasons)
-        self.add(DisconnectListener()) # TODO: pass DisconnectListener parameter to self.connect()
-        self.add(ConnectListener(connectedTimeout)) # TODO: pass ConnectListener parameter to self.connect()
         try:
             self.sendFrame(frame)
-            yield self._notify(lambda l: l.onConnect(self, frame)) # TODO: split up in onConnecting and onConnect
+            yield self._notify(lambda l: l.onConnect(self, frame, connectedTimeout))
 
         except Exception as e:
             yield self.disconnect(failure=e)
@@ -304,23 +335,8 @@ class Stomp(object):
         return self._notify(lambda l: l.onReceipt(self, frame, receipt))
 
     #
-    # private properties
-    #
-    @property
-    def _protocol(self):
-        protocol = self.__protocol
-        if not protocol:
-            raise StompConnectionError('Not connected')
-        return protocol
-
-    @_protocol.setter
-    def _protocol(self, protocol):
-        self.__protocol = protocol
-
-    #
     # private helpers
     #
-
     def _notify(self, notify):
         return task.cooperate(notify(listener) for listener in list(self._listeners)).whenDone()
 

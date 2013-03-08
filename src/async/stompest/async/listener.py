@@ -12,7 +12,13 @@ from stompest.async.util import WaitingDeferred, InFlightOperations
 LOG_CATEGORY = __name__
 
 class Listener(object):
-    def onConnect(self, connection, frame):
+    """This base class defines the interface for the handlers of possible asynchronous STOMP connection events. You may implement any subset of these event handlers and add the resulting listener to the :class:`~.async.client.Stomp` connection.
+    """
+    # TODO: doc strings for all event handlers.
+    def onAdd(self, connection):
+        pass
+
+    def onConnect(self, connection, frame, connectedTimeout):
         pass
 
     def onConnected(self, connection, frame):
@@ -49,17 +55,15 @@ class Listener(object):
         pass
 
 class ConnectListener(Listener):
-    def __init__(self, connectedTimeout=None):
-        self._connectedTimeout = connectedTimeout
-
+    """Waits for the **CONNECTED** frame to arrive.
+    """
     @defer.inlineCallbacks
-    def onConnect(self, connection, frame): # @UnusedVariable
+    def onConnect(self, connection, frame, connectedTimeout): # @UnusedVariable
         self._waiting = WaitingDeferred()
-        yield self._waiting.wait(self._connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % self._connectedTimeout))
+        yield self._waiting.wait(connectedTimeout, StompCancelledError('STOMP broker did not answer on time [timeout=%s]' % connectedTimeout))
 
     def onConnected(self, connection, frame): # @UnusedVariable
         connection.remove(self)
-        connection.add(ErrorListener())
         self._waiting.callback(None)
 
     def onConnectionLost(self, connection, reason):
@@ -71,6 +75,7 @@ class ConnectListener(Listener):
         self.onConnectionLost(connection, StompProtocolError('While trying to connect, received %s' % frame.info()))
 
 class ErrorListener(Listener):
+    """Handles **ERROR** frames."""
     def onError(self, connection, frame):
         connection.disconnect(failure=StompProtocolError('Received %s' % frame.info()))
 
@@ -78,13 +83,14 @@ class ErrorListener(Listener):
         connection.remove(self)
 
 class DisconnectListener(Listener):
+    """Handles graceful disconnect."""
     def __init__(self):
         self.log = logging.getLogger(LOG_CATEGORY)
 
-    def onConnect(self, connection, frame): # @UnusedVariable
+    def onAdd(self, connection):
         self._disconnecting = False
         self._disconnectReason = None
-        connection._disconnected = defer.Deferred()
+        connection.disconnected = defer.Deferred()
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
         self.log.info('Disconnected: %s' % reason.getErrorMessage())
@@ -97,11 +103,11 @@ class DisconnectListener(Listener):
 
         if self._disconnectReason:
             # self.log.debug('Calling disconnected errback: %s' % self._disconnectReason)
-            connection._disconnected.errback(self._disconnectReason)
+            connection.disconnected.errback(self._disconnectReason)
         else:
             # self.log.debug('Calling disconnected callback')
-            connection._disconnected.callback(None)
-        connection._disconnected = None
+            connection.disconnected.callback(None)
+        connection.disconnected = None
 
     def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
         if failure:
@@ -158,7 +164,7 @@ class ReceiptListener(Listener):
         self._receipts[receipt].callback(None)
 
 class SubscriptionListener(Listener):
-    """This event handler corresponds to a STOMP subscription.
+    """Corresponds to a STOMP subscription.
     
     :param handler: A callable :obj:`f(client, frame)` which accepts a :class:`~.async.client.Stomp` connection and the received :class:`~.StompFrame`.
     :param ack: Check this option if you wish to automatically ack **MESSAGE** frames after they were handled (successfully or not).
@@ -235,14 +241,9 @@ class SubscriptionListener(Listener):
         return task.cooperate(handler.wait(timeout, StompCancelledError('Handlers did not finish in time.')) for handler in self._messages.values()).whenDone()
 
 class HeartBeatListener(Listener):
-    """Add this event handler to a :class:`~.async.client.Stomp` connection to automatically handle heart-beating.
+    """Handles heart-beating.
     
     :param thresholds: tolerance thresholds (relative to the negotiated heart-beat periods). The default :obj:`None` is equivalent to the content of the class atrribute :attr:`DEFAULT_HEART_BEAT_THRESHOLDS`. Example: ``{'client': 0.6, 'server' 2.5}`` means that the client will send a heart-beat if it had shown no activity for 60 % of the negotiated client heart-beat period and that the client will disconnect if the server has shown no activity for 250 % of the negotiated server heart-beat period.
-
-    **Example**:
-    
-    >>> client.add(HeartBeatListener())
-    >>> client.connect(heartBeats=(250, 250))
 
     """
     DEFAULT_THRESHOLDS = {'client': 0.8, 'server': 2.0}
@@ -250,15 +251,13 @@ class HeartBeatListener(Listener):
     def __init__(self, thresholds=None):
         self._thresholds = thresholds or self.DEFAULT_THRESHOLDS
         self._heartBeats = {}
-        self._connected = False
 
     def onConnected(self, connection, frame): # @UnusedVariable
-        self._connected = True
         self._beats(connection)
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
-        self._connected = False
-        self._beats(connection)
+        self._beats(None)
+        connection.remove(self)
 
     def onFrame(self, connection, frame): # @UnusedVariable
         connection.session.received()
@@ -275,7 +274,7 @@ class HeartBeatListener(Listener):
             self._heartBeats.pop(which).cancel()
         except:
             pass
-        if not self._connected:
+        if not connection:
             return
         remaining = self._beatRemaining(connection.session, which)
         if remaining < 0:
@@ -296,3 +295,6 @@ class HeartBeatListener(Listener):
         last = {'client': session.lastSent, 'server': session.lastReceived}[which]
         elapsed = time.time() - last
         return max((self._thresholds[which] * heartBeat / 1000.0) - elapsed, 0)
+
+def defaultListeners():
+    return [ConnectListener(), DisconnectListener(), ErrorListener(), HeartBeatListener()]
