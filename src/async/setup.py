@@ -31,12 +31,12 @@ setup(
     zip_safe=True,
     install_requires=[
         'stompest==%s' % FULL_VERSION
-        , 'twisted>=10.1.0'  # Endpoints API
+        , 'twisted>=10.1.0' # Endpoints API
     ],
     tests_require=['mock'],
     test_suite='stompest.async.tests',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Twisted',
         'Topic :: System :: Networking',
         'Operating System :: OS Independent',

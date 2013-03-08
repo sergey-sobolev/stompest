@@ -4,7 +4,7 @@ try:
     pkg_resources.declare_namespace(__name__)
 except ImportError:
     import pkgutil
-    __path__ = pkgutil.extend_path(__path__, __name__)
+    __path__ = pkgutil.extend_path(__path__, __name__) # @ReservedAssignment
 
-VERSION = '2.0'
-FULL_VERSION = '2.0a5'
+VERSION = '2.1'
+FULL_VERSION = '2.1.0'

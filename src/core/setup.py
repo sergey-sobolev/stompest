@@ -33,7 +33,7 @@ setup(
     tests_require=['mock'],
     test_suite='stompest.tests',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Framework :: Twisted',
         'Topic :: System :: Networking',
         'Operating System :: OS Independent',

@@ -16,9 +16,7 @@ Both clients make use of a generic set of components in the `protocol` module ea
 
 * and `protocol.StompFailoverTransport`, a [failover transport](http://activemq.apache.org/failover-transport-reference.html) URI scheme akin to the one used in ActiveMQ.
 
-This module is thoroughly unit tested and (in version 1.x) production hardened for the functionality used by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
-
-The current maintainer also deploys stompest in serious production environments. The substantially redesigned stompest 2 is probably even better tested but should be considered (mature) alpha: Some features to come (for instance, support for [STOMP 1.2 repeated header entries](http://stomp.github.com/stomp-specification-1.2.html#Repeated_Header_Entries)) may still require minor changes of the API. 
+This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
 
 Installation
 ============
