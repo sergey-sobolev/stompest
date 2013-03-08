@@ -10,7 +10,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; stompest documentation - v2.0a5</title>
+    <title>Index &mdash; stompest documentation - v2.1.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -18,7 +18,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a5',
+        VERSION:     '2.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -27,7 +27,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a5" href="index.html" /> 
+    <link rel="top" title="stompest documentation - v2.1.0" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a5</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.0</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -78,10 +78,12 @@
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -131,9 +133,15 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="protocol.html#stompest.protocol.parser.StompParser.add">add() (stompest.protocol.parser.StompParser method)</a>
+  <dt><a href="async.html#stompest.async.client.Stomp.add">add() (stompest.async.client.Stomp method)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="protocol.html#stompest.protocol.parser.StompParser.add">(stompest.protocol.parser.StompParser method)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -210,8 +218,6 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#stompest.protocol.commands.commit">commit() (in module stompest.protocol.commands)</a>
   </dt>
@@ -230,6 +236,8 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#stompest.protocol.commands.connect">connect() (in module stompest.protocol.commands)</a>
   </dt>
@@ -258,12 +266,20 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="async.html#stompest.async.listener.ConnectListener">ConnectListener (class in stompest.async.listener)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.client.Stomp.defaultListeners">defaultListeners() (stompest.async.client.Stomp class method)</a>
+  </dt>
+
       
   <dt><a href="protocol.html#stompest.protocol.commands.disconnect">disconnect() (in module stompest.protocol.commands)</a>
   </dt>
@@ -288,6 +304,10 @@
   <dt><a href="async.html#stompest.async.client.Stomp.disconnected">disconnected (stompest.async.client.Stomp attribute)</a>
   </dt>
 
+      
+  <dt><a href="async.html#stompest.async.listener.DisconnectListener">DisconnectListener (class in stompest.async.listener)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -299,6 +319,12 @@
   </dt>
 
   </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.listener.ErrorListener">ErrorListener (class in stompest.async.listener)</a>
+  </dt>
+
+  </dl></td>
 </tr></table>
 
 <h2 id="G">G</h2>
@@ -306,6 +332,16 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#stompest.protocol.parser.StompParser.get">get() (stompest.protocol.parser.StompParser method)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.listener.HeartBeatListener">HeartBeatListener (class in stompest.async.listener)</a>
   </dt>
 
   </dl></td>
@@ -340,8 +376,6 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#stompest.protocol.session.StompSession.lastSent">lastSent (stompest.protocol.session.StompSession attribute)</a>
   </dt>
@@ -352,6 +386,12 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.listener.Listener">Listener (class in stompest.async.listener)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -399,6 +439,30 @@
   </dl></td>
 </tr></table>
 
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.listener.SubscriptionListener.onConnectionLost">onConnectionLost() (stompest.async.listener.SubscriptionListener method)</a>
+  </dt>
+
+      
+  <dt><a href="async.html#stompest.async.listener.SubscriptionListener.onMessage">onMessage() (stompest.async.listener.SubscriptionListener method)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.listener.SubscriptionListener.onSubscribe">onSubscribe() (stompest.async.listener.SubscriptionListener method)</a>
+  </dt>
+
+      
+  <dt><a href="async.html#stompest.async.listener.SubscriptionListener.onUnsubscribe">onUnsubscribe() (stompest.async.listener.SubscriptionListener method)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
@@ -417,6 +481,10 @@
 
       </dl></dd>
       
+  <dt><a href="async.html#stompest.async.listener.ReceiptListener">ReceiptListener (class in stompest.async.listener)</a>
+  </dt>
+
+      
   <dt><a href="protocol.html#stompest.protocol.session.StompSession.received">received() (stompest.protocol.session.StompSession method)</a>
   </dt>
 
@@ -426,6 +494,10 @@
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="async.html#stompest.async.client.Stomp.remove">remove() (stompest.async.client.Stomp method)</a>
+  </dt>
+
       
   <dt><a href="protocol.html#stompest.protocol.session.StompSession.replay">replay() (stompest.protocol.session.StompSession method)</a>
   </dt>
@@ -468,10 +540,6 @@
   </dt>
 
       </dl></dd>
-      
-  <dt><a href="async.html#stompest.async.client.Stomp.sendToErrorDestination">sendToErrorDestination() (stompest.async.client.Stomp method)</a>
-  </dt>
-
       
   <dt><a href="protocol.html#stompest.protocol.session.StompSession.sent">sent() (stompest.protocol.session.StompSession method)</a>
   </dt>
@@ -551,6 +619,10 @@
   </dt>
 
       
+  <dt><a href="async.html#module-stompest.async.listener">stompest.async.listener (module)</a>
+  </dt>
+
+      
   <dt><a href="config.html#module-stompest.config">stompest.config (module)</a>
   </dt>
 
@@ -562,12 +634,12 @@
   <dt><a href="protocol.html#module-stompest.protocol">stompest.protocol (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#module-stompest.protocol.commands">stompest.protocol.commands (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="protocol.html#module-stompest.protocol.failover">stompest.protocol.failover (module)</a>
   </dt>
@@ -658,6 +730,14 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="protocol.html#stompest.protocol.session.StompSession.subscription">subscription() (stompest.protocol.session.StompSession method)</a>
+  </dt>
+
+      
+  <dt><a href="async.html#stompest.async.listener.SubscriptionListener">SubscriptionListener (class in stompest.async.listener)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -743,7 +823,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a5</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.0</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

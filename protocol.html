@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocol Layer &mdash; stompest documentation - v2.0a5</title>
+    <title>Protocol Layer &mdash; stompest documentation - v2.1.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.0a5',
+        VERSION:     '2.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.0a5" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.1.0" href="index.html" />
     <link rel="next" title="Configuration" href="config.html" />
     <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a5</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.0</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -259,7 +259,7 @@
 <p class="first admonition-title">See also</p>
 <p class="last">The stateless API in the module <a class="reference internal" href="#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt></a> for all API command parameters which are not documented here.</p>
 </div>
-<p>Example:</p>
+<p><strong>Example</strong>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSession</span><span class="p">,</span> <span class="n">StompSpec</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">StompSession</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">login</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">passcode</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span>
@@ -489,6 +489,20 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> &#8211; An arbitrary context object which you can use to store any information related to the subscription at hand.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="stompest.protocol.session.StompSession.subscription">
+<tt class="descname">subscription</tt><big>(</big><em>token</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given subscription token, obtain the corresponding subscription context.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>token</strong> &#8211; The result of the <a class="reference internal" href="#stompest.protocol.session.StompSession.subscribe" title="stompest.protocol.session.StompSession.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> method call which you used to initiate the subscription in question.</td>
 </tr>
 </tbody>
 </table>
@@ -1002,7 +1016,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.0a5</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.0</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
