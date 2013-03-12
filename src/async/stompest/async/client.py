@@ -34,9 +34,8 @@ from stompest.error import StompConnectionError, StompFrameError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
-from .listener import defaultListeners
+from . import util, listener
 from .protocol import StompProtocolCreator
-from .util import exclusive
 
 LOG_CATEGORY = __name__
 
@@ -46,24 +45,21 @@ class Stomp(object):
     """An asynchronous STOMP client for the Twisted framework.
 
     :param config: A :class:`~.StompConfig` object.
+    :param listenersFactory: The listeners which this (parameterless) function produces will be added to the connection each time :meth:`~.async.client.Stomp.connect` is called. The default behavior (:obj:`None`) is to use :func:`~.async.listener.defaultListeners` in the module :mod:`async.listener`. 
+    :param endpointFactory: This function produces a Twisted endpoint which will be used to establish the wire-level connection. It accepts two arguments **broker** (as it is produced by iteration over an :obj:`~.protocol.failover.StompFailoverTransport`) and **timeout** (connect timeout in seconds, :obj:`None` meaning that we will wait indefinitely). The default behavior (:obj:`None`) is to use :func:`~.async.util.endpointFactory` in the module :mod:`async.util`.
     
     .. note :: All API methods which may request a **RECEIPT** frame from the broker -- which is indicated by the **receipt** parameter -- will wait for the **RECEIPT** response until this client's **receiptTimeout**. Here, "wait" is to be understood in the asynchronous sense that the method's :class:`twisted.internet.defer.Deferred` result will only call back then. If **receipt** is :obj:`None`, no such header is sent, and the callback will be triggered earlier.
 
-    .. seealso :: :class:`~.StompConfig` for how to set configuration options, :class:`~.StompSession` for session state, :mod:`.protocol.commands` for all API options which are documented here.
+    .. seealso :: :class:`~.StompConfig` for how to set configuration options, :class:`~.StompSession` for session state, :mod:`.protocol.commands` for all API options which are documented here. Details on endpoints can be found in the `Twisted endpoint howto <http://twistedmatrix.com/documents/current/core/howto/endpoints.html>`_.
     """
     protocolCreatorFactory = StompProtocolCreator
 
-    @classmethod
-    def defaultListeners(cls):
-        """The listeners which this method produces will be added to the connection by default each time :meth:`~.async.client.Stomp.connect` is called.
-        """
-        return defaultListeners()
-
-    def __init__(self, config):
+    def __init__(self, config, listenersFactory=None, endpointFactory=None):
         self._config = config
-
         self._session = StompSession(self._config.version, self._config.check)
-        self._protocolCreator = self.protocolCreatorFactory(self._config.uri)
+
+        self._listenersFactory = listenersFactory or listener.defaultListeners
+        self._protocolCreator = self.protocolCreatorFactory(self._config.uri, endpointFactory or util.endpointFactory)
 
         self.log = logging.getLogger(LOG_CATEGORY)
 
@@ -133,9 +129,9 @@ class Stomp(object):
     #
     # STOMP commands
     #
-    @exclusive
+    @util.exclusive
     @defer.inlineCallbacks
-    def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None, listeners=None):
+    def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None):
         """connect(headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None)
 
         Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.async.client.Stomp.session`, replay them when the STOMP connection is established. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`self` when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.
@@ -143,7 +139,6 @@ class Stomp(object):
         :param versions: The STOMP protocol versions we wish to support. The default behavior (:obj:`None`) is the same as for the :func:`~.commands.connect` function of the commands API, but the highest supported version will be the one you specified in the :class:`~.StompConfig` object. The version which is valid for the connection about to be initiated will be stored in the :attr:`~.async.client.Stomp.session`.
         :param connectTimeout: This is the time (in seconds) to wait for the wire-level connection to be established. If :obj:`None`, we will wait indefinitely.
         :param connectedTimeout: This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker's **CONNECTED** frame to arrive). If :obj:`None`, we will wait indefinitely.
-        :param listeners: These listeners will handle the connection. The default behavior (:obj:`None`) is to add the listeners which the class method :meth:`~.async.client.Stomp.defaultListeners` returns.
 
         .. note :: Only one connect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`.
 
@@ -158,7 +153,7 @@ class Stomp(object):
         else:
             raise StompConnectionError('Already connected')
 
-        for listener in (self.defaultListeners() if (listeners is None) else listeners):
+        for listener in self._listenersFactory():
             self.add(listener)
 
         try:
@@ -187,7 +182,7 @@ class Stomp(object):
         Send a **DISCONNECT** frame and terminate the STOMP connection.
 
         :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
-        :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If receipt is :obj:`None`, we will wait indefinitely.
+        :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If **receipt** is :obj:`None`, we will wait indefinitely.
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """

@@ -5,8 +5,6 @@ from twisted.internet.protocol import Factory, Protocol
 
 from stompest.protocol import StompFailoverTransport, StompParser
 
-from .util import endpointFactory
-
 LOG_CATEGORY = __name__
 
 class StompProtocol(Protocol):
@@ -71,19 +69,16 @@ class StompProtocolCreator(object):
     protocolFactory = StompFactory
     failoverFactory = StompFailoverTransport
 
-    @classmethod
-    def endpointFactory(cls, broker, timeout=None):
-        return endpointFactory(broker, timeout)
-
-    def __init__(self, uri):
+    def __init__(self, uri, endpointFactory):
         self._failover = self.failoverFactory(uri)
+        self._endpointFactory = endpointFactory
         self.log = logging.getLogger(LOG_CATEGORY)
 
     @defer.inlineCallbacks
     def connect(self, timeout, *args, **kwargs):
         for (broker, delay) in self._failover:
             yield self._sleep(delay)
-            endpoint = self.endpointFactory(broker, timeout)
+            endpoint = self._endpointFactory(broker, timeout)
             self.log.info('Connecting to %(host)s:%(port)s ...' % broker)
             try:
                 protocol = yield endpoint.connect(self.protocolFactory(*args, **kwargs))

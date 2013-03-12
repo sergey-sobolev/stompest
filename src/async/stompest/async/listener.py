@@ -135,7 +135,7 @@ class DisconnectListener(Listener):
         self.__disconnectReason = reason
 
 class ReceiptListener(Listener):
-    """:param receiptTimeout: When a STOMP frame was sent to the broker and a **RECEIPT** frame was requested, this is the time (in seconds) to wait for **RECEIPT** frames to arrive. If :obj:`None`, we will wait indefinitely.
+    """:param timeout: When a STOMP frame was sent to the broker and a **RECEIPT** frame was requested, this is the time (in seconds) to wait for **RECEIPT** frames to arrive. If :obj:`None`, we will wait indefinitely.
     
     TODO: Example
     """
