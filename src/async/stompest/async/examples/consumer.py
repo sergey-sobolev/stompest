@@ -20,7 +20,7 @@ class Consumer(object):
 
     @defer.inlineCallbacks
     def run(self):
-        stomp = yield Stomp(self.config).connect()
+        client = yield Stomp(self.config).connect()
         headers = {
             # client-individual mode is necessary for concurrent processing
             # (requires ActiveMQ >= 5.2)
@@ -28,7 +28,7 @@ class Consumer(object):
             # the maximal number of messages the broker will let you work on at the same time
             'activemq.prefetchSize': '100',
         }
-        stomp.subscribe(self.QUEUE, headers, listener=SubscriptionListener(self.consume, errorDestination=self.ERROR_QUEUE))
+        client.subscribe(self.QUEUE, headers, listener=SubscriptionListener(self.consume, errorDestination=self.ERROR_QUEUE))
 
     def consume(self, client, frame):
         """

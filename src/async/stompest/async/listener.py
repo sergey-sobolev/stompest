@@ -137,7 +137,9 @@ class DisconnectListener(Listener):
 class ReceiptListener(Listener):
     """:param timeout: When a STOMP frame was sent to the broker and a **RECEIPT** frame was requested, this is the time (in seconds) to wait for **RECEIPT** frames to arrive. If :obj:`None`, we will wait indefinitely.
     
-    TODO: Example
+    **Example**:
+    
+    >>> client.add(ReceiptListener(1.0))
     """
     def __init__(self, timeout=None):
         self._timeout = timeout

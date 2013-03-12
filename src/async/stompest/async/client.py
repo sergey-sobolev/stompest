@@ -48,7 +48,7 @@ class Stomp(object):
     :param listenersFactory: The listeners which this (parameterless) function produces will be added to the connection each time :meth:`~.async.client.Stomp.connect` is called. The default behavior (:obj:`None`) is to use :func:`~.async.listener.defaultListeners` in the module :mod:`async.listener`. 
     :param endpointFactory: This function produces a Twisted endpoint which will be used to establish the wire-level connection. It accepts two arguments **broker** (as it is produced by iteration over an :obj:`~.protocol.failover.StompFailoverTransport`) and **timeout** (connect timeout in seconds, :obj:`None` meaning that we will wait indefinitely). The default behavior (:obj:`None`) is to use :func:`~.async.util.endpointFactory` in the module :mod:`async.util`.
     
-    .. note :: All API methods which may request a **RECEIPT** frame from the broker -- which is indicated by the **receipt** parameter -- will wait for the **RECEIPT** response until this client's **receiptTimeout**. Here, "wait" is to be understood in the asynchronous sense that the method's :class:`twisted.internet.defer.Deferred` result will only call back then. If **receipt** is :obj:`None`, no such header is sent, and the callback will be triggered earlier.
+    .. note :: All API methods which may request a **RECEIPT** frame from the broker -- which is indicated by the **receipt** parameter -- will wait for the **RECEIPT** response until this client's :obj:`~.async.listener.ReceiptListener`'s **timeout** (given that one was added to this client, which by default is not the case). Here, "wait" is to be understood in the asynchronous sense that the method's :class:`twisted.internet.defer.Deferred` result will only call back then. If **receipt** is :obj:`None`, no such header is sent, and the callback will be triggered earlier.
 
     .. seealso :: :class:`~.StompConfig` for how to set configuration options, :class:`~.StompSession` for session state, :mod:`.protocol.commands` for all API options which are documented here. Details on endpoints can be found in the `Twisted endpoint howto <http://twistedmatrix.com/documents/current/core/howto/endpoints.html>`_.
     """
@@ -182,7 +182,7 @@ class Stomp(object):
         Send a **DISCONNECT** frame and terminate the STOMP connection.
 
         :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
-        :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If **receipt** is :obj:`None`, we will wait indefinitely.
+        :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If **timeout** is :obj:`None`, we will wait indefinitely.
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
@@ -261,7 +261,7 @@ class Stomp(object):
 
         :param listener: An optional :class:`~.Listener` object which will be added to this connection to handle events associated to this subscription.
         
-        Send a **SUBSCRIBE** frame to subscribe to a STOMP destination. This method returns a :class:`twisted.internet.defer.Deferred` object which will fire with a token when a possibly requested **RECEIPT** frame has arrived. The callback value is a token which is used internally to match incoming **MESSAGE** frames and must be kept if you wish to :meth:`~.async.client.Stomp.unsubscribe` later.
+        Send a **SUBSCRIBE** frame to subscribe to a STOMP destination. The callback value of the :class:`twisted.internet.defer.Deferred` which this method returns is a token which is used internally to match incoming **MESSAGE** frames and must be kept if you wish to :meth:`~.async.client.Stomp.unsubscribe` later.
         """
         frame, token = self.session.subscribe(destination, headers, receipt, listener)
         if listener:

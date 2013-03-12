@@ -3,8 +3,10 @@ import logging
 
 from twisted.internet import defer, reactor
 
-from stompest.async import Stomp
 from stompest.config import StompConfig
+
+from stompest.async import Stomp
+from stompest.async.listener import ReceiptListener
 
 class Producer(object):
     QUEUE = '/queue/testIn'
@@ -16,10 +18,11 @@ class Producer(object):
 
     @defer.inlineCallbacks
     def run(self):
-        stomp = yield Stomp(self.config).connect()
+        client = yield Stomp(self.config).connect()
+        client.add(ReceiptListener(1.0))
         for j in range(10):
-            yield stomp.send(self.QUEUE, json.dumps({'count': j}), receipt='message-%d' % j)
-        yield stomp.disconnect() # graceful disconnect: waits until all receipts have arrived
+            yield client.send(self.QUEUE, json.dumps({'count': j}), receipt='message-%d' % j)
+        yield client.disconnect(receipt='bye') # graceful disconnect: waits until all receipts have arrived
         reactor.stop()
 
 if __name__ == '__main__':
