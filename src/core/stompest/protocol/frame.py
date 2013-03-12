@@ -133,6 +133,8 @@ class StompHeartBeat(object):
     def __eq__(self, other):
         return isinstance(other, StompHeartBeat)
 
+    __hash__ = None
+
     def __nonzero__(self):
         return False
 
