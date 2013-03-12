@@ -23,7 +23,6 @@ check:
 
 clean:
 	$(PYTHON) setup.py clean
-	rm -rf build/ dist/ readme.html *.egg-info/
+	rm -rf build/ dist/ readme.html *.egg-info/ *.egg
 	find . -name '*.pyc' -delete
 	find . -name '.DS_Store' -delete
-	

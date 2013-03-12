@@ -65,6 +65,8 @@ class StompFrame(object):
         """Two frames are considered equal if, and only if, they render the same wire-level frame, that is, if their string representation is identical."""
         return str(self) == str(other)
 
+    __hash__ = None
+
     def __iter__(self):
         yield ('command', self.command)
         for (keyword, field, default) in self._KEYWORDS_AND_FIELDS:
