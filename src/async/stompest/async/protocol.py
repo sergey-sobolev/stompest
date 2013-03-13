@@ -20,10 +20,7 @@ class StompProtocol(Protocol):
     def dataReceived(self, data):
         # self.log.debug('Received data: %s' % repr(data))
         self._parser.add(data)
-        while True:
-            frame = self._parser.get()
-            if frame is None:
-                break
+        for frame in iter(self._parser.get, self._parser.SENTINEL):
             if self.log.isEnabledFor(logging.DEBUG):
                 self.log.debug('Received %s' % frame.info())
             try:

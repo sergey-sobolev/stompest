@@ -32,10 +32,7 @@ class BlackHoleStompServer(Protocol):
     def dataReceived(self, data):
         self._parser.add(data)
 
-        while True:
-            frame = self._parser.get()
-            if not frame:
-                break
+        for frame in iter(self._parser.get, self._parser.SENTINEL):
             try:
                 self.log.debug('Received %s' % frame.info())
             except KeyError:

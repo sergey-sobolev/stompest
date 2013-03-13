@@ -35,6 +35,8 @@ class StompParser(object):
     StompFrame(command=u'NACK', rawHeaders=[(u'subscription', u'0'), (u'message-id', u'007')], version='1.1')    
     
     """
+    SENTINEL = None
+
     def __init__(self, version=None):
         self.version = version
         self._parsers = {
@@ -55,6 +57,7 @@ class StompParser(object):
         """
         if self.canRead():
             return self._frames.popleft()
+        return self.SENTINEL
 
     def add(self, data):
         """Add a byte-stream of wire-level data.
