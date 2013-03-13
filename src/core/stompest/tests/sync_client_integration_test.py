@@ -102,7 +102,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61611)?startupMaxReconnectAttempts=1,backOffMultiplier=3', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0))
         self.assertRaises(StompConnectionError, client.connect, host=VIRTUALHOST, connectTimeout=timeout)
 
-        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61613)?randomize=false', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0))  # default is startupMaxReconnectAttempts = 0
+        client = Stomp(StompConfig(uri='failover:(tcp://localhost:61610,tcp://localhost:61613)?randomize=false', login=LOGIN, passcode=PASSCODE, version=StompSpec.VERSION_1_0)) # default is startupMaxReconnectAttempts = 0
         self.assertRaises(StompConnectionError, client.connect, host=VIRTUALHOST, connectTimeout=timeout)
 
     def test_3_socket_failure_and_replay(self):
@@ -110,7 +110,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.connect(host=VIRTUALHOST)
         headers = {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}
         token = client.subscribe(self.DESTINATION, headers)
-        client.sendFrame(StompFrame(StompSpec.DISCONNECT))  # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
+        client.sendFrame(StompFrame(StompSpec.DISCONNECT)) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
         client.connect(host=VIRTUALHOST)
         client.send(self.DESTINATION, 'test message 1')
@@ -119,7 +119,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         headers = {StompSpec.ID_HEADER: 'bla', StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}
         client.subscribe(self.DESTINATION, headers)
         headers[StompSpec.DESTINATION_HEADER] = self.DESTINATION
-        client.sendFrame(StompFrame(StompSpec.DISCONNECT))  # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
+        client.sendFrame(StompFrame(StompSpec.DISCONNECT)) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
         client.connect(host=VIRTUALHOST)
         client.send(self.DESTINATION, 'test message 2')
@@ -174,7 +174,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
             print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
             return
 
-        port = 61612 if (BROKER == 'activemq') else PORT  # stomp+nio on 61613 does not work properly, so use stomp on 61612
+        port = 61612 if (BROKER == 'activemq') else PORT # stomp+nio on 61613 does not work properly, so use stomp on 61612
         client = Stomp(self.getConfig(StompSpec.VERSION_1_1, port))
         self.assertEquals(client.lastReceived, None)
         self.assertEquals(client.lastSent, None)
@@ -218,6 +218,10 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.close()
 
     def test_6_integration_stomp_1_1_encoding_and_escaping_headers(self):
+        if BROKER == 'rabbitmq':
+            print 'Broker does not support unicode characters. Skipping this test case.'
+            return
+
         version = StompSpec.VERSION_1_1
         client = Stomp(self.getConfig(version))
         try:

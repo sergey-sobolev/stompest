@@ -7,3 +7,4 @@
 * 2.0a4 - Improved STOMP protocol version. Minor incompatible changes of the low-level API (protocol.session and protocol.commands). Bugfixes headers encoding.
 * 2.0a5 - Factored out stompest.async into a separate PyPI package to make the stompest library self-consistent.
 * 2.1.0 - Generic Listener API.
+* 2.1.1 - Minor bugfixes.

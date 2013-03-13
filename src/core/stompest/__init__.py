@@ -7,4 +7,4 @@ except ImportError:
     __path__ = pkgutil.extend_path(__path__, __name__) # @ReservedAssignment
 
 VERSION = '2.1'
-FULL_VERSION = '2.1.0'
+FULL_VERSION = '2.1.1'

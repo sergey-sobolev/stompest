@@ -14,6 +14,9 @@ LOG_CATEGORY = __name__
 class Listener(object):
     """This base class defines the interface for the handlers of possible asynchronous STOMP connection events. You may implement any subset of these event handlers and add the resulting listener to the :class:`~.async.client.Stomp` connection.
     """
+    def __str__(self):
+        return self.__class__.__name__
+
     # TODO: doc strings for all event handlers.
     def onAdd(self, connection):
         pass
@@ -120,7 +123,7 @@ class DisconnectListener(Listener):
     def onMessage(self, connection, frame, context): # @UnusedVariable
         if not self._disconnecting:
             return
-        self.log.info('Ignoring message (disconnecting): %s [%s]' % (frame[StompSpec.MESSAGE_ID_HEADER], frame.info()))
+        self.log.info('Ignoring message (disconnecting): %s [%s]' % (frame.headers[StompSpec.MESSAGE_ID_HEADER], frame.info()))
         connection.nack(frame).addBoth(lambda _: None)
 
     @property
@@ -191,7 +194,6 @@ class SubscriptionListener(Listener):
 
     @defer.inlineCallbacks
     def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
-        connection.remove(self)
         if not self._messages:
             defer.returnValue(None)
         self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)

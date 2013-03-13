@@ -79,12 +79,14 @@ class Stomp(object):
         """Add a listener to this client. For the interface definition, cf. :class:`~.async.listener.Listener`. 
         """
         if listener not in self._listeners:
+            # self.log.debug('adding listener: %s' % listener)
             self._listeners.append(listener)
             listener.onAdd(self)
 
     def remove(self, listener):
         """Remove a listener from this client. 
         """
+        # self.log.debug('removing listener: %s' % listener)
         self._listeners.remove(listener)
 
     @property
@@ -112,13 +114,14 @@ class Stomp(object):
     def _protocol(self, protocol):
         self.__protocol = protocol
 
+    @defer.inlineCallbacks
     def sendFrame(self, frame):
         """Send a raw STOMP frame.
 
         .. note :: If we are not connected, this method, and all other API commands for sending STOMP frames except :meth:`~.async.client.Stomp.connect`, will raise a :class:`~.StompConnectionError`. Use this command only if you have to bypass the :class:`~.StompSession` logic and you know what you're doing!
         """
         self._protocol.send(frame)
-        return self._notify(lambda l: l.onSend(self, frame))
+        yield self._notify(lambda l: l.onSend(self, frame))
 
     @property
     def session(self):
@@ -167,10 +170,10 @@ class Stomp(object):
             yield self._notify(lambda l: l.onConnect(self, frame, connectedTimeout))
 
         except Exception as e:
-            yield self.disconnect(failure=e)
+            self.disconnect(failure=e)
             yield self.disconnected
 
-        self._replay()
+        yield self._replay()
 
         defer.returnValue(self)
 
@@ -201,58 +204,64 @@ class Stomp(object):
             protocol.loseConnection()
 
     @connected
+    @defer.inlineCallbacks
     def send(self, destination, body='', headers=None, receipt=None):
         """send(destination, body='', headers=None, receipt=None)
 
         Send a **SEND** frame.
         """
         frame = self.session.send(destination, body, headers, receipt)
-        return self.sendFrame(frame)
+        yield self.sendFrame(frame)
 
     @connected
+    @defer.inlineCallbacks
     def ack(self, frame, receipt=None):
         """ack(frame, receipt=None)
 
         Send an **ACK** frame for a received **MESSAGE** frame.
         """
         frame = self.session.ack(frame, receipt)
-        return self.sendFrame(frame)
+        yield self.sendFrame(frame)
 
     @connected
+    @defer.inlineCallbacks
     def nack(self, frame, receipt=None):
         """nack(frame, receipt=None)
 
         Send a **NACK** frame for a received **MESSAGE** frame.
         """
         frame = self.session.nack(frame, receipt)
-        return self.sendFrame(frame)
+        yield self.sendFrame(frame)
 
     @connected
+    @defer.inlineCallbacks
     def begin(self, transaction=None, receipt=None):
         """begin(transaction=None, receipt=None)
 
         Send a **BEGIN** frame to begin a STOMP transaction.
         """
         frame = self.session.begin(transaction, receipt)
-        return self.sendFrame(frame)
+        yield self.sendFrame(frame)
 
     @connected
+    @defer.inlineCallbacks
     def abort(self, transaction=None, receipt=None):
         """abort(transaction=None, receipt=None)
 
         Send an **ABORT** frame to abort a STOMP transaction.
         """
         frame = self.session.abort(transaction, receipt)
-        return self.sendFrame(frame)
+        yield self.sendFrame(frame)
 
     @connected
+    @defer.inlineCallbacks
     def commit(self, transaction=None, receipt=None):
         """commit(transaction=None, receipt=None)
 
         Send a **COMMIT** frame to commit a STOMP transaction.
         """
         frame = self.session.commit(transaction, receipt)
-        return self.sendFrame(frame)
+        yield self.sendFrame(frame)
 
     @connected
     @defer.inlineCallbacks
@@ -298,14 +307,16 @@ class Stomp(object):
             raise StompFrameError('Unknown STOMP command: %s' % repr(frame))
         yield handler(frame)
 
+    @defer.inlineCallbacks
     def _onConnected(self, frame):
         self.session.connected(frame)
         self.log.info('Connected to stomp broker [session=%s, version=%s]' % (self.session.id, self.session.version))
         self._protocol.setVersion(self.session.version)
-        return self._notify(lambda l: l.onConnected(self, frame))
+        yield self._notify(lambda l: l.onConnected(self, frame))
 
+    @defer.inlineCallbacks
     def _onError(self, frame):
-        return self._notify(lambda l: l.onError(self, frame))
+        yield self._notify(lambda l: l.onError(self, frame))
 
     @defer.inlineCallbacks
     def _onMessage(self, frame):
@@ -325,9 +336,10 @@ class Stomp(object):
             self.log.error('Disconnecting (error in message handler): %s [%s]' % (messageId, frame.info()))
             self.disconnect(failure=e)
 
+    @defer.inlineCallbacks
     def _onReceipt(self, frame):
         receipt = self.session.receipt(frame)
-        return self._notify(lambda l: l.onReceipt(self, frame, receipt))
+        yield self._notify(lambda l: l.onReceipt(self, frame, receipt))
 
     #
     # private helpers
@@ -344,6 +356,8 @@ class Stomp(object):
             yield self._notify(lambda l: l.onCleanup(self))
 
     def _replay(self):
-        for (destination, headers, receipt, context) in self.session.replay():
-            self.log.info('Replaying subscription: %s' % headers)
-            self.subscribe(destination, headers=headers, receipt=receipt, listener=context)
+        def replay():
+            for (destination, headers, receipt, context) in self.session.replay():
+                self.log.info('Replaying subscription: %s' % headers)
+                yield self.subscribe(destination, headers=headers, receipt=receipt, listener=context)
+        return task.cooperate(replay()).whenDone()

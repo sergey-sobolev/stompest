@@ -8,12 +8,12 @@ from stompest.async.listener import SubscriptionListener, ReceiptListener
 from stompest.async.util import sendToErrorDestinationAndRaise
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
-from stompest.protocol import StompSpec
+from stompest.protocol import StompSpec, commands
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from stompest.tests import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
+from stompest.tests import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER, VERSION
 
 class StompestTestError(Exception):
     pass
@@ -22,7 +22,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     queue = None
     errorQueue = None
     log = logging.getLogger(LOG_CATEGORY)
-    headers = {StompSpec.ID_HEADER: '4711'}
+    headers = {StompSpec.ID_HEADER: u'4711'}
 
     TIMEOUT = 0.2
 
@@ -108,11 +108,19 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
     @defer.inlineCallbacks
     def _test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(self, version):
+        if version not in commands.versions(VERSION):
+            print 'Skipping test case (version %s is not configured)' % VERSION
+            defer.returnValue(None)
+
+        if BROKER == 'rabbitmq':
+            print 'RabbitMQ does not support selector header'
+            defer.returnValue(None)
+
         config = self.getConfig(version)
         client = async.Stomp(config)
 
         try:
-            client = yield client.connect(host=VIRTUALHOST, versions=[version])
+            yield client.connect(host=VIRTUALHOST, versions=[version])
         except StompProtocolError as e:
             print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version)
             defer.returnValue(None)
@@ -128,10 +136,15 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client.send(self.queue, self.frame1, messageHeaders)
         client.send(self.queue, self.frame2)
 
+        client.disconnect()
+        yield client.disconnected
+
         # barf on first message so it will get put in error queue
-        # use selector to guarantee message order.  AMQ doesn't guarantee order by default
-        headers = {StompSpec.SELECTOR_HEADER: "food='barf'"}
+        # use selector to guarantee message order (order not necessarily guaranteed)
+        headers = {StompSpec.SELECTOR_HEADER: u"food='barf'"}
         headers.update(defaultHeaders)
+
+        yield client.connect(host=VIRTUALHOST, versions=[version])
         client.subscribe(self.queue, headers, listener=SubscriptionListener(self._saveFrameAndBarf, errorDestination=self.errorQueue, onMessageFailed=self._onMessageFailedSendToErrorDestinationAndRaise))
 
         # client disconnected and returned error
@@ -147,6 +160,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         # reconnect and subscribe again - consuming second message then disconnecting
         client = yield client.connect(host=VIRTUALHOST)
         headers.pop('selector')
+
         client.subscribe(self.queue, headers, listener=SubscriptionListener(self._eatOneFrameAndDisconnect, errorDestination=self.errorQueue))
 
         # client disconnects without error
@@ -161,10 +175,10 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         # verify that first message was in error queue
         self.assertEquals(self.frame1, self.errorQueueFrame.body)
-        self.assertEquals(messageHeaders['food'], self.errorQueueFrame.headers['food'])
+        self.assertEquals(messageHeaders[u'food'], self.errorQueueFrame.headers['food'])
         if version != StompSpec.VERSION_1_0:
             self.assertEquals(messageHeaders[specialCharactersHeader], self.errorQueueFrame.headers[specialCharactersHeader])
-        self.assertNotEquals(self.unhandledFrame.headers['message-id'], self.errorQueueFrame.headers['message-id'])
+        self.assertNotEquals(self.unhandledFrame.headers[StompSpec.MESSAGE_ID_HEADER], self.errorQueueFrame.headers[StompSpec.MESSAGE_ID_HEADER])
 
         # verify that second message was consumed
         self.assertEquals(self.frame2, self.consumedFrame.body)
@@ -175,11 +189,15 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client = async.Stomp(config)
 
         # connect
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
 
         # enqueue two messages
         client.send(self.queue, self.frame1, self.msg1Hdrs)
         client.send(self.queue, self.frame2)
+
+        client.disconnect()
+        yield client.disconnected
+        yield client.connect(host=VIRTUALHOST)
 
         # barf on first frame, disconnect on second frame
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._barfOneEatOneAndDisonnect, errorDestination=self.errorQueue))
@@ -303,7 +321,8 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatFrame))
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
-        yield client.disconnect()
+        client.disconnect()
+        yield client.disconnected
 
     @defer.inlineCallbacks
     def test_replay(self):
@@ -336,7 +355,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
-        yield client.disconnect()
+        client.disconnect()
         yield client.disconnected
 
 class NackTestCase(AsyncClientBaseTestCase):
@@ -351,6 +370,10 @@ class NackTestCase(AsyncClientBaseTestCase):
 
     @defer.inlineCallbacks
     def _test_nack(self, version):
+        if version not in commands.versions(VERSION):
+            print 'Skipping test case (version %s is not configured)' % VERSION
+            defer.returnValue(None)
+
         config = self.getConfig(version)
         client = async.Stomp(config)
         try:
@@ -365,7 +388,7 @@ class NackTestCase(AsyncClientBaseTestCase):
         while not self.framesHandled:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
-        yield client.disconnect()
+        client.disconnect()
         yield client.disconnected
 
         if BROKER == 'activemq':
@@ -374,11 +397,11 @@ class NackTestCase(AsyncClientBaseTestCase):
 
         self.framesHandled = 0
         client = yield client.connect(host=VIRTUALHOST)
-        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, SubscriptionListener(self._eatFrame, ack=True))
+        client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._eatFrame, ack=True))
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
-        yield client.disconnect()
+        client.disconnect()
         yield client.disconnected
 
 class TransactionTestCase(AsyncClientBaseTestCase):
@@ -405,7 +428,7 @@ class TransactionTestCase(AsyncClientBaseTestCase):
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
         self.assertEquals(self.consumedFrame.body, 'test message with transaction')
-        yield client.disconnect()
+        client.disconnect()
         yield client.disconnected
 
     @defer.inlineCallbacks
@@ -425,7 +448,8 @@ class TransactionTestCase(AsyncClientBaseTestCase):
             yield task.deferLater(reactor, 0.01, lambda: None)
         self.assertEquals(self.consumedFrame.body, 'test message without transaction')
         yield client.abort(transaction, receipt='%s-commit' % transaction)
-        yield client.disconnect(receipt='bye')
+        client.disconnect()
+        yield client.disconnected
         self.assertEquals(self.framesHandled, 1)
 
 class HeartBeatTestCase(AsyncClientBaseTestCase):
@@ -434,10 +458,6 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
 
     @defer.inlineCallbacks
     def test_heart_beat(self):
-        if BROKER == 'apollo':
-            print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
-            defer.returnValue(None)
-
         port = 61612 if (BROKER == 'activemq') else PORT
         config = self.getConfig(StompSpec.VERSION_1_1, port)
         client = async.Stomp(config)

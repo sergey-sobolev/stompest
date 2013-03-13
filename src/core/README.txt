@@ -13,7 +13,7 @@ The STOMP client in this package is dead simple: It does not assume anything abo
 
 * and a `failover transport <http://activemq.apache.org/failover-transport-reference.html>`_ URI scheme akin to the one used in ActiveMQ.
 
-This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is tested with Python 2.6 and 2.7, Twisted 11.0 and 12.0 (it should work with Twisted 10.1 and higher), and ActiveMQ 5.5.1, 5.6, 5.7, 5.8. The integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 3.0.2 and `Apollo <http://activemq.apache.org/apollo/>`_ 1.5. All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable). Minor enhancements may be required to use this STOMP adapter with other brokers.
+This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is tested with Python 2.6 and 2.7, Twisted 11 and 12 (it should work with Twisted 10.1 and higher), ActiveMQ 5.8 (it should work with 5.5.1 and higher), and `Apollo <http://activemq.apache.org/apollo/>`_ 1.6. Some of the integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 3.0.2 (RabbitMQ does not support all extended STOMP features). All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable). Minor enhancements may be required to use this STOMP adapter with other brokers.
 
 Asynchronous Client
 ===================
