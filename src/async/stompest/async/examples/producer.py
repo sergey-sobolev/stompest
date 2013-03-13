@@ -22,7 +22,8 @@ class Producer(object):
         client.add(ReceiptListener(1.0))
         for j in range(10):
             yield client.send(self.QUEUE, json.dumps({'count': j}), receipt='message-%d' % j)
-        yield client.disconnect(receipt='bye') # graceful disconnect: waits until all receipts have arrived
+        client.disconnect(receipt='bye')
+        yield client.disconnected # graceful disconnect: waits until all receipts have arrived
         reactor.stop()
 
 if __name__ == '__main__':
