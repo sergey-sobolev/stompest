@@ -92,7 +92,7 @@ class AsyncClientErrorAfterConnectedTestCase(AsyncClientBaseTestCase):
     @defer.inlineCallbacks
     def test_disconnect_on_stomp_protocol_error(self):
         port = self.connections[0].getHost().port
-        config = StompConfig(uri='failover:(tcp://nosuchhost:65535,tcp://localhost:%d)?startupMaxReconnectAttempts=1,initialReconnectDelay=0,randomize=false' % port)
+        config = StompConfig(uri='tcp://localhost:%d' % port)
         client = Stomp(config)
 
         yield client.connect()
@@ -176,6 +176,31 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
             client.send('/queue/fake', 'shutdown')
         else:
             self._got_message.callback(None)
+
+class AsyncClientMultiSubscriptionsTestCase(AsyncClientBaseTestCase):
+    protocols = [RemoteControlViaFrameStompServer]
+
+    @defer.inlineCallbacks
+    def test_multi_subscriptions(self):
+        port = self.connections[0].getHost().port
+        config = StompConfig(uri='tcp://localhost:%d' % port)
+        client = Stomp(config)
+        yield client.connect()
+
+        listeners = []
+        for j in range(2):
+            listener = SubscriptionListener(self._on_message)
+            yield client.subscribe('/queue/%d' % j, headers={'bla': j}, listener=listener)
+            listeners.append(listener)
+
+        for (j, listener) in enumerate(listeners):
+            self.assertEquals(listener._headers['bla'], j)
+
+        yield client.disconnect()
+        yield client.disconnected
+
+    def _on_message(self, client, msg):
+        pass
 
 class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
     protocols = [RemoteControlViaFrameStompServer]

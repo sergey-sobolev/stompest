@@ -222,6 +222,8 @@ class SubscriptionListener(Listener):
         """Set the **ack** header of the **SUBSCRIBE** frame initiating this listener's subscription to the value of the class atrribute :attr:`DEFAULT_ACK_MODE` (if it isn't set already). Keep a copy of the headers for handling messages originating from this subscription."""
         if context is not self:
             return
+        if self._headers is not None: # already subscribed
+            return
         frame.headers.setdefault(StompSpec.ACK_HEADER, self.DEFAULT_ACK_MODE)
         self._headers = frame.headers
 
