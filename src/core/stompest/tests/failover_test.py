@@ -1,5 +1,8 @@
 import itertools
+import socket
 import unittest
+
+from mock import patch
 
 from stompest.error import StompConnectTimeout
 from stompest.protocol import StompFailoverUri, StompFailoverTransport
@@ -91,6 +94,34 @@ class StompFailoverTest(unittest.TestCase):
             (0.01, {'host': '127.0.0.1', 'protocol': 'tcp', 'port': 61615}),
             (0.02, {'host': 'remote1', 'protocol': 'tcp', 'port': 61616}),
             (0.04, {'host': 'remote2', 'protocol': 'tcp', 'port': 61616})
+        ])
+
+    @patch('socket.gethostbyname')
+    def test_priority_backup_localhost_lookup(self, mock_gethostbyname):
+        local_ip = '1.2.3.4'
+        uri = 'failover:tcp://remote1:61616,tcp://localhost:61616,tcp://127.0.0.1:61615,tcp://%s:61616?startupMaxReconnectAttempts=3,priorityBackup=true,randomize=false' % local_ip
+        protocol = StompFailoverTransport(uri)
+        mock_gethostbyname.side_effect = lambda *_args, **_kwargs: local_ip
+        self._test_failover(iter(protocol), [
+            (0, {'host': 'localhost', 'protocol': 'tcp', 'port': 61616}),
+            (0.01, {'host': '127.0.0.1', 'protocol': 'tcp', 'port': 61615}),
+            (0.02, {'host': local_ip, 'protocol': 'tcp', 'port': 61616}),
+            (0.04, {'host': 'remote1', 'protocol': 'tcp', 'port': 61616}),
+        ])
+
+    @patch('socket.gethostbyname')
+    def test_priority_backup_broken_localhost_lookup(self, mock_gethostbyname):
+        local_ip = '1.2.3.4'
+        uri = 'failover:tcp://remote1:61616,tcp://localhost:61616,tcp://127.0.0.1:61615,tcp://%s:61616?startupMaxReconnectAttempts=3,priorityBackup=true,randomize=false' % local_ip
+        protocol = StompFailoverTransport(uri)
+        def _broken_gethostbyname(host):
+            raise socket.gaierror()
+        mock_gethostbyname.side_effect = _broken_gethostbyname
+        self._test_failover(iter(protocol), [
+            (0, {'host': 'localhost', 'protocol': 'tcp', 'port': 61616}),
+            (0.01, {'host': '127.0.0.1', 'protocol': 'tcp', 'port': 61615}),
+            (0.02, {'host': 'remote1', 'protocol': 'tcp', 'port': 61616}),
+            (0.04, {'host': local_ip, 'protocol': 'tcp', 'port': 61616}),
         ])
 
     def test_randomize(self):

@@ -37,6 +37,8 @@ class StompFailoverTransport(object):
     
     .. seealso :: The :class:`StompFailoverUri` which parses failover transport URIs.
     """
+    _REGEX_LOCALHOST_IPV4 = re.compile('^127\.\d+\.\d+\.\d+$')
+
     def __init__(self, uri):
         self._failoverUri = StompFailoverUri(uri)
         self._maxReconnectAttempts = None
@@ -47,6 +49,23 @@ class StompFailoverTransport(object):
             for broker in self._brokers():
                 yield broker, self._delay()
 
+    @classmethod
+    def isLocalHost(cls, host):
+        if host == 'localhost' or cls._REGEX_LOCALHOST_IPV4.match(host):
+            return True
+        hostName = socket.gethostname()
+        for alternative in (
+            lambda h: h,
+            socket.gethostbyname,
+            socket.getfqdn
+        ):
+          try:
+              if host == alternative(hostName):
+                  return True
+          except socket.gaierror:
+              pass
+        return False
+
     def _brokers(self):
         failoverUri = self._failoverUri
         options = failoverUri.options
@@ -54,7 +73,7 @@ class StompFailoverTransport(object):
         if options['randomize']:
             random.shuffle(brokers)
         if options['priorityBackup']:
-            brokers.sort(key=lambda b: b['host'] in failoverUri.LOCAL_HOST_NAMES, reverse=True)
+            brokers.sort(key=lambda b: self.isLocalHost(b['host']), reverse=True)
         return brokers
 
     def _delay(self):
@@ -117,14 +136,6 @@ class StompFailoverUri(object):
     
     .. seealso :: :class:`StompFailoverTransport`, `failover transport <http://activemq.apache.org/failover-transport-reference.html>`_ of ActiveMQ.
     """
-    LOCAL_HOST_NAMES = set([
-        'localhost',
-        '127.0.0.1',
-        socket.gethostbyname(socket.gethostname()),
-        socket.gethostname(),
-        socket.getfqdn(socket.gethostname())
-    ])
-
     _configurationOption = collections.namedtuple('_configurationOption', ['parser', 'default'])
     _bool = {'true': True, 'false': False}.__getitem__
 
