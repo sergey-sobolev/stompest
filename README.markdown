@@ -80,7 +80,7 @@ Clients
 Acknowledgements
 ================
 * Version 1.x of stompest was written by [Roger Hoover (@theduderog)](http://github.com/theduderog) at [Mozes](http://www.mozes.com/) and deployed in their production environment.
-* Kudos to [Oisin Mulvihill](https://github.com/oisinmulvihill), the developer of [stomper] (http://code.google.com/p/stomper/)! His idea of an abstract representation of the STOMP protocol lives on in stompest.
+* Kudos to [Oisin Mulvihill](https://github.com/oisinmulvihill), the developer of [stomper] (https://github.com/oisinmulvihill/stomper)! His idea of an abstract representation of the STOMP protocol lives on in stompest.
 
 Caveats
 =======
