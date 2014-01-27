@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocol Layer &mdash; stompest documentation - v2.1.2</title>
+    <title>Protocol Layer &mdash; stompest documentation - v2.1.3</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '2.1.2',
+        URL_ROOT:    './',
+        VERSION:     '2.1.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.1.2" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.1.3" href="index.html" />
     <link rel="next" title="Configuration" href="config.html" />
     <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
@@ -45,7 +43,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.2</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.3</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -141,7 +139,7 @@
 <span class="go">timeout: Reconnect timeout: 0 attempts</span>
 </pre></div>
 </div>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The <a class="reference internal" href="#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></tt></a> which parses failover transport URIs.</p>
 </div>
@@ -241,7 +239,7 @@
 </tr>
 </tbody>
 </table>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="#stompest.protocol.failover.StompFailoverTransport" title="stompest.protocol.failover.StompFailoverTransport"><tt class="xref py py-class docutils literal"><span class="pre">StompFailoverTransport</span></tt></a>, <a class="reference external" href="http://activemq.apache.org/failover-transport-reference.html">failover transport</a> of ActiveMQ.</p>
 </div>
@@ -255,7 +253,7 @@
 <p class="first admonition-title">Note</p>
 <p class="last">Being stateful implies that the session keeps track of subscriptions, receipts, and transactions, so keep track of them yourself, too! &#8211; Unless you like to be surprised by a spurious <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt> ...</p>
 </div>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The stateless API in the module <a class="reference internal" href="#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt></a> for all API command parameters which are not documented here.</p>
 </div>
@@ -420,7 +418,7 @@
 <dt id="stompest.protocol.session.StompSession.message">
 <tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.session.StompSession.message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle a <strong>MESSAGE</strong> frame. Returns a token which you can use to match this message to its subscription.</p>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The <a class="reference internal" href="#stompest.protocol.session.StompSession.subscribe" title="stompest.protocol.session.StompSession.subscribe"><tt class="xref py py-meth docutils literal"><span class="pre">subscribe()</span></tt></a> method.</p>
 </div>
@@ -589,7 +587,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">UnicodeEncodeError: &#39;ascii&#39; codec can&#39;t encode character u&#39;\xea&#39; in position 3</span>: <span class="n">ordinal not in range(128)</span>
+<span class="gr">UnicodeEncodeError</span>: <span class="n">&#39;ascii&#39; codec can&#39;t encode character u&#39;\xea&#39; in position 3: ordinal not in range(128)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="go">&#39;SEND\nsome french:fen\xc3\xaatre\n\n\x00&#39;</span>
@@ -646,12 +644,12 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={u&#39;destination&#39;: &#39;/queue/test&#39;, u&#39;message-id&#39;</span>: <span class="n">&#39;007&#39;}]</span>
+<span class="gr">stompest.error.StompProtocolError</span>: <span class="n">Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={u&#39;destination&#39;: &#39;/queue/test&#39;, u&#39;message-id&#39;: &#39;007&#39;}]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s">&#39;message-12345&#39;</span><span class="p">)</span>
 <span class="go">StompFrame(command=u&#39;DISCONNECT&#39;, headers={u&#39;receipt&#39;: &#39;message-12345&#39;})</span>
 </pre></div>
 </div>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">Specification of STOMP protocols <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, your favorite broker&#8217;s documentation for additional STOMP headers.</p>
 </div>
@@ -794,7 +792,7 @@
 <dt id="stompest.protocol.commands.message">
 <tt class="descclassname">stompest.protocol.commands.</tt><tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.protocol.commands.message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Handle a <strong>MESSAGE</strong> frame. Returns a token which you can use to match this message to its subscription.</p>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The <a class="reference internal" href="#stompest.protocol.commands.subscribe" title="stompest.protocol.commands.subscribe"><tt class="xref py py-func docutils literal"><span class="pre">subscribe()</span></tt></a> command.</p>
 </div>
@@ -895,7 +893,7 @@
 <dt id="stompest.protocol.spec.StompSpec">
 <em class="property">class </em><tt class="descclassname">stompest.protocol.spec.</tt><tt class="descname">StompSpec</tt><a class="headerlink" href="#stompest.protocol.spec.StompSpec" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class hosts all constants related to the STOMP protocol specification in its various versions. There really isn&#8217;t much to document, but you are invited to take a look at all available constants in the source code. Wait a minute ... one attribute is particularly noteworthy, name <tt class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></tt> &#8212; which currently is <tt class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></tt> (but this may change in upcoming stompest releases, so you&#8217;re advised to always explicitly define which STOMP protocol version you are going to use).</p>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">Specification of STOMP protocols <a class="reference external" href="http://stomp.github.com//stomp-specification-1.0.html">1.0</a> and <a class="reference external" href="http://stomp.github.com//stomp-specification-1.1.html">1.1</a>, your favorite broker&#8217;s documentation for additional STOMP headers.</p>
 </div>
@@ -945,7 +943,7 @@
 <span class="gp">... </span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
-<span class="gr">stompest.error.StompFrameError: Invalid command</span>: <span class="n">u&#39;NACK&#39;</span>
+<span class="gr">stompest.error.StompFrameError</span>: <span class="n">Invalid command: u&#39;NACK&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 <span class="go">StompFrame(command=u&#39;RECEIPT&#39;, rawHeaders=[(u&#39;receipt-id&#39;, u&#39;message-12345&#39;)])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span>
@@ -1016,12 +1014,12 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.2</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.3</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Jan Müller.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
   </body>
 </html>

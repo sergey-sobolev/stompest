@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Asynchronous Client &mdash; stompest documentation - v2.1.2</title>
+    <title>Asynchronous Client &mdash; stompest documentation - v2.1.3</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '2.1.2',
+        URL_ROOT:    './',
+        VERSION:     '2.1.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.1.2" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.1.3" href="index.html" />
     <link rel="next" title="Protocol Layer" href="protocol.html" />
     <link rel="prev" title="Synchronous Client" href="sync.html" /> 
   </head>
@@ -45,7 +43,7 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.2</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.3</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar">
@@ -99,7 +97,7 @@
   <div class="section" id="module-stompest.async.client">
 <span id="asynchronous-client"></span><span id="async"></span><h1>Asynchronous Client<a class="headerlink" href="#module-stompest.async.client" title="Permalink to this headline">¶</a></h1>
 <p>The asynchronous client is based on <a class="reference external" href="http://twistedmatrix.com/">Twisted</a>, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default &#8220;poison pill&#8221; error handling), concurrent message processing, graceful shutdown, and connect and disconnect timeouts.</p>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference external" href="http://stomp.github.com/">STOMP protocol specification</a>, <a class="reference external" href="http://twistedmatrix.com/documents/current/api/">Twisted API documentation</a>, <a class="reference external" href="http://activemq.apache.org/stomp.html">Apache ActiveMQ - Stomp</a></p>
 </div>
@@ -263,7 +261,7 @@
 <p class="first admonition-title">Note</p>
 <p class="last">All API methods which may request a <strong>RECEIPT</strong> frame from the broker &#8211; which is indicated by the <strong>receipt</strong> parameter &#8211; will wait for the <strong>RECEIPT</strong> response until this client&#8217;s <a class="reference internal" href="#stompest.async.listener.ReceiptListener" title="stompest.async.listener.ReceiptListener"><tt class="xref py py-obj docutils literal"><span class="pre">ReceiptListener</span></tt></a>&#8216;s <strong>timeout</strong> (given that one was added to this client, which by default is not the case). Here, &#8220;wait&#8221; is to be understood in the asynchronous sense that the method&#8217;s <tt class="xref py py-class docutils literal"><span class="pre">twisted.internet.defer.Deferred</span></tt> result will only call back then. If <strong>receipt</strong> is <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, no such header is sent, and the callback will be triggered earlier.</p>
 </div>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last"><a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> for how to set configuration options, <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> for session state, <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt></a> for all API options which are documented here. Details on endpoints can be found in the <a class="reference external" href="http://twistedmatrix.com/documents/current/core/howto/endpoints.html">Twisted endpoint howto</a>.</p>
 </div>
@@ -318,7 +316,7 @@
 <p class="first admonition-title">Note</p>
 <p class="last">Only one connect attempt may be pending at a time. Any other attempt will result in a <tt class="xref py py-class docutils literal"><span class="pre">StompAlreadyRunningError</span></tt>.</p>
 </div>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The <a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt></a> and <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><tt class="xref py py-mod docutils literal"><span class="pre">session</span></tt></a> modules for the details of subscription replay and failover transport.</p>
 </div>
@@ -490,7 +488,7 @@
 </tr>
 </tbody>
 </table>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The unit tests in the module <tt class="xref py py-mod docutils literal"><span class="pre">tests.async_client_integration_test</span></tt> cover a couple of usage scenarios.</p>
 </div>
@@ -543,12 +541,12 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.2</a> &raquo;</li> 
+        <li><a href="index.html">stompest documentation - v2.1.3</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Jan Müller.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
   </body>
 </html>
