@@ -146,8 +146,8 @@ class StompParser(object):
         self._flush()
         raise StompFrameError(message)
 
-    def _decode(self, text):
-        text = StompSpec.CODECS[self.version].decode(text)[0]
+    def _decode(self, data):
+        text = StompSpec.CODECS[self.version].decode(data)[0]
         stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
         if stripLineDelimiter and text.endswith(stripLineDelimiter):
             return text[:-1]
