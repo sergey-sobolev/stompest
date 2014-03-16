@@ -8,3 +8,6 @@
 * 2.0a5 - Factored out stompest.async into a separate PyPI package to make the stompest library self-consistent.
 * 2.1.0 - Generic Listener API.
 * 2.1.1 - Minor bugfixes.
+* 2.1.2 - Bugfix subscription handler.
+* 2.1.3 - Bugfix thanks to [Peter McAlpine](https://github.com/rtkpmcalpine). More stable detection of localhost network addresses.
+* 2.1.4 - Bugfix heart-beat negotiation.

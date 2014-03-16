@@ -8,7 +8,7 @@ upload:
 	$(PYTHON) setup.py sdist upload
 
 readme:
-	$(PYTHON) setup.py --long-description | rst2html > readme.html
+	$(PYTHON) setup.py --long-description | rst2html.py > readme.html
 
 test:
 	$(PYTHON) setup.py test

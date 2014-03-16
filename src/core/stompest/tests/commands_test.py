@@ -96,5 +96,15 @@ class CommandsTest(unittest.TestCase):
         self.assertRaises(StompProtocolError, commands.nack, StompFrame(StompSpec.MESSAGE, {StompSpec.SUBSCRIPTION_HEADER: 'hi'}, version=StompSpec.VERSION_1_1))
         self.assertRaises(StompProtocolError, commands.nack, StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: 'hi'}, version=StompSpec.VERSION_1_1))
 
+    def test_negotiateHeartBeat(self):
+        for (args, result) in [
+            ((0, 0), 0)
+            , ((0, 1), 0)
+            , ((1, 0), 0)
+            , ((1, 2), 2)
+            , ((2, 1), 2)
+        ]:
+            self.assertEquals(commands.negotiateHeartBeat(*args), result)
+
 if __name__ == '__main__':
     unittest.main()

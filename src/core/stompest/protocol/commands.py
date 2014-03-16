@@ -199,9 +199,19 @@ def beat(version=None):
     """
     version = _version(version)
     if version == StompSpec.VERSION_1_0:
-        raise StompProtocolError('Heatbeat not supported (version %s)' % version)
+        raise StompProtocolError('Heart-beating not supported (version %s)' % version)
 
     return StompHeartBeat()
+
+def negotiateHeartBeat(client, server):
+    """Determine the negotiated heart-beating period.
+
+    :param client: The client's proposed heart-beating period.
+    :param server: The server's proposed heart-beating period.
+    """
+    if not (client and server):
+        return 0
+    return max(client, server)
 
 # incoming frames
 

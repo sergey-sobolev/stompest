@@ -465,7 +465,7 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
         disconnected = client.disconnected
 
         yield task.deferLater(reactor, 2.5, lambda: None)
-        client.session._clientHeartBeat = 0
+        client.session._clientSendHeartBeat = 0
         try:
             yield disconnected
         except StompConnectionError:

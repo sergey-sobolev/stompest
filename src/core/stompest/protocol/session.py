@@ -86,6 +86,7 @@ class StompSession(object):
         """Create a **CONNECT** frame and set the session state to :attr:`CONNECTING`."""
         self.__check('connect', [self.DISCONNECTED])
         self._versions = versions
+        (self._clientSendHeartBeat, self._clientReceiveHeartBeat) = (0, 0) if (heartBeats is None) else heartBeats
         frame = commands.connect(login, passcode, headers, self._versions, host, heartBeats)
         self._state = self.CONNECTING
         return frame
@@ -210,7 +211,7 @@ class StompSession(object):
         """Handle a **CONNECTED** frame and set the session state to :attr:`CONNECTED`."""
         self.__check('connected', [self.CONNECTING])
         try:
-            (self.version, self._server, self._id, (self._serverHeartBeat, self._clientHeartBeat)) = commands.connected(frame, versions=self._versions)
+            (self.version, self._server, self._id, (self._serverSendHeartBeat, self._serverReceiveHeartBeat)) = commands.connected(frame, versions=self._versions)
         finally:
             self._versions = None
         self._state = self.CONNECTED
@@ -269,13 +270,13 @@ class StompSession(object):
     def clientHeartBeat(self):
         """The negotiated client heart-beat period in ms.
         """
-        return self._clientHeartBeat
+        return commands.negotiateHeartBeat(self._clientSendHeartBeat, self._serverReceiveHeartBeat)
 
     @property
     def serverHeartBeat(self):
         """The negotiated server heart-beat period in ms.
         """
-        return self._serverHeartBeat
+        return commands.negotiateHeartBeat(self._clientReceiveHeartBeat, self._serverSendHeartBeat)
 
     # session information
 
@@ -329,7 +330,7 @@ class StompSession(object):
         self._server = None
         self._state = self.DISCONNECTED
         self._lastSent = self._lastReceived = None
-        self._clientHeartBeat = self._serverHeartBeat = 0
+        self._clientSendHeartBeat = self._clientReceiveHeartBeat = self._serverSendHeartBeat = self._serverReceiveHeartBeat = 0
         self.version = self.__version
         self._versions = None
 
