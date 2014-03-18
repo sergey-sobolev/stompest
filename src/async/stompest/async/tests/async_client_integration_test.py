@@ -468,7 +468,7 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
         client.session._clientSendHeartBeat = 0
         try:
             yield disconnected
-        except StompConnectionError:
+        except (StompConnectionError, StompProtocolError):
             pass
         else:
             raise

@@ -170,9 +170,6 @@ class SimpleStompIntegrationTest(unittest.TestCase):
 
     def test_5_integration_stomp_1_1_heartbeat(self):
         version = StompSpec.VERSION_1_1
-        if BROKER == 'apollo':
-            print "Broker %s doesn't properly support heart-beating. Skipping test." % BROKER
-            return
 
         port = 61612 if (BROKER == 'activemq') else PORT # stomp+nio on 61613 does not work properly, so use stomp on 61612
         client = Stomp(self.getConfig(StompSpec.VERSION_1_1, port))
@@ -209,7 +206,9 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         try:
             while not client.canRead(0.5 * clientHeartBeatInSeconds):
                 pass
-        except StompConnectionError:
+            if client.receiveFrame().command == StompSpec.ERROR:
+                raise StompProtocolError()
+        except (StompConnectionError, StompProtocolError):
             self.assertTrue((time.time() - start) < (3.0 * clientHeartBeatInSeconds))
             self.assertTrue((time.time() - client.lastReceived) < (2.0 * serverHeartBeatInSeconds))
             self.assertTrue((time.time() - client.lastSent) > clientHeartBeatInSeconds)
