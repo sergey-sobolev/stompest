@@ -344,8 +344,10 @@ class Stomp(object):
     #
     # private helpers
     #
+    @defer.inlineCallbacks
     def _notify(self, notify):
-        return task.cooperate(notify(listener) for listener in list(self._listeners)).whenDone()
+        for listener in list(self._listeners):
+            yield notify(listener)
 
     @defer.inlineCallbacks
     def _onConnectionLost(self, reason):
