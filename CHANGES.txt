@@ -11,3 +11,4 @@
 * 2.1.2 - Bugfix subscription handler.
 * 2.1.3 - Bugfix thanks to [Peter McAlpine](https://github.com/rtkpmcalpine). More stable detection of localhost network addresses.
 * 2.1.4 - Bugfix heart-beat negotiation.
+* 2.1.5 - Improvement thanks to [Ray Ruvinskiy](https://github.com/rtkrruvinskiy). Avoid unintended inflation of messaging handling time.
