@@ -1,9 +1,11 @@
 import binascii
 import itertools
 import logging
+import select
 import unittest
 
 from mock import Mock
+from mock import patch
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompFrame, StompSpec
@@ -123,6 +125,18 @@ class StompFrameTransportTest(unittest.TestCase):
 
         self.assertRaises(StompConnectionError, transport.receive)
         self.assertEquals(transport._socket, None)
+
+    @patch('select.select')
+    def test_can_connect_eintr_retries_connection(self, select_call):
+        select_call.return_value = (Mock(), Mock(), Mock())
+        transport = self._get_receive_mock('test')
+        def raise_eintr_once(*args):
+            select_call.side_effect = None
+            raise select.error(4, 'Interrupted system call')
+        select_call.side_effect = raise_eintr_once
+
+        transport.canRead()
+        self.assertEquals(2, select_call.call_count)
 
 if __name__ == '__main__':
     unittest.main()

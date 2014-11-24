@@ -1,5 +1,7 @@
 import select
 import socket
+import time
+import errno
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
@@ -23,10 +25,20 @@ class StompFrameTransport(object):
         self._check()
         if self._parser.canRead():
             return True
-        if timeout is None:
-            files, _, _ = select.select([self._socket], [], [])
-        else:
-            files, _, _ = select.select([self._socket], [], [], timeout)
+
+        startTime = time.time()
+        try:
+            if timeout is None:
+                files, _, _ = select.select([self._socket], [], [])
+            else:
+                files, _, _ = select.select([self._socket], [], [], timeout)
+        except select.error as (code, msg):
+            if code == errno.EINTR:
+                if timeout is None:
+                    return self.canRead()
+                else:
+                    return self.canRead(max(0, timeout - (time.time() - startTime)))
+            raise
         return bool(files)
 
     def connect(self, timeout=None):
