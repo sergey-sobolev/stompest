@@ -12,3 +12,4 @@
 * 2.1.3 - Bugfix thanks to [Peter McAlpine](https://github.com/rtkpmcalpine). More stable detection of localhost network addresses.
 * 2.1.4 - Bugfix heart-beat negotiation.
 * 2.1.5 - Improvement thanks to [Ray Ruvinskiy](https://github.com/rtkrruvinskiy). Avoid unintended inflation of messaging handling time.
+* 2.1.6 - Bugfix thanks to [Cory Stegelmeier](https://github.com/rtkcstegel). Retry system calls when EINTR is received.
