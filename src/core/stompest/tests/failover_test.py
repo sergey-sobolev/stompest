@@ -2,6 +2,7 @@ import itertools
 import socket
 import unittest
 
+from sys import version_info
 from mock import patch
 
 from stompest.error import StompConnectTimeout
@@ -11,23 +12,23 @@ class StompFailoverUriTest(unittest.TestCase):
     def test_configuration(self):
         uri = 'tcp://localhost:61613'
         configuration = StompFailoverUri(uri)
-        self.assertEquals(configuration.brokers, [{'host': 'localhost', 'protocol': 'tcp', 'port': 61613}])
-        self.assertEquals(configuration.options, {'priorityBackup': False, 'initialReconnectDelay': 10, 'reconnectDelayJitter': 0, 'maxReconnectDelay': 30000, 'backOffMultiplier': 2.0, 'startupMaxReconnectAttempts': 0, 'maxReconnectAttempts':-1, 'useExponentialBackOff': True, 'randomize': True})
+        self.assertEqual(configuration.brokers, [{'host': 'localhost', 'protocol': 'tcp', 'port': 61613}])
+        self.assertEqual(configuration.options, {'priorityBackup': False, 'initialReconnectDelay': 10, 'reconnectDelayJitter': 0, 'maxReconnectDelay': 30000, 'backOffMultiplier': 2.0, 'startupMaxReconnectAttempts': 0, 'maxReconnectAttempts':-1, 'useExponentialBackOff': True, 'randomize': True})
 
         uri = 'tcp://123.456.789.0:61616?randomize=true,maxReconnectAttempts=-1,priorityBackup=true'
         configuration = StompFailoverUri(uri)
         self.assertTrue(configuration.options['randomize'])
-        self.assertEquals(configuration.options['priorityBackup'], True)
-        self.assertEquals(configuration.options['maxReconnectAttempts'], -1)
-        self.assertEquals(configuration.brokers, [{'host': '123.456.789.0', 'protocol': 'tcp', 'port': 61616}])
+        self.assertEqual(configuration.options['priorityBackup'], True)
+        self.assertEqual(configuration.options['maxReconnectAttempts'], -1)
+        self.assertEqual(configuration.brokers, [{'host': '123.456.789.0', 'protocol': 'tcp', 'port': 61616}])
 
         uri = 'failover:(tcp://primary:61616,tcp://secondary:61616)?randomize=false,maxReconnectAttempts=2,backOffMultiplier=3.0'
         configuration = StompFailoverUri(uri)
-        self.assertEquals(configuration.uri, uri)
+        self.assertEqual(configuration.uri, uri)
         self.assertFalse(configuration.options['randomize'])
-        self.assertEquals(configuration.options['backOffMultiplier'], 3.0)
-        self.assertEquals(configuration.options['maxReconnectAttempts'], 2)
-        self.assertEquals(configuration.brokers, [
+        self.assertEqual(configuration.options['backOffMultiplier'], 3.0)
+        self.assertEqual(configuration.options['maxReconnectAttempts'], 2)
+        self.assertEqual(configuration.brokers, [
             {'host': 'primary', 'protocol': 'tcp', 'port': 61616},
             {'host': 'secondary', 'protocol': 'tcp', 'port': 61616}
         ])
@@ -133,10 +134,10 @@ class StompFailoverTest(unittest.TestCase):
         while (localShuffled * remoteShuffled) == 0:
             protocol = StompFailoverTransport(uri)
             hosts = [broker['host'] for (broker, _) in itertools.islice(protocol, 4)]
-            self.assertEquals(set(hosts[:2]), set(localHosts))
+            self.assertEqual(set(hosts[:2]), set(localHosts))
             if (hosts[:2] != localHosts):
                 localShuffled += 1
-            self.assertEquals(set(hosts[2:]), set(remoteHosts))
+            self.assertEqual(set(hosts[2:]), set(remoteHosts))
             if (hosts[2:] != remoteHosts):
                 remoteShuffled += 1
 
@@ -144,19 +145,29 @@ class StompFailoverTest(unittest.TestCase):
         uri = 'failover:tcp://remote1:61616?useExponentialBackOff=false,startupMaxReconnectAttempts=1,reconnectDelayJitter=4'
         for j in itertools.count():
             protocol = iter(StompFailoverTransport(uri))
-            protocol.next()
-            _, delay = protocol.next()
+            if version_info[0] == 2:
+                protocol.next()
+                _, delay = protocol.next()
+            else:
+                protocol.__next__()
+                _, delay = protocol.__next__()
             self.assertTrue(abs(delay - 0.01) < 0.004)
             if (j > 10) and (abs(delay - 0.01) > 0.003):
                 break
 
     def _test_failover(self, brokersAndDelays, expectedDelaysAndBrokers):
         for (expectedDelay, expectedBroker) in expectedDelaysAndBrokers:
-            broker, delay = brokersAndDelays.next()
-            self.assertEquals(delay, expectedDelay)
-            self.assertEquals(broker, expectedBroker)
+            if version_info[0] == 2:
+                broker, delay = brokersAndDelays.next()
+            else:
+                broker, delay = brokersAndDelays.__next__()
+            self.assertEqual(delay, expectedDelay)
+            self.assertEqual(broker, expectedBroker)
 
-        self.assertRaises(StompConnectTimeout, brokersAndDelays.next)
+        if version_info[0] == 2:
+            self.assertRaises(StompConnectTimeout, brokersAndDelays.next)
+        else:
+            self.assertRaises(StompConnectTimeout, brokersAndDelays.__next__)
 
 if __name__ == '__main__':
     unittest.main()

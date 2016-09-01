@@ -28,7 +28,7 @@ from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import StompFailoverTransport, StompSession
 from stompest.util import checkattr
 
-from .transport import StompFrameTransport
+from stompest.sync.transport import StompFrameTransport
 
 LOG_CATEGORY = __name__
 
@@ -289,11 +289,11 @@ class Stomp(object):
             timeout = deadline and max(0, deadline - time.time())
             if not self._transport.canRead(timeout):
                 return False
-            frame = self._transport.receive()
+            frame = self._transport.receive()            
             self.session.received()
             if self.log.isEnabledFor(logging.DEBUG):
-                self.log.debug('Received %s' % frame.info())
-            if frame:  # there's a real STOMP frame on the wire, not a heart-beat
+                self.log.debug('Received %s' % frame.info())            
+            if frame.__class__.__name__ == 'StompFrame':  # there's a real STOMP frame on the wire, not a heart-beat
                 self._messages.append(frame)
                 return True
 

@@ -59,11 +59,11 @@ class StompFailoverTransport(object):
             socket.gethostbyname,
             socket.getfqdn
         ):
-          try:
-              if host == alternative(hostName):
-                  return True
-          except socket.gaierror:
-              pass
+            try:
+                if host == alternative(hostName):
+                    return True
+            except socket.gaierror:
+                pass
         return False
 
     def _brokers(self):
@@ -177,15 +177,15 @@ class StompFailoverUri(object):
 
             try:
                 self._setOptions(options)
-            except Exception, msg:
+            except Exception as msg:
                 raise ValueError('invalid options: %s' % msg)
 
             try:
                 self._setBrokers(uri)
-            except Exception, msg:
+            except Exception as msg:
                 raise ValueError('invalid broker(s): %s' % msg)
 
-        except ValueError, msg:
+        except ValueError as msg:
             raise ValueError('invalid uri: %s [%s]' % (self.uri, msg))
 
     def _setBrokers(self, uri):
@@ -197,7 +197,7 @@ class StompFailoverUri(object):
         self.brokers = brokers
 
     def _setOptions(self, options=None):
-        _options = dict((k, o.default) for (k, o) in self._SUPPORTED_OPTIONS.iteritems())
+        _options = dict((k, o.default) for (k, o) in self._SUPPORTED_OPTIONS.items())
         if options:
             _options.update((k, self._SUPPORTED_OPTIONS[k].parser(v)) for (k, _, v) in (o.partition('=') for o in options.split(',')))
         self.options = _options

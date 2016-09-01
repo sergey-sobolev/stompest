@@ -2,6 +2,7 @@ import select
 import socket
 import time
 import errno
+from sys import version_info
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
@@ -32,7 +33,7 @@ class StompFrameTransport(object):
                 files, _, _ = select.select([self._socket], [], [])
             else:
                 files, _, _ = select.select([self._socket], [], [], timeout)
-        except select.error as (code, msg):
+        except select.error as code:
             if code == errno.EINTR:
                 if timeout is None:
                     return self.canRead()
@@ -72,7 +73,11 @@ class StompFrameTransport(object):
             self._parser.add(data)
 
     def send(self, frame):
-        self._write(str(frame))
+        if version_info[0] == 3:
+            frame = str(frame).encode('ascii') if (frame.__class__.__name__ == 'StompFrame' and frame.version == '1.0') else str(frame).encode('utf-8')
+            self._write(frame)
+        else:      
+            self._write(str(frame))
 
     def setVersion(self, version):
         self._parser.version = version

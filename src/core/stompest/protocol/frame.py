@@ -1,5 +1,6 @@
-from .spec import StompSpec
-from .util import escape
+from stompest.protocol.spec import StompSpec
+from stompest.protocol.util import escape
+from sys import version_info
 
 class StompFrame(object):
     """This object represents a STOMP frame.
@@ -82,9 +83,13 @@ class StompFrame(object):
 
     def __str__(self):
         """Render the wire-level representation of a STOMP frame."""
-        headers = sorted(self.headers.iteritems()) if self.rawHeaders is None else self.rawHeaders
-        headers = ''.join('%s:%s%s' % (self._encode(self._escape(unicode(key))), self._encode(self._escape(unicode(value))), StompSpec.LINE_DELIMITER) for (key, value) in headers)
-        return StompSpec.LINE_DELIMITER.join([self._encode(unicode(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
+        headers = sorted(self.headers.items()) if self.rawHeaders is None else self.rawHeaders
+        if version_info[0] == 2:
+            headers = ''.join('%s:%s%s' % (self._encode(self._escape(unicode(key))), self._encode(self._escape(unicode(value))), StompSpec.LINE_DELIMITER) for (key, value) in headers)
+            return StompSpec.LINE_DELIMITER.join([self._encode(unicode(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
+        else:
+            headers = ''.join('%s:%s%s' % (self._encode(self._escape(str(key))), self._encode(self._escape(str(value))), StompSpec.LINE_DELIMITER) for (key, value) in headers) 
+            return StompSpec.LINE_DELIMITER.join([self._encode(str(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])      
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters)."""
@@ -106,7 +111,7 @@ class StompFrame(object):
         self._version = StompSpec.version(value)
 
     def _encode(self, text):
-        return StompSpec.CODECS[self.version].encode(text)[0]
+        return StompSpec.CODECS[self.version].encode(text)[0] if version_info[0] == 2 else StompSpec.CODECS[self.version].encode(text)[0].decode()
 
     def _escape(self, text):
         return escape(self.version)(self.command, text)

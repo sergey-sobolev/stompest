@@ -1,6 +1,6 @@
 import re
 
-from .spec import StompSpec
+from stompest.protocol.spec import StompSpec
 
 def escape(version):
     return _HeadersEscaper.get(version)
@@ -38,7 +38,7 @@ class _HeadersEscaper(_HeadersTransformer):
     _INSTANCES = {} # each class needs its own instance cache
 
     def _escapeSequences(self, version):
-        return dict((escapeSequence, '%s%s' % (self._ESCAPE_CHARACTER, character)) for (character, escapeSequence) in self._escapedCharacters(version).iteritems())
+        return dict((escapeSequence, '%s%s' % (self._ESCAPE_CHARACTER, character)) for (character, escapeSequence) in self._escapedCharacters(version).items())
 
     @property
     def _regex(self):
