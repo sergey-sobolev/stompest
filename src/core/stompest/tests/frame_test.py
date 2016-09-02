@@ -1,8 +1,8 @@
 import binascii
 import unittest
-from sys import version_info
 
 from stompest.protocol import StompFrame, StompSpec
+from stompest.protocol.util import ispy2
 import codecs
 
 class StompFrameTest(unittest.TestCase):
@@ -42,7 +42,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(eval(repr(frame)), frame)
         frame.version = StompSpec.VERSION_1_1
         self.assertEqual(eval(repr(frame)), frame)
-        if version_info[0] == 2:
+        if ispy2():
             self.assertEqual(str(frame), codecs.lookup('utf-8').encode(command + u'\n' + key + u':' + value + u'\n\n\x00')[0])
         else:
             self.assertEqual(str(frame), codecs.lookup('utf-8').encode(command + u'\n' + key + u':' + value + u'\n\n\x00')[0].decode())
@@ -58,7 +58,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         headers = {'content-length': str(len(body))}
         frame = StompFrame('MESSAGE', headers, body)
         self.assertEqual(frame.body, body)
-        if version_info[0] == 2:
+        if ispy2():
             self.assertEqual(str(frame), 'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
 
     def test_duplicate_headers(self):

@@ -27,6 +27,7 @@ import time
 from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import StompFailoverTransport, StompSession
 from stompest.util import checkattr
+from stompest.protocol.frame import StompFrame
 
 from stompest.sync.transport import StompFrameTransport
 
@@ -289,11 +290,11 @@ class Stomp(object):
             timeout = deadline and max(0, deadline - time.time())
             if not self._transport.canRead(timeout):
                 return False
-            frame = self._transport.receive()            
+            frame = self._transport.receive()
             self.session.received()
             if self.log.isEnabledFor(logging.DEBUG):
-                self.log.debug('Received %s' % frame.info())            
-            if frame.__class__.__name__ == 'StompFrame':  # there's a real STOMP frame on the wire, not a heart-beat
+                self.log.debug('Received %s' % frame.info())
+            if isinstance(frame, StompFrame):  # there's a real STOMP frame on the wire, not a heart-beat (duck-typing didn't work in Py3)
                 self._messages.append(frame)
                 return True
 

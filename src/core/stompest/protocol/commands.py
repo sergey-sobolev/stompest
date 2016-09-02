@@ -29,11 +29,12 @@ StompFrame(command=u'DISCONNECT', headers={u'receipt': 'message-12345'})
 
 .. seealso :: Specification of STOMP protocols `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_ and `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, your favorite broker's documentation for additional STOMP headers.
 """
-from sys import version_info
+
 from stompest.error import StompProtocolError
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec
+from stompest.protocol.util import ispy2
 
 # outgoing frames
 
@@ -121,10 +122,8 @@ def subscribe(destination, headers, receipt=None, version=None):
         if (version != StompSpec.VERSION_1_0):
             raise
     token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
-    if version_info[0] == 2:
-        return frame, tuple(map(unicode, token))
-    else:
-        return frame, tuple(map(str, token))
+    cast = unicode if ispy2() else str
+    return frame, tuple(map(cast, token))
 
 def unsubscribe(token, receipt=None, version=None):
     """Create an **UNSUBSCRIBE** frame.

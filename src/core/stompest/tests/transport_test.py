@@ -3,7 +3,6 @@ import itertools
 import logging
 import select
 import unittest
-from sys import version_info
 
 from mock import Mock
 from mock import patch
@@ -11,6 +10,7 @@ from mock import patch
 from stompest.error import StompConnectionError
 from stompest.protocol import StompFrame, StompSpec
 from stompest.sync.transport import StompFrameTransport
+from stompest.protocol.util import ispy2
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -47,7 +47,7 @@ class StompFrameTransportTest(unittest.TestCase):
         transport.send(frame)
         self.assertEqual(1, transport._socket.sendall.call_count)
         args, _ = transport._socket.sendall.call_args
-        self.assertEqual(str(frame) if version_info[0] == 2 else str(frame).encode(), args[0])
+        self.assertEqual(str(frame) if ispy2() else str(frame).encode(), args[0])
 
     def test_send_not_connected_raises(self):
         frame = StompFrame(StompSpec.MESSAGE)

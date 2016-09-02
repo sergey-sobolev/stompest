@@ -1,8 +1,8 @@
 import copy
 import functools
-from sys import version_info
 
 from stompest.protocol import StompSpec
+from stompest.protocol.util import ispy2
 
 _RESERVED_HEADERS = set([StompSpec.MESSAGE_ID_HEADER, StompSpec.DESTINATION_HEADER, u'timestamp', u'expires', u'priority'])
 
@@ -23,6 +23,7 @@ def cloneFrame(frame, persistent=None):
     frame.unraw()
     headers = filterReservedHeaders(frame.headers)
     if persistent is not None:
-        headers[u'persistent'] = unicode(bool(persistent)).lower() if version_info[0] == 2 else str(bool(persistent)).lower()
+        cast = unicode if ispy2() else str
+        headers[u'persistent'] = cast(bool(persistent)).lower()
     frame.headers = headers
     return frame

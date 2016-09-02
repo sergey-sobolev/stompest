@@ -2,11 +2,11 @@ import itertools
 import socket
 import unittest
 
-from sys import version_info
 from mock import patch
 
 from stompest.error import StompConnectTimeout
 from stompest.protocol import StompFailoverUri, StompFailoverTransport
+from stompest.protocol.util import ispy2
 
 class StompFailoverUriTest(unittest.TestCase):
     def test_configuration(self):
@@ -145,7 +145,7 @@ class StompFailoverTest(unittest.TestCase):
         uri = 'failover:tcp://remote1:61616?useExponentialBackOff=false,startupMaxReconnectAttempts=1,reconnectDelayJitter=4'
         for j in itertools.count():
             protocol = iter(StompFailoverTransport(uri))
-            if version_info[0] == 2:
+            if ispy2():
                 protocol.next()
                 _, delay = protocol.next()
             else:
@@ -157,14 +157,14 @@ class StompFailoverTest(unittest.TestCase):
 
     def _test_failover(self, brokersAndDelays, expectedDelaysAndBrokers):
         for (expectedDelay, expectedBroker) in expectedDelaysAndBrokers:
-            if version_info[0] == 2:
+            if ispy2():
                 broker, delay = brokersAndDelays.next()
             else:
                 broker, delay = brokersAndDelays.__next__()
             self.assertEqual(delay, expectedDelay)
             self.assertEqual(broker, expectedBroker)
 
-        if version_info[0] == 2:
+        if ispy2():
             self.assertRaises(StompConnectTimeout, brokersAndDelays.next)
         else:
             self.assertRaises(StompConnectTimeout, brokersAndDelays.__next__)

@@ -58,9 +58,6 @@ class StompSpec(object):
         VERSION_1_2: set([SEND, MESSAGE, ERROR])
     }
 
-    CODECS = {  # for command and headers
-        VERSION_1_0: 'ascii'
-    }
     CODECS = dict([
         (version, codecs.lookup('ascii' if version == '1.0' else 'utf-8')) for version in VERSIONS
     ])

@@ -1,10 +1,10 @@
 import binascii
 import unittest
-from sys import version_info
 
 from stompest.error import StompFrameError
 from stompest.protocol import commands, StompFrame, StompParser, StompSpec
 from stompest.protocol.frame import StompHeartBeat
+from stompest.protocol.util import ispy2
 
 class StompParserTest(unittest.TestCase):
     def _generate_bytes(self, stream):
@@ -139,7 +139,7 @@ class StompParserTest(unittest.TestCase):
         frame = parser.get()
         self.assertEqual(StompSpec.MESSAGE, frame.command)
         self.assertEqual(headers, frame.headers)
-        self.assertEqual(body if version_info[0] == 2 else str(body), frame.body)
+        self.assertEqual(body if ispy2() else str(body), frame.body)
 
         self.assertEqual(parser.get(), None)
 
