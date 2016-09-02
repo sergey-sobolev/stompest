@@ -37,8 +37,8 @@ class SimpleStompTest(unittest.TestCase):
         frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, 'testing 1 2 3')
         stomp = self._get_transport_mock(frame_)
         frame = stomp.receiveFrame()
-        self.assertEquals(frame_, frame)
-        self.assertEquals(1, stomp._transport.receive.call_count)
+        self.assertEqual(frame_, frame)
+        self.assertEqual(1, stomp._transport.receive.call_count)
 
     def test_canRead_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
@@ -63,7 +63,7 @@ class SimpleStompTest(unittest.TestCase):
     def test_error_frame_after_connect_raises_StompProtocolError(self):
         stomp = self._get_connect_mock(StompFrame(StompSpec.ERROR, body='fake error'))
         self.assertRaises(StompProtocolError, stomp.connect)
-        self.assertEquals(stomp._transport.receive.call_count, 1)
+        self.assertEqual(stomp._transport.receive.call_count, 1)
 
     def test_connect_when_connected_raises_StompConnectionError(self):
         stomp = self._get_transport_mock()
@@ -78,7 +78,7 @@ class SimpleStompTest(unittest.TestCase):
         stomp.connect()
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(StompFrame(StompSpec.CONNECT, {StompSpec.LOGIN_HEADER: login, StompSpec.PASSCODE_HEADER: passcode}), sentFrame)
+        self.assertEqual(StompFrame(StompSpec.CONNECT, {StompSpec.LOGIN_HEADER: login, StompSpec.PASSCODE_HEADER: passcode}), sentFrame)
 
     def test_send_writes_correct_frame(self):
         destination = '/queue/foo'
@@ -88,7 +88,7 @@ class SimpleStompTest(unittest.TestCase):
         stomp.send(destination, message, headers)
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(StompFrame('SEND', {StompSpec.DESTINATION_HEADER: destination, 'foo': 'bar', 'fuzz': 'ball'}, message), sentFrame)
+        self.assertEqual(StompFrame('SEND', {StompSpec.DESTINATION_HEADER: destination, 'foo': 'bar', 'fuzz': 'ball'}, message), sentFrame)
 
     def test_subscribe_writes_correct_frame(self):
         destination = '/queue/foo'
@@ -97,15 +97,15 @@ class SimpleStompTest(unittest.TestCase):
         stomp.subscribe(destination, headers)
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(StompFrame(StompSpec.SUBSCRIBE, {StompSpec.DESTINATION_HEADER: destination, 'foo': 'bar', 'fuzz': 'ball'}, ''), sentFrame)
+        self.assertEqual(StompFrame(StompSpec.SUBSCRIBE, {StompSpec.DESTINATION_HEADER: destination, 'foo': 'bar', 'fuzz': 'ball'}, ''), sentFrame)
 
     def test_subscribe_matching_and_corner_cases(self):
         destination = '/queue/foo'
         headers = {'foo': 'bar', 'fuzz': 'ball'}
         stomp = self._get_transport_mock()
         token = stomp.subscribe(destination, headers)
-        self.assertEquals(token, (StompSpec.DESTINATION_HEADER, destination))
-        self.assertEquals(stomp.message(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination})), token)
+        self.assertEqual(token, (StompSpec.DESTINATION_HEADER, destination))
+        self.assertEqual(stomp.message(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination})), token)
         self.assertRaises(StompProtocolError, stomp.message, StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: 'unknown'}))
         self.assertRaises(StompProtocolError, stomp.message, StompFrame(StompSpec.MESSAGE, {StompSpec.DESTINATION_HEADER: destination}))
 
@@ -119,7 +119,7 @@ class SimpleStompTest(unittest.TestCase):
         stomp.nack(frame, receipt='123')
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(commands.nack(frame, receipt='123'), sentFrame)
+        self.assertEqual(commands.nack(frame, receipt='123'), sentFrame)
 
     def test_ack_writes_correct_frame(self):
         id_ = '12345'
@@ -127,7 +127,7 @@ class SimpleStompTest(unittest.TestCase):
         stomp.ack(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: id_}, 'blah'))
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(StompFrame(StompSpec.ACK, {StompSpec.MESSAGE_ID_HEADER: id_}), sentFrame)
+        self.assertEqual(StompFrame(StompSpec.ACK, {StompSpec.MESSAGE_ID_HEADER: id_}), sentFrame)
 
     def test_transaction_writes_correct_frames(self):
         transaction = '4711'
@@ -139,16 +139,16 @@ class SimpleStompTest(unittest.TestCase):
             method(transaction)
             args, _ = stomp._transport.send.call_args
             sentFrame = args[0]
-            self.assertEquals(StompFrame(command, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
+            self.assertEqual(StompFrame(command, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
 
         with stomp.transaction(transaction):
             args, _ = stomp._transport.send.call_args
             sentFrame = args[0]
-            self.assertEquals(StompFrame(StompSpec.BEGIN, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
+            self.assertEqual(StompFrame(StompSpec.BEGIN, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
 
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEquals(StompFrame(StompSpec.COMMIT, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
+        self.assertEqual(StompFrame(StompSpec.COMMIT, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
 
         try:
             with stomp.transaction(transaction):
@@ -156,7 +156,7 @@ class SimpleStompTest(unittest.TestCase):
         except:
             args, _ = stomp._transport.send.call_args
             sentFrame = args[0]
-            self.assertEquals(StompFrame(StompSpec.ABORT, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
+            self.assertEqual(StompFrame(StompSpec.ABORT, {StompSpec.TRANSACTION_HEADER: transaction}), sentFrame)
 
 if __name__ == '__main__':
     unittest.main()

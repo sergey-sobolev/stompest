@@ -4,9 +4,9 @@
 """
 # TODO: STOMP 1.1 - deal with repeated headers -> http://stomp.github.com/stomp-specification-1.1.html#Repeated_Header_Entries
 
-import commands
-from failover import StompFailoverTransport, StompFailoverUri
-from frame import StompFrame
-from parser import StompParser
-from spec import StompSpec
-from session import StompSession
+import stompest.protocol.commands
+from stompest.protocol.failover import StompFailoverTransport, StompFailoverUri
+from stompest.protocol.frame import StompFrame
+from stompest.protocol.parser import StompParser
+from stompest.protocol.spec import StompSpec
+from stompest.protocol.session import StompSession

@@ -29,10 +29,12 @@ StompFrame(command=u'DISCONNECT', headers={u'receipt': 'message-12345'})
 
 .. seealso :: Specification of STOMP protocols `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_ and `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, your favorite broker's documentation for additional STOMP headers.
 """
+
 from stompest.error import StompProtocolError
 
-from .frame import StompFrame, StompHeartBeat
-from .spec import StompSpec
+from stompest.protocol.frame import StompFrame, StompHeartBeat
+from stompest.protocol.spec import StompSpec
+from stompest.protocol.util import ispy2
 
 # outgoing frames
 
@@ -120,7 +122,8 @@ def subscribe(destination, headers, receipt=None, version=None):
         if (version != StompSpec.VERSION_1_0):
             raise
     token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
-    return frame, tuple(map(unicode, token))
+    cast = unicode if ispy2() else str
+    return frame, tuple(map(cast, token))
 
 def unsubscribe(token, receipt=None, version=None):
     """Create an **UNSUBSCRIBE** frame.
@@ -301,12 +304,12 @@ def _ackHeaders(frame, transactions):
     else:
         if transaction in set(transactions or []):
             keys[StompSpec.TRANSACTION_HEADER] = StompSpec.TRANSACTION_HEADER
-    return dict((keys[key], value) for (key, value) in frame.headers.iteritems() if key in keys)
+    return dict((keys[key], value) for (key, value) in frame.headers.items() if key in keys)
 
 def _addReceiptHeader(frame, receipt):
     if not receipt:
         return
-    if not isinstance(receipt, basestring):
+    if not isinstance(receipt, str):
         raise StompProtocolError('Invalid receipt (not a string): %s' % repr(receipt))
     frame.headers[StompSpec.RECEIPT_HEADER] = str(receipt)
 

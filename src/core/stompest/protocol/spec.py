@@ -50,7 +50,7 @@ class StompSpec(object):
     }
 
     COMMANDS = dict(CLIENT_COMMANDS)
-    for (version, commands) in SERVER_COMMANDS.iteritems():
+    for (version, commands) in SERVER_COMMANDS.items():
         COMMANDS.setdefault(version, set()).update(commands)
 
     COMMANDS_BODY_ALLOWED = {
@@ -58,11 +58,8 @@ class StompSpec(object):
         VERSION_1_2: set([SEND, MESSAGE, ERROR])
     }
 
-    CODECS = {  # for command and headers
-        VERSION_1_0: 'ascii'
-    }
     CODECS = dict([
-        (version, codecs.lookup(CODECS.get(version, 'utf-8'))) for version in VERSIONS
+        (version, codecs.lookup('ascii' if version == '1.0' else 'utf-8')) for version in VERSIONS
     ])
 
     LINE_DELIMITER = '\n'

@@ -2,11 +2,12 @@ import copy
 import functools
 
 from stompest.protocol import StompSpec
+from stompest.protocol.util import ispy2
 
 _RESERVED_HEADERS = set([StompSpec.MESSAGE_ID_HEADER, StompSpec.DESTINATION_HEADER, u'timestamp', u'expires', u'priority'])
 
 def filterReservedHeaders(headers):
-    return dict((header, value) for (header, value) in headers.iteritems() if header not in _RESERVED_HEADERS)
+    return dict((header, value) for (header, value) in headers.items() if header not in _RESERVED_HEADERS)
 
 def checkattr(attribute):
     def _checkattr(f):
@@ -22,6 +23,7 @@ def cloneFrame(frame, persistent=None):
     frame.unraw()
     headers = filterReservedHeaders(frame.headers)
     if persistent is not None:
-        headers[u'persistent'] = unicode(bool(persistent)).lower()
+        cast = unicode if ispy2() else str
+        headers[u'persistent'] = cast(bool(persistent)).lower()
     frame.headers = headers
     return frame

@@ -29,8 +29,9 @@ import itertools
 import time
 import uuid
 
-import commands
+import stompest.protocol.commands
 from stompest.error import StompProtocolError
+from stompest.protocol.util import ispy2
 
 class StompSession(object):
     """This object implements an abstract STOMP protocol session.
@@ -47,7 +48,7 @@ class StompSession(object):
     def __init__(self, version=None, check=True):
         self.version = version
         self._check = check
-        self._nextSubscription = itertools.count().next
+        self._nextSubscription = itertools.count().next if ispy2() else itertools.count().__next__
         self._reset()
         self._flush()
 
@@ -58,7 +59,7 @@ class StompSession(object):
 
     @version.setter
     def version(self, version):
-        version = commands.version(version)
+        version = stompest.protocol.commands.version(version)
         try:
             self.__version
         except AttributeError:
@@ -72,11 +73,11 @@ class StompSession(object):
             self.__versions
         except:
             self.__versions = None
-        return list(sorted(self.__versions or commands.versions(self.version)))
+        return list(sorted(self.__versions or stompest.protocol.commands.versions(self.version)))
 
     @_versions.setter
     def _versions(self, versions):
-        if versions and (set(versions) - set(commands.versions(self.version))):
+        if versions and (set(versions) - set(stompest.protocol.commands.versions(self.version))):
             raise StompProtocolError('Invalid versions: %s [version=%s]' % (versions, self.version))
         self.__versions = versions
 
@@ -87,14 +88,14 @@ class StompSession(object):
         self.__check('connect', [self.DISCONNECTED])
         self._versions = versions
         (self._clientSendHeartBeat, self._clientReceiveHeartBeat) = (0, 0) if (heartBeats is None) else heartBeats
-        frame = commands.connect(login, passcode, headers, self._versions, host, heartBeats)
+        frame = stompest.protocol.commands.connect(login, passcode, headers, self._versions, host, heartBeats)
         self._state = self.CONNECTING
         return frame
 
     def disconnect(self, receipt=None):
         """Create a **DISCONNECT** frame and set the session state to :attr:`DISCONNECTING`."""
         self.__check('disconnect', [self.CONNECTED])
-        frame = commands.disconnect(receipt, version=self.version)
+        frame = stompest.protocol.commands.disconnect(receipt, version=self.version)
         self._receipt(receipt)
         self._state = self.DISCONNECTING
         return frame
@@ -111,7 +112,7 @@ class StompSession(object):
     def send(self, destination, body='', headers=None, receipt=None):
         """Create a **SEND** frame."""
         self.__check('send', [self.CONNECTED])
-        frame = commands.send(destination, body, headers, receipt, version=self.version)
+        frame = stompest.protocol.commands.send(destination, body, headers, receipt, version=self.version)
         self._receipt(receipt)
         return frame
 
@@ -121,7 +122,7 @@ class StompSession(object):
         :param context: An arbitrary context object which you can use to store any information related to the subscription at hand.
         """
         self.__check('subscribe', [self.CONNECTED])
-        frame, token = commands.subscribe(destination, headers, receipt, version=self.version)
+        frame, token = stompest.protocol.commands.subscribe(destination, headers, receipt, version=self.version)
         if token in self._subscriptions:
             raise StompProtocolError('Already subscribed [%s=%s]' % token)
         self._receipt(receipt)
@@ -131,7 +132,7 @@ class StompSession(object):
     def unsubscribe(self, token, receipt=None):
         """Create an **UNSUBSCRIBE** frame and lose track of the subscription assiocated to it."""
         self.__check('unsubscribe', [self.CONNECTED])
-        frame = commands.unsubscribe(token, receipt, version=self.version)
+        frame = stompest.protocol.commands.unsubscribe(token, receipt, version=self.version)
         try:
             self._subscriptions.pop(token)
         except KeyError:
@@ -142,14 +143,14 @@ class StompSession(object):
     def ack(self, frame, receipt=None):
         """Create an **ACK** frame for a received **MESSAGE** frame."""
         self.__check('ack', [self.CONNECTED])
-        frame = commands.ack(frame, self._transactions, receipt)
+        frame = stompest.protocol.commands.ack(frame, self._transactions, receipt)
         self._receipt(receipt)
         return frame
 
     def nack(self, frame, receipt=None):
         """Create a **NACK** frame for a received **MESSAGE** frame."""
         self.__check('nack', [self.CONNECTED])
-        frame = commands.nack(frame, self._transactions, receipt)
+        frame = stompest.protocol.commands.nack(frame, self._transactions, receipt)
         self._receipt(receipt)
         return frame
 
@@ -168,7 +169,7 @@ class StompSession(object):
         .. note :: If you try and begin a pending transaction twice, this will result in a :class:`~.stompest.error.StompProtocolError`.
         """
         self.__check('begin', [self.CONNECTED])
-        frame = commands.begin(transaction, receipt, version=self.version)
+        frame = stompest.protocol.commands.begin(transaction, receipt, version=self.version)
         if transaction in self._transactions:
             raise StompProtocolError('Transaction already active: %s' % transaction)
         self._transactions.add(transaction)
@@ -183,7 +184,7 @@ class StompSession(object):
         .. note :: If you try and abort a transaction which is not pending, this will result in a :class:`~.stompest.error.StompProtocolError`.
         """
         self.__check('abort', [self.CONNECTED])
-        frame = commands.abort(transaction, receipt, version=self.version)
+        frame = stompest.protocol.commands.abort(transaction, receipt, version=self.version)
         try:
             self._transactions.remove(transaction)
         except KeyError:
@@ -199,7 +200,7 @@ class StompSession(object):
         .. note :: If you try and commit a transaction which is not pending, this will result in a :class:`~.stompest.error.StompProtocolError`.
         """
         self.__check('commit', [self.CONNECTED])
-        frame = commands.commit(transaction, receipt, version=self.version)
+        frame = stompest.protocol.commands.commit(transaction, receipt, version=self.version)
         try:
             self._transactions.remove(transaction)
         except KeyError:
@@ -211,7 +212,7 @@ class StompSession(object):
         """Handle a **CONNECTED** frame and set the session state to :attr:`CONNECTED`."""
         self.__check('connected', [self.CONNECTING])
         try:
-            (self.version, self._server, self._id, (self._serverSendHeartBeat, self._serverReceiveHeartBeat)) = commands.connected(frame, versions=self._versions)
+            (self.version, self._server, self._id, (self._serverSendHeartBeat, self._serverReceiveHeartBeat)) = stompest.protocol.commands.connected(frame, versions=self._versions)
         finally:
             self._versions = None
         self._state = self.CONNECTED
@@ -222,7 +223,7 @@ class StompSession(object):
         .. seealso :: The :meth:`subscribe` method.
         """
         self.__check('message', [self.CONNECTED])
-        token = commands.message(frame)
+        token = stompest.protocol.commands.message(frame)
         if token not in self._subscriptions:
             raise StompProtocolError('No such subscription [%s=%s]' % token)
         return token
@@ -230,7 +231,7 @@ class StompSession(object):
     def receipt(self, frame):
         """Handle a **RECEIPT** frame. Returns the receipt id which you can use to match this receipt to the command that requested it."""
         self.__check('receipt', [self.CONNECTED, self.DISCONNECTING])
-        receipt = commands.receipt(frame)
+        receipt = stompest.protocol.commands.receipt(frame)
         try:
             self._receipts.remove(receipt)
         except KeyError:
@@ -242,7 +243,7 @@ class StompSession(object):
     def beat(self):
         """Create a STOMP heart-beat.
         """
-        return commands.beat(self.version)
+        return stompest.protocol.commands.beat(self.version)
 
     def sent(self):
         """Notify the session that data was sent (counts as client heart-beat).
@@ -270,13 +271,13 @@ class StompSession(object):
     def clientHeartBeat(self):
         """The negotiated client heart-beat period in ms.
         """
-        return commands.negotiateHeartBeat(self._clientSendHeartBeat, self._serverReceiveHeartBeat)
+        return stompest.protocol.commands.negotiateHeartBeat(self._clientSendHeartBeat, self._serverReceiveHeartBeat)
 
     @property
     def serverHeartBeat(self):
         """The negotiated server heart-beat period in ms.
         """
-        return commands.negotiateHeartBeat(self._clientReceiveHeartBeat, self._serverSendHeartBeat)
+        return stompest.protocol.commands.negotiateHeartBeat(self._clientReceiveHeartBeat, self._serverSendHeartBeat)
 
     # session information
 
@@ -301,7 +302,7 @@ class StompSession(object):
         """Flush all active subscriptions and return an iterator over the :meth:`subscribe` parameters (**destinations**, **header**, **receipt**, **context**) which you can consume to replay the subscriptions upon the next :meth:`connect`."""
         subscriptions = self._subscriptions
         self._flush()
-        for (_, destination, headers, receipt, context) in sorted(subscriptions.itervalues()):
+        for (_, destination, headers, receipt, context) in sorted(subscriptions.values()):
             yield destination, headers, receipt, context
 
     def subscription(self, token):

@@ -5,6 +5,8 @@ import errno
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
+from stompest.protocol.util import ispy2
+from stompest.protocol.frame import StompFrame
 
 class StompFrameTransport(object):
     factory = StompParser
@@ -32,7 +34,7 @@ class StompFrameTransport(object):
                 files, _, _ = select.select([self._socket], [], [])
             else:
                 files, _, _ = select.select([self._socket], [], [], timeout)
-        except select.error as (code, msg):
+        except select.error as code:
             if code == errno.EINTR:
                 if timeout is None:
                     return self.canRead()
@@ -72,7 +74,8 @@ class StompFrameTransport(object):
             self._parser.add(data)
 
     def send(self, frame):
-        self._write(str(frame))
+        frame = str(frame) if ispy2() else (str(frame).encode('ascii') if (isinstance(frame, StompFrame) and frame.version == '1.0') else str(frame).encode('utf-8'))
+        self._write(frame)
 
     def setVersion(self, version):
         self._parser.version = version
