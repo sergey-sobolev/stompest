@@ -70,7 +70,6 @@ class StompSessionTest(unittest.TestCase):
         self.assertEqual(session.server, None)
         self.assertEqual(session.id, '4711')
         self.assertEqual(session.version, StompSpec.VERSION_1_0)
-        self.assertRaises(StompProtocolError, session.disconnect, 4711)
         frame = session.disconnect()
         session.close()
         self.assertEqual(frame, commands.disconnect())

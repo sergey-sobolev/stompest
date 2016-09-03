@@ -1,5 +1,4 @@
 import re
-from sys import version_info
 
 from stompest.protocol.spec import StompSpec
 
@@ -8,9 +7,6 @@ def escape(version):
 
 def unescape(version):
     return _HeadersUnescaper.get(version)
-
-def ispy2():
-    return version_info[0] == 2
 
 class _HeadersTransformer(object):
     _ESCAPE_CHARACTER = StompSpec.ESCAPE_CHARACTER

@@ -1,4 +1,3 @@
-# -*- coding: iso-8859-1 -*-
 """This module implements a low-level and stateless API for all commands of the STOMP protocol version supported by stompest. All STOMP command frames are represented as :class:`~.frame.StompFrame` objects. It forms the basis for :class:`~.session.StompSession` which represents the full state of an abstract STOMP protocol session and (via :class:`~.session.StompSession`) of both high-level STOMP clients. You can use the commands API independently of other stompest modules to roll your own STOMP related functionality.
 
 .. note :: Whenever you have to pass a **version** parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of :attr:`StompSpec.DEFAULT_VERSION`, which is currently :obj:`'1.0'` but may change in upcoming versions of stompest (or you might override it yourself). Any command which does not conform to the STOMP protocol version in question will result in a :class:`~.error.StompProtocolError`. The **version** parameter will always be the last argument in the signature; since command signatures may vary with a new STOMP protocol version, you are advised to always specify it as a keyword (as opposed to a positional) argument.
@@ -10,22 +9,22 @@ Examples:
 >>> versions
 ['1.0', '1.1']
 >>> commands.connect(versions=versions)
-StompFrame(command=u'CONNECT', headers={u'host': '', u'accept-version': '1.0,1.1'})
+StompFrame(command='CONNECT', headers={'host': '', 'accept-version': '1.0,1.1'})
 >>> frame, token = commands.subscribe('/queue/test', {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '100'})
 >>> frame = StompFrame(StompSpec.MESSAGE, {StompSpec.DESTINATION_HEADER: '/queue/test', StompSpec.MESSAGE_ID_HEADER: '007'}, 'hello')
 >>> frame
-StompFrame(command=u'MESSAGE', headers={u'destination': '/queue/test', u'message-id': '007'}, body='hello')
+StompFrame(command='MESSAGE', headers={'destination': '/queue/test', 'message-id': '007'}, body=b'hello')
 >>> commands.message(frame) == token # This message matches your subscription.
 True
 >>> commands.message(frame)
-(u'destination', '/queue/test')
+('destination', '/queue/test')
 >>> frame.version = StompSpec.VERSION_1_1
 >>> commands.message(frame)
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
-stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={u'destination': '/queue/test', u'message-id': '007'}]
+stompest.error.StompProtocolError: Invalid MESSAGE frame (subscription header mandatory in version 1.1) [headers={'destination': '/queue/test', 'message-id': '007'}]
 >>> commands.disconnect(receipt='message-12345')
-StompFrame(command=u'DISCONNECT', headers={u'receipt': 'message-12345'})
+StompFrame(command='DISCONNECT', headers={'receipt': 'message-12345'})
 
 .. seealso :: Specification of STOMP protocols `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_ and `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, your favorite broker's documentation for additional STOMP headers.
 """
@@ -34,7 +33,7 @@ from stompest.error import StompProtocolError
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec
-from stompest.protocol.util import ispy2
+from stompest.python3 import toText
 
 # outgoing frames
 
@@ -91,7 +90,7 @@ def disconnect(receipt=None, version=None):
     _addReceiptHeader(frame, receipt)
     return frame
 
-def send(destination, body='', headers=None, receipt=None, version=None):
+def send(destination, body=b'', headers=None, receipt=None, version=None):
     """Create a **SEND** frame.
     
     :param destination: Destination for the frame.
@@ -122,8 +121,7 @@ def subscribe(destination, headers, receipt=None, version=None):
         if (version != StompSpec.VERSION_1_0):
             raise
     token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
-    cast = unicode if ispy2() else str
-    return frame, tuple(map(cast, token))
+    return frame, tuple(map(toText, token))
 
 def unsubscribe(token, receipt=None, version=None):
     """Create an **UNSUBSCRIBE** frame.
@@ -309,9 +307,10 @@ def _ackHeaders(frame, transactions):
 def _addReceiptHeader(frame, receipt):
     if not receipt:
         return
-    if not isinstance(receipt, str):
+    try:
+        frame.headers[StompSpec.RECEIPT_HEADER] = toText(receipt)
+    except:
         raise StompProtocolError('Invalid receipt (not a string): %s' % repr(receipt))
-    frame.headers[StompSpec.RECEIPT_HEADER] = str(receipt)
 
 def _checkCommand(frame, commands=None):
     if frame.command not in (commands or StompSpec.COMMANDS):

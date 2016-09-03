@@ -1,4 +1,7 @@
+from __future__ import unicode_literals
+
 import codecs
+
 from stompest.error import StompProtocolError
 
 class StompSpec(object):
@@ -11,17 +14,17 @@ class StompSpec(object):
     VERSIONS = [VERSION_1_0, VERSION_1_1, VERSION_1_2]
     DEFAULT_VERSION = VERSION_1_0
 
-    ABORT = u'ABORT'
-    ACK = u'ACK'
-    BEGIN = u'BEGIN'
-    COMMIT = u'COMMIT'
-    CONNECT = u'CONNECT'
-    DISCONNECT = u'DISCONNECT'
-    NACK = u'NACK'
-    SEND = u'SEND'
-    STOMP = u'STOMP'
-    SUBSCRIBE = u'SUBSCRIBE'
-    UNSUBSCRIBE = u'UNSUBSCRIBE'
+    ABORT = 'ABORT'
+    ACK = 'ACK'
+    BEGIN = 'BEGIN'
+    COMMIT = 'COMMIT'
+    CONNECT = 'CONNECT'
+    DISCONNECT = 'DISCONNECT'
+    NACK = 'NACK'
+    SEND = 'SEND'
+    STOMP = 'STOMP'
+    SUBSCRIBE = 'SUBSCRIBE'
+    UNSUBSCRIBE = 'UNSUBSCRIBE'
 
     CLIENT_COMMANDS = {
         VERSION_1_0: set([
@@ -38,10 +41,10 @@ class StompSpec(object):
         ])
     }
 
-    CONNECTED = u'CONNECTED'
-    ERROR = u'ERROR'
-    MESSAGE = u'MESSAGE'
-    RECEIPT = u'RECEIPT'
+    CONNECTED = 'CONNECTED'
+    ERROR = 'ERROR'
+    MESSAGE = 'MESSAGE'
+    RECEIPT = 'RECEIPT'
 
     SERVER_COMMANDS = {
         VERSION_1_0: set([CONNECTED, ERROR, MESSAGE, RECEIPT]),
@@ -82,29 +85,29 @@ class StompSpec(object):
     FRAME_DELIMITER = '\x00'
     HEADER_SEPARATOR = ':'
 
-    ACCEPT_VERSION_HEADER = u'accept-version'
-    ACK_HEADER = u'ack'
-    CONTENT_LENGTH_HEADER = u'content-length'
-    CONTENT_TYPE_HEADER = u'content-type'
-    DESTINATION_HEADER = u'destination'
-    HEART_BEAT_HEADER = u'heart-beat'
-    HOST_HEADER = u'host'
-    ID_HEADER = u'id'
-    LOGIN_HEADER = u'login'
-    MESSAGE_ID_HEADER = u'message-id'
-    PASSCODE_HEADER = u'passcode'
-    RECEIPT_HEADER = u'receipt'
-    RECEIPT_ID_HEADER = u'receipt-id'
-    SELECTOR_HEADER = u'selector'
-    SESSION_HEADER = u'session'
-    SERVER_HEADER = u'server'
-    SUBSCRIPTION_HEADER = u'subscription'
-    TRANSACTION_HEADER = u'transaction'
-    VERSION_HEADER = u'version'
+    ACCEPT_VERSION_HEADER = 'accept-version'
+    ACK_HEADER = 'ack'
+    CONTENT_LENGTH_HEADER = 'content-length'
+    CONTENT_TYPE_HEADER = 'content-type'
+    DESTINATION_HEADER = 'destination'
+    HEART_BEAT_HEADER = 'heart-beat'
+    HOST_HEADER = 'host'
+    ID_HEADER = 'id'
+    LOGIN_HEADER = 'login'
+    MESSAGE_ID_HEADER = 'message-id'
+    PASSCODE_HEADER = 'passcode'
+    RECEIPT_HEADER = 'receipt'
+    RECEIPT_ID_HEADER = 'receipt-id'
+    SELECTOR_HEADER = 'selector'
+    SESSION_HEADER = 'session'
+    SERVER_HEADER = 'server'
+    SUBSCRIPTION_HEADER = 'subscription'
+    TRANSACTION_HEADER = 'transaction'
+    VERSION_HEADER = 'version'
 
-    ACK_AUTO = u'auto'
-    ACK_CLIENT = u'client'
-    ACK_CLIENT_INDIVIDUAL = u'client-individual'
+    ACK_AUTO = 'auto'
+    ACK_CLIENT = 'client'
+    ACK_CLIENT_INDIVIDUAL = 'client-individual'
     CLIENT_ACK_MODES = set([ACK_CLIENT, ACK_CLIENT_INDIVIDUAL])
 
     HEART_BEAT_SEPARATOR = ','

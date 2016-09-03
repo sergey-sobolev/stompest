@@ -1,11 +1,10 @@
 import logging
 import unittest
 
-from mock import Mock
-
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import commands, StompFrame, StompSpec
+from stompest.python3 import mock
 from stompest.sync import Stomp
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,15 +17,15 @@ CONFIG = StompConfig('tcp://%s:%s' % (HOST, PORT), check=False)
 class SimpleStompTest(unittest.TestCase):
     def _get_transport_mock(self, receive=None, config=None):
         stomp = Stomp(config or CONFIG)
-        stomp._transport = Mock()
+        stomp._transport = mock.Mock()
         if receive:
             stomp._transport.receive.return_value = receive
         return stomp
 
     def _get_connect_mock(self, receive=None, config=None):
         stomp = Stomp(config or CONFIG)
-        stomp._transportFactory = Mock()
-        transport = stomp._transportFactory.return_value = Mock()
+        stomp._transportFactory = mock.Mock()
+        transport = stomp._transportFactory.return_value = mock.Mock()
         transport.host = 'mock'
         transport.port = 0
         if receive:
@@ -34,7 +33,7 @@ class SimpleStompTest(unittest.TestCase):
         return stomp
 
     def test_receiveFrame(self):
-        frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, 'testing 1 2 3')
+        frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, b'testing 1 2 3')
         stomp = self._get_transport_mock(frame_)
         frame = stomp.receiveFrame()
         self.assertEqual(frame_, frame)
@@ -46,7 +45,7 @@ class SimpleStompTest(unittest.TestCase):
 
     def test_send_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
-        self.assertRaises(StompConnectionError, stomp.send, '/queue/foo', 'test message')
+        self.assertRaises(StompConnectionError, stomp.send, '/queue/foo', b'test message')
 
     def test_subscribe_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
@@ -82,7 +81,7 @@ class SimpleStompTest(unittest.TestCase):
 
     def test_send_writes_correct_frame(self):
         destination = '/queue/foo'
-        message = 'test message'
+        message = b'test message'
         headers = {'foo': 'bar', 'fuzz': 'ball'}
         stomp = self._get_transport_mock()
         stomp.send(destination, message, headers)
@@ -97,7 +96,7 @@ class SimpleStompTest(unittest.TestCase):
         stomp.subscribe(destination, headers)
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
-        self.assertEqual(StompFrame(StompSpec.SUBSCRIBE, {StompSpec.DESTINATION_HEADER: destination, 'foo': 'bar', 'fuzz': 'ball'}, ''), sentFrame)
+        self.assertEqual(StompFrame(StompSpec.SUBSCRIBE, {StompSpec.DESTINATION_HEADER: destination, 'foo': 'bar', 'fuzz': 'ball'}), sentFrame)
 
     def test_subscribe_matching_and_corner_cases(self):
         destination = '/queue/foo'
@@ -112,7 +111,7 @@ class SimpleStompTest(unittest.TestCase):
     def test_stomp_version_1_1(self):
         destination = '/queue/foo'
         stomp = self._get_transport_mock(config=StompConfig('tcp://%s:%s' % (HOST, PORT), version=StompSpec.VERSION_1_1, check=False))
-        stomp._transport = Mock()
+        stomp._transport = mock.Mock()
         frame = StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination})
         self.assertRaises(StompProtocolError, stomp.nack, frame)
         frame = StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: '4711', StompSpec.DESTINATION_HEADER: destination, StompSpec.SUBSCRIPTION_HEADER: '0815'}, version=StompSpec.VERSION_1_1)

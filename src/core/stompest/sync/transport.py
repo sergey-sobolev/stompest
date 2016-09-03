@@ -1,12 +1,12 @@
+from __future__ import unicode_literals
+
+import errno
 import select
 import socket
 import time
-import errno
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
-from stompest.protocol.util import ispy2
-from stompest.protocol.frame import StompFrame
 
 class StompFrameTransport(object):
     factory = StompParser
@@ -74,8 +74,7 @@ class StompFrameTransport(object):
             self._parser.add(data)
 
     def send(self, frame):
-        frame = str(frame) if ispy2() else (str(frame).encode('ascii') if (isinstance(frame, StompFrame) and frame.version == '1.0') else str(frame).encode('utf-8'))
-        self._write(frame)
+        self._write(frame.__str__())
 
     def setVersion(self, version):
         self._parser.version = version

@@ -42,7 +42,6 @@ class CommandsTest(unittest.TestCase):
     def test_disconnect(self):
         self.assertEqual(commands.disconnect(), StompFrame(StompSpec.DISCONNECT))
         self.assertEqual(commands.disconnect(receipt='4711'), StompFrame(StompSpec.DISCONNECT, {StompSpec.RECEIPT_HEADER: '4711'}))
-        self.assertRaises(StompProtocolError, commands.disconnect, receipt=4711)
 
     def test_connected(self):
         self.assertEqual(commands.connected(StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'hi'})), (StompSpec.VERSION_1_0, None, 'hi', (0, 0)))

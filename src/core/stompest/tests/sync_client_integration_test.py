@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 import unittest
 
@@ -36,8 +38,8 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client = Stomp(config)
         client.connect(host=VIRTUALHOST)
 
-        client.send(self.DESTINATION, 'test message 1')
-        client.send(self.DESTINATION, 'test message 2')
+        client.send(self.DESTINATION, b'test message 1')
+        client.send(self.DESTINATION, b'test message 2')
         self.assertFalse(client.canRead(self.TIMEOUT))
         client.subscribe(self.DESTINATION, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
         self.assertTrue(client.canRead(self.TIMEOUT))
@@ -55,35 +57,35 @@ class SimpleStompIntegrationTest(unittest.TestCase):
 
         with client.transaction(4711) as transaction:
             self.assertEqual(transaction, '4711')
-            client.send(self.DESTINATION, 'test message', {StompSpec.TRANSACTION_HEADER: transaction})
+            client.send(self.DESTINATION, b'test message', {StompSpec.TRANSACTION_HEADER: transaction})
             self.assertFalse(client.canRead(0))
         self.assertTrue(client.canRead(self.TIMEOUT))
         frame = client.receiveFrame()
-        self.assertEqual(frame.body, 'test message')
+        self.assertEqual(frame.body, b'test message')
         client.ack(frame)
 
         with client.transaction(4713, receipt='4712') as transaction:
             self.assertEqual(transaction, '4713')
             self.assertEqual(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {StompSpec.RECEIPT_ID_HEADER: '4712-begin'}))
-            client.send(self.DESTINATION, 'test message', {StompSpec.TRANSACTION_HEADER: transaction})
-            client.send(self.DESTINATION, 'test message without transaction')
+            client.send(self.DESTINATION, b'test message', {StompSpec.TRANSACTION_HEADER: transaction})
+            client.send(self.DESTINATION, b'test message without transaction')
             self.assertTrue(client.canRead(self.TIMEOUT))
             frame = client.receiveFrame()
-            self.assertEqual(frame.body, 'test message without transaction')
+            self.assertEqual(frame.body, b'test message without transaction')
             client.ack(frame)
             self.assertFalse(client.canRead(0))
         frames = [client.receiveFrame() for _ in range(2)]
         frames = list(sorted(frames, key=lambda f: f.command))
         frame = frames[0]
         client.ack(frame)
-        self.assertEqual(frame.body, 'test message')
+        self.assertEqual(frame.body, b'test message')
         frame = frames[1]
         self.assertEqual(frame, StompFrame(StompSpec.RECEIPT, {StompSpec.RECEIPT_ID_HEADER: '4712-commit'}))
 
         try:
             with client.transaction(4714) as transaction:
                 self.assertEqual(transaction, '4714')
-                client.send(self.DESTINATION, 'test message', {StompSpec.TRANSACTION_HEADER: transaction})
+                client.send(self.DESTINATION, b'test message', {StompSpec.TRANSACTION_HEADER: transaction})
                 raise RuntimeError('poof')
         except RuntimeError as e:
             self.assertEqual(str(e), 'poof')
@@ -113,7 +115,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.sendFrame(StompFrame(StompSpec.DISCONNECT)) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
         client.connect(host=VIRTUALHOST)
-        client.send(self.DESTINATION, 'test message 1')
+        client.send(self.DESTINATION, b'test message 1')
         client.ack(client.receiveFrame())
         client.unsubscribe(token)
         headers = {StompSpec.ID_HEADER: 'bla', StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}
@@ -122,7 +124,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.sendFrame(StompFrame(StompSpec.DISCONNECT)) # DISCONNECT frame is out-of-band, as far as the session is concerned -> unexpected disconnect
         self.assertRaises(StompConnectionError, client.receiveFrame)
         client.connect(host=VIRTUALHOST)
-        client.send(self.DESTINATION, 'test message 2')
+        client.send(self.DESTINATION, b'test message 2')
         client.ack(client.receiveFrame())
         client.unsubscribe((StompSpec.ID_HEADER, 'bla'))
         client.disconnect()
@@ -135,8 +137,8 @@ class SimpleStompIntegrationTest(unittest.TestCase):
             print('Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version))
             return
 
-        client.send(self.DESTINATION, 'test message 1')
-        client.send(self.DESTINATION, 'test message 2')
+        client.send(self.DESTINATION, b'test message 1')
+        client.send(self.DESTINATION, b'test message 2')
         self.assertFalse(client.canRead(self.TIMEOUT))
         token = client.subscribe(self.DESTINATION, {StompSpec.ID_HEADER: 4711, StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
         self.assertTrue(client.canRead(self.TIMEOUT))
@@ -145,7 +147,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         client.ack(client.receiveFrame())
         self.assertFalse(client.canRead(self.TIMEOUT))
         client.unsubscribe(token)
-        client.send(self.DESTINATION, 'test message 3', receipt='4711')
+        client.send(self.DESTINATION, b'test message 3', receipt='4711')
         self.assertTrue(client.canRead(self.TIMEOUT))
         self.assertEqual(client.receiveFrame(), StompFrame(StompSpec.RECEIPT, {StompSpec.RECEIPT_ID_HEADER: '4711'}))
         self.assertFalse(client.canRead(self.TIMEOUT))
@@ -171,8 +173,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
     def test_5_integration_stomp_1_1_heartbeat(self):
         version = StompSpec.VERSION_1_1
 
-        port = 61612 if (BROKER == 'activemq') else PORT # stomp+nio on 61613 does not work properly, so use stomp on 61612
-        client = Stomp(self.getConfig(StompSpec.VERSION_1_1, port))
+        client = Stomp(self.getConfig(StompSpec.VERSION_1_1, PORT))
         self.assertEqual(client.lastReceived, None)
         self.assertEqual(client.lastSent, None)
 
@@ -229,16 +230,17 @@ class SimpleStompIntegrationTest(unittest.TestCase):
             print('Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version))
             return
 
-        specialCharactersHeader = u'fen\xeatre:\r\n'
-        headers = {specialCharactersHeader: u'\xbfqu\xe9 tal?, s\xfc\xdf'}
-        client.send(self.DESTINATION, body='test message 1', headers=headers)
+        key = b'fen\xc3\xaatre'.decode('utf-8')
+        value = b'\xc2\xbfqu\xc3\xa9 tal?'.decode('utf-8')
+        headers = {key: value}
+        client.send(self.DESTINATION, body=b'test message 1', headers=headers)
         self.assertFalse(client.canRead(self.TIMEOUT))
         token = client.subscribe(self.DESTINATION, {StompSpec.ID_HEADER: 4711, StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL})
         self.assertTrue(client.canRead(self.TIMEOUT))
         frame = client.receiveFrame()
         client.ack(frame)
         self.assertEqual(frame.version, version)
-        self.assertEqual(frame.headers[specialCharactersHeader], headers[specialCharactersHeader])
+        self.assertEqual(frame.headers[key], headers[key])
         self.assertFalse(client.canRead(self.TIMEOUT))
         client.unsubscribe(token)
         client.disconnect(receipt='4712')

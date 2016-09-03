@@ -1,16 +1,13 @@
 import collections
-from types import GeneratorType
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import BytesIO as IO
 
 from stompest.error import StompFrameError
+from stompest.python3 import makeCharacter, makeBytes
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec
-from stompest.protocol.util import unescape, ispy2
+from stompest.protocol.util import unescape
 
 class StompParser(object):
     """This is a parser for a wire-level byte-stream of STOMP frames.
@@ -67,14 +64,10 @@ class StompParser(object):
     def add(self, data):
         """Add a byte-stream of wire-level data.
         
-        :param data: An iterable of characters. If any character evaluates to :obj:`False`, that stream will no longer be consumed.
+        :param data: A byte-stream, i.e., a :class:`str`-like (Python 2) or :class:`bytes`-like (Python 3) object.
         """
-        if not ispy2() and not (isinstance(data, str) or isinstance(data, GeneratorType)):
-            data = data.decode()
-        for character in data:
-            if not character:
-                return
-            self.parse(character)
+        for byte in data:
+            self.parse(makeCharacter(byte))
 
     def reset(self):
         """Reset internal state, including all fully or partially parsed frames.
@@ -83,7 +76,7 @@ class StompParser(object):
         self._next()
 
     def _flush(self):
-        self._buffer = StringIO()
+        self._buffer = IO()
 
     def _next(self):
         self._frame = None
@@ -102,8 +95,6 @@ class StompParser(object):
         self.parse = self._parsers[state]
 
     def _parseHeartBeat(self, character):
-        if not ispy2() and not isinstance(character, str):
-            character = chr(character)        
         if character != StompSpec.LINE_DELIMITER:
             self._transition('command')
             self.parse(character)
@@ -114,10 +105,8 @@ class StompParser(object):
             self._append()
 
     def _parseCommand(self, character):
-        if not ispy2() and not isinstance(character, str):
-            character = chr(character)
         if character != StompSpec.LINE_DELIMITER:
-            self._buffer.write(character)
+            self._write(character)
             return
         command = self._decode(self._buffer.getvalue())
         if command not in StompSpec.COMMANDS[self.version]:
@@ -126,10 +115,8 @@ class StompParser(object):
         self._transition('headers')
 
     def _parseHeader(self, character):
-        if not ispy2() and not isinstance(character, str):
-            character = chr(character)        
         if character != StompSpec.LINE_DELIMITER:
-            self._buffer.write(character)
+            self._write(character)
             return
         header = self._decode(self._buffer.getvalue())
         if header:
@@ -145,11 +132,9 @@ class StompParser(object):
             self._transition('body')
 
     def _parseBody(self, character):
-        if not ispy2() and not isinstance(character, str):
-            character = chr(character)        
         self._read += 1
         if (self._read <= self._length) or (character != StompSpec.FRAME_DELIMITER):
-            self._buffer.write(character)
+            self._write(character)
             return
         self._frame.body = self._buffer.getvalue()
         command = self._frame.command
@@ -161,9 +146,10 @@ class StompParser(object):
         self._flush()
         raise StompFrameError(message)
 
+    def _write(self, character):
+        self._buffer.write(makeBytes(character))
+
     def _decode(self, data):
-        if not ispy2():
-            data = data.encode()
         text = StompSpec.CODECS[self.version].decode(data)[0]
         stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
         if stripLineDelimiter and text.endswith(stripLineDelimiter):

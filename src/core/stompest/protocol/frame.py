@@ -1,6 +1,8 @@
+from __future__ import unicode_literals
+
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape
-from stompest.protocol.util import ispy2
+from stompest.python3 import toText
 
 class StompFrame(object):
     """This object represents a STOMP frame.
@@ -52,9 +54,9 @@ class StompFrame(object):
 
     """
     INFO_LENGTH = 20
-    _KEYWORDS_AND_FIELDS = [('headers', '_headers', {}), ('body', 'body', ''), ('rawHeaders', 'rawHeaders', None), ('version', 'version', StompSpec.DEFAULT_VERSION)]
+    _KEYWORDS_AND_FIELDS = [('headers', '_headers', {}), ('body', 'body', b''), ('rawHeaders', 'rawHeaders', None), ('version', 'version', StompSpec.DEFAULT_VERSION)]
 
-    def __init__(self, command, headers=None, body='', rawHeaders=None, version=None):
+    def __init__(self, command, headers=None, body=b'', rawHeaders=None, version=None):
         self.version = version
 
         self.command = command
@@ -64,7 +66,7 @@ class StompFrame(object):
 
     def __eq__(self, other):
         """Two frames are considered equal if, and only if, they render the same wire-level frame, that is, if their string representation is identical."""
-        return str(self) == str(other)
+        return self.__str__() == other.__str__()
 
     __hash__ = None
 
@@ -81,12 +83,17 @@ class StompFrame(object):
             for (keyword, value) in self
         ))
 
+    def __bytes__(self):
+        return self.__str__()
+
     def __str__(self):
         """Render the wire-level representation of a STOMP frame."""
         headers = sorted(self.headers.items()) if self.rawHeaders is None else self.rawHeaders
-        headers = ''.join('%s:%s%s' % (self._encode(self._escape(unicode(key) if ispy2() else str(key))), self._encode(self._escape(unicode(value) if ispy2() else str(value))), StompSpec.LINE_DELIMITER) for (key, value) in headers)
-        return StompSpec.LINE_DELIMITER.join([self._encode(unicode(self.command) if ispy2() else str(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])
-        return StompSpec.LINE_DELIMITER.join([self._encode(str(self.command)), headers, '%s%s' % (self.body, StompSpec.FRAME_DELIMITER)])      
+        headers = ''.join('%s:%s%s' % (self._escape(toText(key)), self._escape(toText(value)), StompSpec.LINE_DELIMITER) for (key, value) in headers)
+        return self._encode(StompSpec.LINE_DELIMITER).join([self._encode(self.command), self._encode(headers), b'%s%s' % (self.body, self._encode(StompSpec.FRAME_DELIMITER))])
+
+    def __unicode__(self):
+        return self._decode(self.__str__())
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters)."""
@@ -107,13 +114,6 @@ class StompFrame(object):
     def version(self, value):
         self._version = StompSpec.version(value)
 
-    def _encode(self, text):
-        text = StompSpec.CODECS[self.version].encode(text)[0]
-        return text if ispy2() else text.decode()
-
-    def _escape(self, text):
-        return escape(self.version)(self.command, text)
-
     @property
     def headers(self):
         return self._headers if (self.rawHeaders is None) else dict(reversed(self.rawHeaders))
@@ -128,6 +128,19 @@ class StompFrame(object):
             return
         self.headers = self.headers
         self.rawHeaders = None
+
+    @property
+    def _codecs(self):
+        return StompSpec.CODECS[self.version]
+
+    def _decode(self, bytestring):
+        return self._codecs.decode(bytestring)[0]
+
+    def _encode(self, text):
+        return self._codecs.encode(text)[0]
+
+    def _escape(self, text):
+        return escape(self.version)(self.command, text)
 
 class StompHeartBeat(object):
     """This object represents a STOMP heart-beat. Its string representation (via :meth:`__str__`) renders the wire-level STOMP heart-beat."""
@@ -145,7 +158,7 @@ class StompHeartBeat(object):
         return '%s()' % self.__class__.__name__
 
     def __str__(self):
-        return StompSpec.LINE_DELIMITER
+        return StompSpec.LINE_DELIMITER.encode()
 
     def info(self):
         return 'heart-beat'

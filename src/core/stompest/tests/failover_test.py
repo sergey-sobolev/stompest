@@ -2,11 +2,9 @@ import itertools
 import socket
 import unittest
 
-from mock import patch
-
 from stompest.error import StompConnectTimeout
 from stompest.protocol import StompFailoverUri, StompFailoverTransport
-from stompest.protocol.util import ispy2
+from stompest.python3 import nextMethod, mock
 
 class StompFailoverUriTest(unittest.TestCase):
     def test_configuration(self):
@@ -97,7 +95,7 @@ class StompFailoverTest(unittest.TestCase):
             (0.04, {'host': 'remote2', 'protocol': 'tcp', 'port': 61616})
         ])
 
-    @patch('socket.gethostbyname')
+    @mock.patch('socket.gethostbyname')
     def test_priority_backup_localhost_lookup(self, mock_gethostbyname):
         local_ip = '1.2.3.4'
         uri = 'failover:tcp://remote1:61616,tcp://localhost:61616,tcp://127.0.0.1:61615,tcp://%s:61616?startupMaxReconnectAttempts=3,priorityBackup=true,randomize=false' % local_ip
@@ -110,7 +108,7 @@ class StompFailoverTest(unittest.TestCase):
             (0.04, {'host': 'remote1', 'protocol': 'tcp', 'port': 61616}),
         ])
 
-    @patch('socket.gethostbyname')
+    @mock.patch('socket.gethostbyname')
     def test_priority_backup_broken_localhost_lookup(self, mock_gethostbyname):
         local_ip = '1.2.3.4'
         uri = 'failover:tcp://remote1:61616,tcp://localhost:61616,tcp://127.0.0.1:61615,tcp://%s:61616?startupMaxReconnectAttempts=3,priorityBackup=true,randomize=false' % local_ip
@@ -145,29 +143,21 @@ class StompFailoverTest(unittest.TestCase):
         uri = 'failover:tcp://remote1:61616?useExponentialBackOff=false,startupMaxReconnectAttempts=1,reconnectDelayJitter=4'
         for j in itertools.count():
             protocol = iter(StompFailoverTransport(uri))
-            if ispy2():
-                protocol.next()
-                _, delay = protocol.next()
-            else:
-                protocol.__next__()
-                _, delay = protocol.__next__()
+            nextProtocol = nextMethod(protocol)
+            nextProtocol()
+            _, delay = nextProtocol()
             self.assertTrue(abs(delay - 0.01) < 0.004)
             if (j > 10) and (abs(delay - 0.01) > 0.003):
                 break
 
     def _test_failover(self, brokersAndDelays, expectedDelaysAndBrokers):
         for (expectedDelay, expectedBroker) in expectedDelaysAndBrokers:
-            if ispy2():
-                broker, delay = brokersAndDelays.next()
-            else:
-                broker, delay = brokersAndDelays.__next__()
+            nextBrokerAndDelay = nextMethod(brokersAndDelays)
+            broker, delay = nextBrokerAndDelay()
             self.assertEqual(delay, expectedDelay)
             self.assertEqual(broker, expectedBroker)
 
-        if ispy2():
-            self.assertRaises(StompConnectTimeout, brokersAndDelays.next)
-        else:
-            self.assertRaises(StompConnectTimeout, brokersAndDelays.__next__)
+        self.assertRaises(StompConnectTimeout, nextBrokerAndDelay)
 
 if __name__ == '__main__':
     unittest.main()

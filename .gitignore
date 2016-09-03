@@ -1,3 +1,5 @@
+.settings
+__pycache__
 *.pyc
 *.pyo
 *.egg

@@ -31,7 +31,7 @@ import uuid
 
 import stompest.protocol.commands
 from stompest.error import StompProtocolError
-from stompest.protocol.util import ispy2
+from stompest.python3 import nextMethod
 
 class StompSession(object):
     """This object implements an abstract STOMP protocol session.
@@ -48,7 +48,7 @@ class StompSession(object):
     def __init__(self, version=None, check=True):
         self.version = version
         self._check = check
-        self._nextSubscription = itertools.count().next if ispy2() else itertools.count().__next__
+        self._nextSubscription = nextMethod(itertools.count())
         self._reset()
         self._flush()
 
