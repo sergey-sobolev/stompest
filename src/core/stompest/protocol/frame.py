@@ -147,14 +147,14 @@ class StompFrame(object):
         self.rawHeaders = None
 
     @property
-    def _codecs(self):
-        return StompSpec.CODECS[self.version]
+    def _codec(self):
+        return StompSpec.codec(self.version)
 
     def _decode(self, bytestring):
-        return self._codecs.decode(bytestring)[0]
+        return self._codec.decode(bytestring)[0]
 
     def _encode(self, text):
-        return self._codecs.encode(text)[0]
+        return self._codec.encode(text)[0]
 
     def _escape(self, text):
         return escape(self.version)(self.command, text)

@@ -150,7 +150,7 @@ class StompParser(object):
         self._buffer.write(makeBytesFromString(character))
 
     def _decode(self, data):
-        text = StompSpec.CODECS[self.version].decode(data)[0]
+        text = StompSpec.codec(self.version).decode(data)[0]
         stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
         if stripLineDelimiter and text.endswith(stripLineDelimiter):
             return text[:-1]

@@ -1,7 +1,7 @@
 stomp, stomper, stompest!
 =========================
 
-`stompest <https://github.com/nikipore/stompest/>`_ is a full-featured implementation of the `STOMP <http://stomp.github.com/>`_ protocol (versions `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_, `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, and `1.2 <http://stomp.github.com//stomp-specification-1.2.html>`_) for Python 2.6 (and higher).
+`stompest <https://github.com/nikipore/stompest/>`_ is a full-featured implementation of the `STOMP <http://stomp.github.com/>`_ protocol (versions `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_, `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, and `1.2 <http://stomp.github.com//stomp-specification-1.2.html>`_) for Python 2.7 and Python 3.
 
 The STOMP client in this package is dead simple: It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want. The package also consists of a generic set of components each of which you may use independently to roll your own STOMP client:
 
@@ -13,7 +13,7 @@ The STOMP client in this package is dead simple: It does not assume anything abo
 
 * and a `failover transport <http://activemq.apache.org/failover-transport-reference.html>`_ URI scheme akin to the one used in ActiveMQ.
 
-This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is tested with Python 2.6 and 2.7, Twisted 11 and 12 (it should work with Twisted 10.1 and higher), ActiveMQ 5.8 (it should work with 5.5.1 and higher), and `Apollo <http://activemq.apache.org/apollo/>`_ 1.6. Some of the integration tests also pass against `RabbitMQ <http://www.rabbitmq.com/>`_ 3.0.2 (RabbitMQ does not support all extended STOMP features). All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable). Minor enhancements may be required to use this STOMP adapter with other brokers.
+This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is tested with Python 2.7, Python 3.5, Twisted 16, ActiveMQ 5.13, and `Apollo <http://activemq.apache.org/apollo/>`_ 1.6.
 
 Asynchronous Client
 ===================

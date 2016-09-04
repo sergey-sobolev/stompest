@@ -8,14 +8,14 @@ from stompest import FULL_VERSION
 def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
-if sys.version_info[:2] < (2, 6):
-    print('stompest requires Python version 2.6 or later (%s detected).' % '.'.join(sys.version_info[:2]))
+if sys.version_info[:2] < (2, 7):
+    print('stompest requires Python version 2.7 or later (%s detected).' % '.'.join(sys.version_info[:2]))
     sys.exit(-1)
 
 setup(
     name='stompest',
     version=FULL_VERSION,
-    author='Jan Mueller',
+    author='Jan Müller',
     author_email='nikipore@gmail.com',
     description='STOMP library for Python including a synchronous client.',
     license='Apache License 2.0',
@@ -36,7 +36,8 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: Apache Software License',
         'Intended Audience :: Developers',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
 )
