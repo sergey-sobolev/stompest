@@ -54,7 +54,7 @@ class StompFrameTransportTest(unittest.TestCase):
 
     def test_receive(self):
         headers = {'x': 'y'}
-        body = b'testing 1 2 3'
+        body = 'testing 1 2 3'
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
         transport = self._get_receive_mock(frame.__str__())
         frame_ = transport.receive()
@@ -72,7 +72,7 @@ class StompFrameTransportTest(unittest.TestCase):
 
     def test_receive_multiple_frames_extra_newlines(self):
         headers = {'x': 'y'}
-        body = b'testing 1 2 3'
+        body = 'testing 1 2 3'
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
         transport = self._get_receive_mock(b'\n\n%s\n%s\n' % (frame.__str__(), frame.__str__()))
@@ -121,7 +121,6 @@ class StompFrameTransportTest(unittest.TestCase):
         self.assertRaises(StompConnectionError, transport.receive)
         self.assertEqual(transport._socket, None)
 
-    # TODO: fix this unit test (or remove if no longer applicable
     @mock.patch('select.select')
     def _test_can_connect_eintr_retries_connection(self, select_call):
         select_call.return_value = (mock.Mock(), mock.Mock(), mock.Mock())

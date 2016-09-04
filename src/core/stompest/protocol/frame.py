@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
+from stompest.python3 import toText
+
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape
-from stompest.python3 import toText
 
 class StompFrame(object):
     """This object represents a STOMP frame.
@@ -56,7 +57,7 @@ class StompFrame(object):
     INFO_LENGTH = 20
     _KEYWORDS_AND_FIELDS = [('headers', '_headers', {}), ('body', 'body', b''), ('rawHeaders', 'rawHeaders', None), ('version', 'version', StompSpec.DEFAULT_VERSION)]
 
-    def __init__(self, command, headers=None, body=b'', rawHeaders=None, version=None):
+    def __init__(self, command, headers=None, body='', rawHeaders=None, version=None):
         self.version = version
 
         self.command = command
@@ -115,12 +116,33 @@ class StompFrame(object):
         self._version = StompSpec.version(value)
 
     @property
+    def command(self):
+        return self._command
+
+    @command.setter
+    def command(self, value):
+        self._command = toText(value)
+
+    @property
     def headers(self):
         return self._headers if (self.rawHeaders is None) else dict(reversed(self.rawHeaders))
 
     @headers.setter
     def headers(self, value):
         self._headers = dict(value or {})
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, value):
+        try:
+            value = self._encode(value)
+        except:
+            if not hasattr(value, 'decode'):
+                raise TypeError('Body is not a byte string: %s' % repr(value))
+        self._body = value
 
     def unraw(self):
         """If the frame has raw headers, copy their deduplicated version to the :attr:`headers` attribute, and remove the raw headers afterwards."""

@@ -13,7 +13,7 @@ StompFrame(command='CONNECT', headers={'host': '', 'accept-version': '1.0,1.1'})
 >>> frame, token = commands.subscribe('/queue/test', {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '100'})
 >>> frame = StompFrame(StompSpec.MESSAGE, {StompSpec.DESTINATION_HEADER: '/queue/test', StompSpec.MESSAGE_ID_HEADER: '007'}, 'hello')
 >>> frame
-StompFrame(command='MESSAGE', headers={'destination': '/queue/test', 'message-id': '007'}, body=b'hello')
+StompFrame(command='MESSAGE', headers={'destination': '/queue/test', 'message-id': '007'}, body='hello')
 >>> commands.message(frame) == token # This message matches your subscription.
 True
 >>> commands.message(frame)
@@ -30,10 +30,10 @@ StompFrame(command='DISCONNECT', headers={'receipt': 'message-12345'})
 """
 
 from stompest.error import StompProtocolError
+from stompest.python3 import toText
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec
-from stompest.python3 import toText
 
 # outgoing frames
 
@@ -90,7 +90,7 @@ def disconnect(receipt=None, version=None):
     _addReceiptHeader(frame, receipt)
     return frame
 
-def send(destination, body=b'', headers=None, receipt=None, version=None):
+def send(destination, body='', headers=None, receipt=None, version=None):
     """Create a **SEND** frame.
     
     :param destination: Destination for the frame.

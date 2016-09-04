@@ -56,15 +56,14 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         headers = {'content-length': str(len(body))}
         frame = StompFrame('MESSAGE', headers, body)
         self.assertEqual(frame.body, body)
-        # TODO: fix this
-        # self.assertEqual(bytes(frame)), b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
+        self.assertEqual(frame.__str__(), b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
 
     def test_duplicate_headers(self):
         rawHeaders = (('foo', 'bar1'), ('foo', 'bar2'))
         headers = dict(reversed(rawHeaders))
         message = {
             'command': 'SEND',
-            'body': b'some stuff\nand more',
+            'body': 'some stuff\nand more',
             'rawHeaders': rawHeaders
         }
         frame = StompFrame(**message)
@@ -80,13 +79,15 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(frame.__str__(), rawFrame)
 
     def test_non_string_arguments(self):
-        message = {'command': 0, 'headers': {123: 456}, 'body': 789}
+        message = {'command': 0, 'headers': {123: 456}}
         frame = StompFrame(**message)
-        self.assertEqual(frame.command, 0)
+        self.assertEqual(frame.command, '0')
         self.assertEqual(frame.headers, {123: 456})
-        self.assertEqual(frame.body, 789)
-        self.assertEqual(dict(frame), message)
-        self.assertRaises(TypeError, frame.__str__)
+        self.assertEqual(dict(frame), {'command': '0', 'headers': {123: 456}})
+        self.assertEqual(frame.__str__(), b'0\n123:456\n\n\x00')
+
+        message = {'command': 'bla', 'body': 789}
+        self.assertRaises(TypeError, StompFrame, **message)
 
         message = {'command': 'bla', 'headers': {123: 456}}
         frame = StompFrame(**message)

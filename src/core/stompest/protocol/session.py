@@ -29,9 +29,10 @@ import itertools
 import time
 import uuid
 
-import stompest.protocol.commands
 from stompest.error import StompProtocolError
 from stompest.python3 import nextMethod
+
+import stompest.protocol.commands
 
 class StompSession(object):
     """This object implements an abstract STOMP protocol session.

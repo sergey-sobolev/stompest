@@ -33,7 +33,7 @@ class SimpleStompTest(unittest.TestCase):
         return stomp
 
     def test_receiveFrame(self):
-        frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, b'testing 1 2 3')
+        frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, 'testing 1 2 3')
         stomp = self._get_transport_mock(frame_)
         frame = stomp.receiveFrame()
         self.assertEqual(frame_, frame)
@@ -45,7 +45,7 @@ class SimpleStompTest(unittest.TestCase):
 
     def test_send_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
-        self.assertRaises(StompConnectionError, stomp.send, '/queue/foo', b'test message')
+        self.assertRaises(StompConnectionError, stomp.send, '/queue/foo', 'test message')
 
     def test_subscribe_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
@@ -81,7 +81,7 @@ class SimpleStompTest(unittest.TestCase):
 
     def test_send_writes_correct_frame(self):
         destination = '/queue/foo'
-        message = b'test message'
+        message = 'test message'
         headers = {'foo': 'bar', 'fuzz': 'ball'}
         stomp = self._get_transport_mock()
         stomp.send(destination, message, headers)
