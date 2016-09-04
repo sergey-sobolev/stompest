@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 
@@ -8,17 +9,14 @@ from stompest import FULL_VERSION
 def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
-if sys.version_info[:2] < (2, 6):
-    print 'stompest requires Python version 2.6 or later (%s detected).' % '.'.join(sys.version_info[:2])
-    sys.exit(-1)
-if sys.version_info[:2] >= (3, 0):
-    print 'stompest is not yet compatible with Python 3 (%s detected).' % '.'.join(sys.version_info[:2])
+if sys.version_info[:2] < (2, 7):
+    print('stompest requires Python version 2.7 or later (%s detected).' % '.'.join(sys.version_info[:2]))
     sys.exit(-1)
 
 setup(
     name='stompest.async',
     version=FULL_VERSION,
-    author='Jan Mueller',
+    author='Jan Müller',
     author_email='nikipore@gmail.com',
     description='Twisted STOMP client based upon the stompest API.',
     license='Apache License 2.0',
@@ -31,7 +29,7 @@ setup(
     zip_safe=True,
     install_requires=[
         'stompest==%s' % FULL_VERSION
-        , 'twisted>=10.1.0' # Endpoints API
+        , 'twisted>=16.4.0'
     ],
     tests_require=['mock'],
     test_suite='stompest.async.tests',
@@ -42,7 +40,8 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: Apache Software License',
         'Intended Audience :: Developers',
-        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
 )

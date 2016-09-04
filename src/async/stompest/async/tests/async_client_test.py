@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from twisted.internet import defer, reactor
@@ -6,12 +8,12 @@ from twisted.python import log
 from twisted.trial import unittest
 
 from stompest.async import Stomp
+from stompest.async.listener import SubscriptionListener
 from stompest.config import StompConfig
 from stompest.error import StompCancelledError, StompConnectionError, StompConnectTimeout, StompProtocolError
+from stompest.protocol import StompSpec
 
 from .broker_simulator import BlackHoleStompServer, ErrorOnConnectStompServer, ErrorOnSendStompServer, RemoteControlViaFrameStompServer
-from stompest.protocol.spec import StompSpec
-from stompest.async.listener import SubscriptionListener
 
 observer = log.PythonLoggingObserver()
 observer.start()
@@ -21,7 +23,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     protocols = []
 
     def setUp(self):
-        self.connections = map(self._create_connection, self.protocols)
+        self.connections = [self._create_connection(p) for p in self.protocols]
 
     def _create_connection(self, protocol):
         factory = Factory()
@@ -35,7 +37,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
 
 class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
     protocols = [BlackHoleStompServer]
-    TIMEOUT = 0.02
+    TIMEOUT = 0.01
 
     @defer.inlineCallbacks
     def test_connection_timeout(self):
@@ -96,7 +98,7 @@ class AsyncClientErrorAfterConnectedTestCase(AsyncClientBaseTestCase):
         client = Stomp(config)
 
         yield client.connect()
-        client.send('/queue/fake', 'fake message')
+        client.send('/queue/fake', b'fake message')
         try:
             yield client.disconnected
         except StompProtocolError:
@@ -116,12 +118,12 @@ class AsyncClientFailoverOnDisconnectTestCase(AsyncClientBaseTestCase):
         yield client.connect()
         self.connections[0].stopListening()
         queue = '/queue/fake'
-        client.send(queue, 'shutdown')
+        client.send(queue, b'shutdown')
         try:
             client = yield client.disconnected
         except StompConnectionError:
             yield client.connect()
-        client.send(queue, 'fake message')
+        client.send(queue, b'fake message')
 
         try:
             yield client.disconnected
@@ -171,9 +173,9 @@ class AsyncClientReplaySubscriptionTestCase(AsyncClientBaseTestCase):
 
     def _on_message(self, client, msg):
         self.assertTrue(isinstance(client, Stomp))
-        self.assertEquals(msg.body, 'hi')
+        self.assertEquals(msg.body, b'hi')
         if self.shutdown:
-            client.send('/queue/fake', 'shutdown')
+            client.send('/queue/fake', b'shutdown')
         else:
             self._got_message.callback(None)
 
@@ -236,7 +238,7 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
         yield self._got_message
 
         disconnected = client.disconnected
-        client.send('/queue/fake', 'shutdown') # tell the broker to drop the connection
+        client.send('/queue/fake', b'shutdown') # tell the broker to drop the connection
         try:
             yield disconnected
         except StompConnectionError:

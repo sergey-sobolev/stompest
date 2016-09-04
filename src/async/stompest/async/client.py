@@ -205,8 +205,8 @@ class Stomp(object):
 
     @connected
     @defer.inlineCallbacks
-    def send(self, destination, body='', headers=None, receipt=None):
-        """send(destination, body='', headers=None, receipt=None)
+    def send(self, destination, body=b'', headers=None, receipt=None):
+        """send(destination, body=b'', headers=None, receipt=None)
 
         Send a **SEND** frame.
         """
@@ -300,7 +300,7 @@ class Stomp(object):
     def _onFrame(self, frame):
         yield self._notify(lambda l: l.onFrame(self, frame))
         if not frame:
-            return
+            defer.returnValue(None)
         try:
             handler = self._handlers[frame.command]
         except KeyError:

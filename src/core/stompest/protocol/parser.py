@@ -18,7 +18,7 @@ class StompParser(object):
 
     >>> from stompest.protocol import StompParser
     >>> parser = StompParser('1.0') # STOMP 1.0 does not support the NACK command.
-    >>> messages = ['RECEIPT\\nreceipt-id:message-12345\\n\\n\\x00', 'NACK\\nsubscription:0\\nmessage-id:007\\n\\n\\x00']
+    >>> messages = [b'RECEIPT\\nreceipt-id:message-12345\\n\\n\\x00', b'NACK\\nsubscription:0\\nmessage-id:007\\n\\n\\x00']
     >>> for message in messages:
     ...     parser.add(message)
     ... 

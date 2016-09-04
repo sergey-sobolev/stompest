@@ -4,6 +4,7 @@ from twisted.internet import defer, reactor, task
 from twisted.internet.protocol import Factory, Protocol
 
 from stompest.protocol import StompFailoverTransport, StompParser
+from stompest.six import binaryType
 
 LOG_CATEGORY = __name__
 
@@ -45,7 +46,7 @@ class StompProtocol(Protocol):
     def send(self, frame):
         if self.log.isEnabledFor(logging.DEBUG):
             self.log.debug('Sending %s' % frame.info())
-        self.transport.write(str(frame))
+        self.transport.write(binaryType(frame))
 
     def setVersion(self, version):
         self._parser.version = version

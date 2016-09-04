@@ -7,6 +7,7 @@ __pycache__
 _trial_temp
 *~
 *.swp
+.eggs
 .project
 .pydevproject
 build/
@@ -14,6 +15,6 @@ dist/
 /.settings
 /.DS_Store
 /.externalToolBuilders
-/readme.html
+readme.html
 /temp
 .DS_Store

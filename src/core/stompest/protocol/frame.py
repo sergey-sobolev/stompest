@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from stompest.six import binaryType, textType
@@ -23,7 +23,7 @@ class StompFrame(object):
     >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
     >>> frame
     StompFrame(command='SEND', rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
-    >>> frame.__str__()
+    >>> bytes(frame)
     b'SEND\\nfoo:bar1\\nfoo:bar2\\n\\n\\x00'
     >>> dict(frame)
     {'command': 'SEND', 'rawHeaders': [('foo', 'bar1'), ('foo', 'bar2')]}
@@ -35,22 +35,22 @@ class StompFrame(object):
     >>> frame.unraw()
     >>> frame
     StompFrame(command=u'SEND', headers={'foo': 'bar1'})
-    >>> frame.__str__()
+    >>> bytes(frame)
     b'SEND\\nfoo:bar1\\n\\n\\x00'
     >>> frame.headers = {'foo': 'bar4'}
     >>> frame.headers
     {'foo': 'bar4'}
     >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', b'fen\xc3\xaatre'.decode('utf-8'))], version=StompSpec.VERSION_1_0)
-    >>> frame.__str__()
+    >>> bytes(frame)
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     UnicodeEncodeError: 'ascii' codec can't encode character '\xea' in position 3: ordinal not in range(128)
     >>> frame.version = StompSpec.VERSION_1_1
-    >>> frame.__str__()
+    >>> bytes(frame)
     b'SEND\\nsome french:fen\\xc3\\xaatre\\n\\n\\x00'
     >>> import codecs
     >>> c = codecs.lookup('utf-8')
-    >>> c.decode(frame.__str__())
+    >>> c.decode(binaryType(frame))
     ('SEND\nsome french:fenêtre\n\n\x00', 28)
     
     """
@@ -168,14 +168,23 @@ class StompHeartBeat(object):
 
     __hash__ = None
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
+
+    def __nonzero__(self):
+        return self.__bool__()
 
     def __repr__(self):
         return '%s()' % self.__class__.__name__
 
+    def __bytes__(self):
+        return self.__str__()
+
     def __str__(self):
         return StompSpec.LINE_DELIMITER.encode()
+
+    def __unicode__(self):
+        return self.__str__().decode()
 
     def info(self):
         return 'heart-beat'

@@ -13,7 +13,7 @@ The STOMP client in this package is dead simple: It does not assume anything abo
 
 * and a `failover transport <http://activemq.apache.org/failover-transport-reference.html>`_ URI scheme akin to the one used in ActiveMQ.
 
-This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is tested with Python 2.7, Python 3.5, Twisted 16, ActiveMQ 5.13, and `Apollo <http://activemq.apache.org/apollo/>`_ 1.6.
+This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by `Mozes <http://www.mozes.com/>`_ --- persistent queueing on `ActiveMQ <http://activemq.apache.org/>`_. It is tested with Python 2.7, Python 3.3-3.5, Twisted 16.4.0, ActiveMQ 5.14, and `Apollo <http://activemq.apache.org/apollo/>`_ 1.6.
 
 Asynchronous Client
 ===================

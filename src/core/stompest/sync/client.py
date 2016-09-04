@@ -25,9 +25,8 @@ import logging
 import time
 
 from stompest.error import StompConnectionError, StompProtocolError
-from stompest.protocol import StompFailoverTransport, StompSession
+from stompest.protocol import StompFailoverTransport, StompFrame, StompSession
 from stompest.util import checkattr
-from stompest.protocol.frame import StompFrame
 
 from stompest.sync.transport import StompFrameTransport
 
@@ -220,9 +219,9 @@ class Stomp(object):
           File "<stdin>", line 4, in <module>
         RuntimeError: poof
         >>> client.receiveFrame()
-        StompFrame(command=u'RECEIPT', headers={'receipt-id': 'important-begin'})
+        StompFrame(command='RECEIPT', headers={'receipt-id': 'important-begin'})
         >>> client.receiveFrame()
-        StompFrame(command=u'RECEIPT', headers={'receipt-id': 'important-abort'})
+        StompFrame(command='RECEIPT', headers={'receipt-id': 'important-abort'})
         >>> frame = client.receiveFrame()
         >>> frame.command, frame.body
         ('MESSAGE', b'message without transaction header')
@@ -353,7 +352,7 @@ class Stomp(object):
         
         >>> # you might want to enable logging to trace the wire-level traffic
         ... import time
-        >>> client = Stomp(StompConfig('tcp://localhost:61612', version=StompSpec.VERSION_1_1))
+        >>> client = Stomp(StompConfig('tcp://localhost:61613', version=StompSpec.VERSION_1_1))
         >>> client.connect(heartBeats=(100, 100))
         >>> start = time.time()
         >>> elapsed = lambda t = None: (t or time.time()) - start

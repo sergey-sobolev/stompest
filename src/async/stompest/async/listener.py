@@ -150,7 +150,7 @@ class ReceiptListener(Listener):
         self.log = logging.getLogger(LOG_CATEGORY)
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
-        for waiting in self._receipts.values():
+        for waiting in list(self._receipts.values()):
             if waiting.called:
                 continue
             waiting.errback(StompCancelledError('Receipt did not arrive (connection lost)'))
@@ -244,7 +244,7 @@ class SubscriptionListener(Listener):
         connection.remove(self)
 
     def _waitForMessages(self, timeout):
-        return task.cooperate(handler.wait(timeout, StompCancelledError('Handlers did not finish in time.')) for handler in self._messages.values()).whenDone()
+        return task.cooperate(handler.wait(timeout, StompCancelledError('Handlers did not finish in time.')) for handler in list(self._messages.values())).whenDone()
 
 class HeartBeatListener(Listener):
     """Handles heart-beating.

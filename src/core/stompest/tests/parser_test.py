@@ -6,6 +6,7 @@ import unittest
 from stompest.error import StompFrameError
 from stompest.protocol import commands, StompFrame, StompParser, StompSpec
 from stompest.protocol.frame import StompHeartBeat
+from stompest.six import binaryType
 
 class StompParserTest(unittest.TestCase):
     def _generate_bytes(self, stream):
@@ -20,7 +21,7 @@ class StompParserTest(unittest.TestCase):
         )
 
         parser = StompParser()
-        parser.add(frame.__str__())
+        parser.add(binaryType(frame))
         self.assertEqual(parser.get(), frame)
         self.assertEqual(parser.get(), None)
 
@@ -58,10 +59,10 @@ class StompParserTest(unittest.TestCase):
         )
         parser = StompParser()
 
-        parser.add(frame.__str__())
+        parser.add(binaryType(frame))
         parser.reset()
         self.assertEqual(parser.get(), None)
-        parser.add(frame.__str__()[:20])
+        parser.add(binaryType(frame)[:20])
         self.assertEqual(parser.get(), None)
 
     def test_frame_without_header_or_body_succeeds(self):
@@ -72,7 +73,7 @@ class StompParserTest(unittest.TestCase):
     def test_frames_with_optional_newlines_succeeds(self):
         parser = StompParser()
         disconnect = commands.disconnect()
-        frame = b'\n%s\n' % disconnect
+        frame = b'\n' + binaryType(disconnect) + b'\n'
         parser.add(2 * frame)
         for _ in range(2):
             self.assertEqual(parser.get(), disconnect)
@@ -81,7 +82,7 @@ class StompParserTest(unittest.TestCase):
     def test_frames_with_heart_beats_succeeds(self):
         parser = StompParser(version=StompSpec.VERSION_1_1)
         disconnect = commands.disconnect()
-        frame = b'\n%s\n' % disconnect.__str__()
+        frame = b'\n' + binaryType(disconnect) + b'\n'
         parser.add(2 * frame)
         frames = []
         while parser.canRead():
@@ -150,7 +151,6 @@ class StompParserTest(unittest.TestCase):
             (StompSpec.VERSION_1_2, False)
         ]:
             parser = StompParser(version)
-            print(type(head))
             parser.add(head)
             parser.add(b'ouch!')
             try:
@@ -182,7 +182,7 @@ class StompParserTest(unittest.TestCase):
         textWithCarriageReturn = 'there\rfolks'
         frame = commands.send(queue, headers={'hi': textWithCarriageReturn})
         parser = StompParser(StompSpec.VERSION_1_2)
-        parser.add(frame.__str__())
+        parser.add(binaryType(frame))
         self.assertEqual(parser.get().headers['hi'], textWithCarriageReturn)
 
     def test_add_multiple_frames_per_read(self):

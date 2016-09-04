@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 
@@ -31,7 +32,6 @@ setup(
     test_suite='stompest.tests',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        'Framework :: Twisted',
         'Topic :: System :: Networking',
         'Operating System :: OS Independent',
         'License :: OSI Approved :: Apache Software License',

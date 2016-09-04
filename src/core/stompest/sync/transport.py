@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
 import errno
-import select
+import select # @UnresolvedImport
 import socket
 import time
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
+from stompest.six import binaryType
 
 class StompFrameTransport(object):
     factory = StompParser
@@ -74,7 +75,7 @@ class StompFrameTransport(object):
             self._parser.add(data)
 
     def send(self, frame):
-        self._write(frame.__str__())
+        self._write(binaryType(frame))
 
     def setVersion(self, version):
         self._parser.version = version

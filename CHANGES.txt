@@ -13,3 +13,4 @@
 * 2.1.4 - Bugfix heart-beat negotiation.
 * 2.1.5 - Improvement thanks to [Ray Ruvinskiy](https://github.com/rtkrruvinskiy). Avoid unintended inflation of messaging handling time.
 * 2.1.6 - Bugfix thanks to [Cory Stegelmeier](https://github.com/rtkcstegel). Retry system calls when EINTR is received.
+* 2.2.0 - Support for Python 3.3-3.5 thanks to [Petr Rašek](https://github.com/hydratk). Dropped support for Python 2.6.

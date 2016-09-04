@@ -1,1 +1,1 @@
-from client import Stomp
+from stompest.async.client import Stomp

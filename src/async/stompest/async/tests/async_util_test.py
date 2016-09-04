@@ -33,9 +33,9 @@ class ExclusiveWrapperTest(unittest.TestCase):
         def g():
             yield task.deferLater(reactor, 0, lambda: {}[None])
 
-        for _ in xrange(5):
+        for _ in range(5):
             running = g()
-            for _ in xrange(5):
+            for _ in range(5):
                 self.assertRaises(StompAlreadyRunningError, g)
             try:
                 yield running
@@ -94,7 +94,7 @@ class InFlightOperationsTest(unittest.TestCase):
 
         try:
             with op(None, logging.getLogger(LOG_CATEGORY)) as w:
-                reactor.callLater(0, w.cancel)  # @UndefinedVariable
+                reactor.callLater(0, w.cancel) # @UndefinedVariable
                 yield w.wait(timeout=None, fail=None)
         except CancelledError:
             pass
@@ -104,7 +104,7 @@ class InFlightOperationsTest(unittest.TestCase):
 
         try:
             with op(None, logging.getLogger(LOG_CATEGORY)) as w:
-                reactor.callLater(0, w.errback, StompCancelledError('4711'))  # @UndefinedVariable
+                reactor.callLater(0, w.errback, StompCancelledError('4711')) # @UndefinedVariable
                 yield w.wait()
         except StompCancelledError as e:
             self.assertEquals(str(e), '4711')
@@ -113,7 +113,7 @@ class InFlightOperationsTest(unittest.TestCase):
         self.assertEquals(list(op), [])
 
         with op(None, logging.getLogger(LOG_CATEGORY)) as w:
-            reactor.callLater(0, w.callback, 4711)  # @UndefinedVariable
+            reactor.callLater(0, w.callback, 4711) # @UndefinedVariable
             result = yield w.wait()
             self.assertEquals(result, 4711)
         self.assertEquals(list(op), [])

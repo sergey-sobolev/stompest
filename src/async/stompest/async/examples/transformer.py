@@ -36,7 +36,7 @@ class IncrementTransformer(object):
         """
         data = json.loads(frame.body)
         data['count'] += 1
-        client.send(self.OUT_QUEUE, json.dumps(data))
+        client.send(self.OUT_QUEUE, json.dumps(data).encode())
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

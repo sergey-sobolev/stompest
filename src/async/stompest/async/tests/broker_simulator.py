@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from twisted.internet import reactor
@@ -5,6 +7,7 @@ from twisted.internet.protocol import Factory, Protocol
 
 from stompest.error import StompFrameError
 from stompest.protocol import StompFrame, StompParser, StompSpec
+from stompest.six import binaryType
 
 LOG_CATEGORY = __name__
 
@@ -40,7 +43,7 @@ class BlackHoleStompServer(Protocol):
             self.commandMap[frame.command](frame)
 
     def getFrame(self, command, headers, body):
-        return str(StompFrame(command, headers, body, version=self._parser.version))
+        return binaryType(StompFrame(command, headers, body, version=self._parser.version))
 
     def handleConnect(self, frame):
         pass
@@ -62,7 +65,7 @@ class BlackHoleStompServer(Protocol):
 
 class ErrorOnConnectStompServer(BlackHoleStompServer):
     def handleConnect(self, frame):
-        self.transport.write(self.getFrame(StompSpec.ERROR, {}, 'Fake error message'))
+        self.transport.write(self.getFrame(StompSpec.ERROR, {}, b'Fake error message'))
 
 class ErrorOnSendStompServer(BlackHoleStompServer):
     def handleConnect(self, frame):
@@ -72,13 +75,13 @@ class ErrorOnSendStompServer(BlackHoleStompServer):
         else:
             headers = {StompSpec.VERSION_HEADER: '1.1'}
             self._parser.version = '1.1'
-        self.transport.write(self.getFrame(StompSpec.CONNECTED, headers, ''))
+        self.transport.write(self.getFrame(StompSpec.CONNECTED, headers, b''))
 
     def handleDisconnect(self, frame):
         self.transport.loseConnection()
 
     def handleSend(self, frame):
-        self.transport.write(self.getFrame(StompSpec.ERROR, {}, 'Fake error message'))
+        self.transport.write(self.getFrame(StompSpec.ERROR, {}, b'Fake error message'))
 
 class RemoteControlViaFrameStompServer(BlackHoleStompServer):
     def handleConnect(self, frame):
@@ -88,13 +91,13 @@ class RemoteControlViaFrameStompServer(BlackHoleStompServer):
         else:
             headers = {StompSpec.VERSION_HEADER: '1.1'}
             self._parser.version = '1.1'
-        self.transport.write(self.getFrame(StompSpec.CONNECTED, headers, ''))
+        self.transport.write(self.getFrame(StompSpec.CONNECTED, headers, b''))
 
     def handleDisconnect(self, frame):
         self.transport.loseConnection()
 
     def handleSend(self, frame):
-        if frame.body == 'shutdown':
+        if frame.body == b'shutdown':
             self.transport.loseConnection()
 
     def handleSubscribe(self, frame):
@@ -104,11 +107,11 @@ class RemoteControlViaFrameStompServer(BlackHoleStompServer):
             replyHeaders[StompSpec.SUBSCRIPTION_HEADER] = headers[StompSpec.ID_HEADER]
         except:
             pass
-        self.transport.write(self.getFrame(StompSpec.MESSAGE, replyHeaders, 'hi'))
+        self.transport.write(self.getFrame(StompSpec.MESSAGE, replyHeaders, b'hi'))
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     factory = Factory()
     factory.protocol = ErrorOnConnectStompServer
-    reactor.listenTCP(8007, factory)
-    reactor.run()
+    reactor.listenTCP(8007, factory) # @UndefinedVariable
+    reactor.run() # @UndefinedVariable

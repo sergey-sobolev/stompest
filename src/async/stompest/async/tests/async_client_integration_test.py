@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 from twisted.internet import reactor, defer, task
@@ -22,7 +24,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     queue = None
     errorQueue = None
     log = logging.getLogger(LOG_CATEGORY)
-    headers = {StompSpec.ID_HEADER: u'4711'}
+    headers = {StompSpec.ID_HEADER: '4711'}
 
     TIMEOUT = 0.2
 
@@ -88,9 +90,9 @@ class AsyncClientBaseTestCase(unittest.TestCase):
         sendToErrorDestinationAndRaise(client, failure, frame, errorDestination)
 
 class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase):
-    frame1 = 'choke on this'
+    frame1 = b'choke on this'
     msg1Hdrs = {'food': 'barf', 'persistent': 'true'}
-    frame2 = 'follow up message'
+    frame2 = b'follow up message'
     queue = '/queue/asyncHandlerExceptionWithErrorQueueUnitTest'
     errorQueue = '/queue/zzz.error.asyncStompestHandlerExceptionWithErrorQueueUnitTest'
 
@@ -109,11 +111,11 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
     @defer.inlineCallbacks
     def _test_onhandlerException_ackMessage_filterReservedHdrs_send2ErrorQ_and_disconnect(self, version):
         if version not in commands.versions(VERSION):
-            print 'Skipping test case (version %s is not configured)' % VERSION
+            print('Skipping test case (version %s is not configured)' % VERSION)
             defer.returnValue(None)
 
         if BROKER == 'rabbitmq':
-            print 'RabbitMQ does not support selector header'
+            print('RabbitMQ does not support selector header')
             defer.returnValue(None)
 
         config = self.getConfig(version)
@@ -122,16 +124,16 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         try:
             yield client.connect(host=VIRTUALHOST, versions=[version])
         except StompProtocolError as e:
-            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version)
+            print('Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (e, version))
             defer.returnValue(None)
 
         # enqueue two messages
         messageHeaders = dict(self.msg1Hdrs)
         defaultHeaders = {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}
-        specialCharactersHeader = u'fen\xeatre:\r\n'
+        specialCharactersHeader = b'fen\xc3\xaatre'.decode('utf-8')
         if version != StompSpec.VERSION_1_0:
             defaultHeaders.update(self.headers)
-            messageHeaders[specialCharactersHeader] = u'\xbfqu\xe9 tal?, s\xfc\xdf'
+            messageHeaders[specialCharactersHeader] = b'\xc2\xbfqu\xc3\xa9 tal?'.decode('utf-8')
 
         client.send(self.queue, self.frame1, messageHeaders)
         client.send(self.queue, self.frame2)
@@ -141,7 +143,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         # barf on first message so it will get put in error queue
         # use selector to guarantee message order (order not necessarily guaranteed)
-        headers = {StompSpec.SELECTOR_HEADER: u"food='barf'"}
+        headers = {StompSpec.SELECTOR_HEADER: "food='barf'"}
         headers.update(defaultHeaders)
 
         yield client.connect(host=VIRTUALHOST, versions=[version])
@@ -175,7 +177,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         # verify that first message was in error queue
         self.assertEquals(self.frame1, self.errorQueueFrame.body)
-        self.assertEquals(messageHeaders[u'food'], self.errorQueueFrame.headers['food'])
+        self.assertEquals(messageHeaders['food'], self.errorQueueFrame.headers['food'])
         if version != StompSpec.VERSION_1_0:
             self.assertEquals(messageHeaders[specialCharactersHeader], self.errorQueueFrame.headers[specialCharactersHeader])
         self.assertNotEquals(self.unhandledFrame.headers[StompSpec.MESSAGE_ID_HEADER], self.errorQueueFrame.headers[StompSpec.MESSAGE_ID_HEADER])
@@ -254,7 +256,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
     numMsgs = 5
     msgCount = 0
-    frame = 'test'
+    frame = b'test'
     queue = '/queue/asyncGracefulDisconnectUnitTest'
 
     @defer.inlineCallbacks
@@ -265,7 +267,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
 
         # connect
         client = yield client.connect(host=VIRTUALHOST)
-        yield task.cooperate(iter([client.send(self.queue, self.frame, receipt='message-%d' % j) for j in xrange(self.numMsgs)])).whenDone()
+        yield task.cooperate(iter([client.send(self.queue, self.frame, receipt='message-%d' % j) for j in range(self.numMsgs)])).whenDone()
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._frameHandler))
 
         # wait for disconnect
@@ -298,7 +300,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         client.disconnect()
 
 class SubscribeTestCase(AsyncClientBaseTestCase):
-    frame = 'test'
+    frame = b'test'
     queue = '/queue/asyncSubscribeTestCase'
 
     @defer.inlineCallbacks
@@ -359,7 +361,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         yield client.disconnected
 
 class NackTestCase(AsyncClientBaseTestCase):
-    frame = 'test'
+    frame = b'test'
     queue = '/queue/asyncNackTestCase'
 
     def test_nack_stomp_1_1(self):
@@ -371,7 +373,7 @@ class NackTestCase(AsyncClientBaseTestCase):
     @defer.inlineCallbacks
     def _test_nack(self, version):
         if version not in commands.versions(VERSION):
-            print 'Skipping test case (version %s is not configured)' % VERSION
+            print('Skipping test case (version %s is not configured)' % VERSION)
             defer.returnValue(None)
 
         config = self.getConfig(version)
@@ -380,7 +382,7 @@ class NackTestCase(AsyncClientBaseTestCase):
             client = yield client.connect(host=VIRTUALHOST, versions=[version])
 
         except StompProtocolError as e:
-            print 'Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (version, e)
+            print('Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (version, e))
             defer.returnValue(None)
 
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._nackFrame, ack=False))
@@ -392,7 +394,7 @@ class NackTestCase(AsyncClientBaseTestCase):
         yield client.disconnected
 
         if BROKER == 'activemq':
-            print 'Broker %s by default does not redeliver messages. Will not try and harvest the NACKed message.' % BROKER
+            print('Broker %s by default does not redeliver messages. Will not try and harvest the NACKed message.' % BROKER)
             return
 
         self.framesHandled = 0
@@ -405,7 +407,7 @@ class NackTestCase(AsyncClientBaseTestCase):
         yield client.disconnected
 
 class TransactionTestCase(AsyncClientBaseTestCase):
-    frame = 'test'
+    frame = b'test'
     queue = '/queue/asyncTransactionTestCase'
 
     @defer.inlineCallbacks
@@ -418,16 +420,16 @@ class TransactionTestCase(AsyncClientBaseTestCase):
 
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
-        client.send(self.queue, 'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
+        client.send(self.queue, b'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
         yield task.deferLater(reactor, 0.1, lambda: None)
-        client.send(self.queue, 'test message without transaction')
+        client.send(self.queue, b'test message without transaction')
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
-        self.assertEquals(self.consumedFrame.body, 'test message without transaction')
+        self.assertEquals(self.consumedFrame.body, b'test message without transaction')
         yield client.commit(transaction, receipt='%s-commit' % transaction)
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
-        self.assertEquals(self.consumedFrame.body, 'test message with transaction')
+        self.assertEquals(self.consumedFrame.body, b'test message with transaction')
         client.disconnect()
         yield client.disconnected
 
@@ -441,25 +443,24 @@ class TransactionTestCase(AsyncClientBaseTestCase):
 
         transaction = '4711'
         yield client.begin(transaction, receipt='%s-begin' % transaction)
-        client.send(self.queue, 'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
+        client.send(self.queue, b'test message with transaction', {StompSpec.TRANSACTION_HEADER: transaction})
         yield task.deferLater(reactor, 0.1, lambda: None)
-        client.send(self.queue, 'test message without transaction')
+        client.send(self.queue, b'test message without transaction')
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)
-        self.assertEquals(self.consumedFrame.body, 'test message without transaction')
+        self.assertEquals(self.consumedFrame.body, b'test message without transaction')
         yield client.abort(transaction, receipt='%s-commit' % transaction)
         client.disconnect()
         yield client.disconnected
         self.assertEquals(self.framesHandled, 1)
 
 class HeartBeatTestCase(AsyncClientBaseTestCase):
-    frame = 'test'
+    frame = b'test'
     queue = '/queue/asyncHeartBeatTestCase'
 
     @defer.inlineCallbacks
     def test_heart_beat(self):
-        port = 61612 if (BROKER == 'activemq') else PORT
-        config = self.getConfig(StompSpec.VERSION_1_1, port)
+        config = self.getConfig(StompSpec.VERSION_1_1, PORT)
         client = async.Stomp(config)
         yield client.connect(host=VIRTUALHOST, heartBeats=(250, 250))
         disconnected = client.disconnected

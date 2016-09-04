@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import unittest
 
 from stompest.protocol import StompFrame, StompSpec
+from stompest.six import binaryType
 
 class StompFrameTest(unittest.TestCase):
     def test_frame(self):
@@ -55,7 +56,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         headers = {'content-length': str(len(body))}
         frame = StompFrame('MESSAGE', headers, body)
         self.assertEqual(frame.body, body)
-        self.assertEqual(frame.__str__(), b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
+        self.assertEqual(binaryType(frame), b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
 
     def test_duplicate_headers(self):
         rawHeaders = (('foo', 'bar1'), ('foo', 'bar2'))
@@ -69,13 +70,13 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(frame.headers, headers)
         self.assertEqual(frame.rawHeaders, rawHeaders)
         rawFrame = b'SEND\nfoo:bar1\nfoo:bar2\n\nsome stuff\nand more\x00'
-        self.assertEqual(frame.__str__(), rawFrame)
+        self.assertEqual(binaryType(frame), rawFrame)
 
         frame.unraw()
         self.assertEqual(frame.headers, headers)
         self.assertEqual(frame.rawHeaders, None)
         rawFrame = b'SEND\nfoo:bar1\n\nsome stuff\nand more\x00'
-        self.assertEqual(frame.__str__(), rawFrame)
+        self.assertEqual(binaryType(frame), rawFrame)
 
     def test_non_string_arguments(self):
         message = {'command': 0, 'headers': {123: 456}}
@@ -83,11 +84,11 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(frame.command, '0')
         self.assertEqual(frame.headers, {123: 456})
         self.assertEqual(dict(frame), {'command': '0', 'headers': {123: 456}})
-        self.assertEqual(frame.__str__(), b'0\n123:456\n\n\x00')
+        self.assertEqual(binaryType(frame), b'0\n123:456\n\n\x00')
 
         message = {'command': 'bla', 'headers': {123: 456}}
         frame = StompFrame(**message)
-        self.assertEqual(frame.__str__(), b'bla\n123:456\n\n\x00')
+        self.assertEqual(binaryType(frame), b'bla\n123:456\n\n\x00')
         self.assertEqual(eval(repr(frame)), frame)
 
     def test_unescape(self):

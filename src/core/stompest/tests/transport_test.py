@@ -6,7 +6,7 @@ import unittest
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompFrame, StompSpec
-from stompest.six import makeBytesFromSequence, mock
+from stompest.six import binaryType, makeBytesFromSequence, mock
 from stompest.sync.transport import StompFrameTransport
 
 logging.basicConfig(level=logging.DEBUG)
@@ -42,7 +42,7 @@ class StompFrameTransportTest(unittest.TestCase):
         transport.send(frame)
         self.assertEqual(1, transport._socket.sendall.call_count)
         args, _ = transport._socket.sendall.call_args
-        self.assertEqual(frame.__str__(), args[0])
+        self.assertEqual(binaryType(frame), args[0])
 
     def test_send_not_connected_raises(self):
         frame = StompFrame(StompSpec.MESSAGE)
@@ -56,7 +56,7 @@ class StompFrameTransportTest(unittest.TestCase):
         headers = {'x': 'y'}
         body = b'testing 1 2 3'
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
-        transport = self._get_receive_mock(frame.__str__())
+        transport = self._get_receive_mock(binaryType(frame))
         frame_ = transport.receive()
         self.assertEqual(frame, frame_)
         self.assertEqual(1, transport._socket.recv.call_count)
@@ -75,7 +75,7 @@ class StompFrameTransportTest(unittest.TestCase):
         body = b'testing 1 2 3'
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
-        transport = self._get_receive_mock(b'\n\n%s\n%s\n' % (frame.__str__(), frame.__str__()))
+        transport = self._get_receive_mock(b'\n\n' + binaryType(frame) + b'\n' + binaryType(frame) + b'\n')
         frame_ = transport.receive()
         self.assertEqual(frame, frame_)
         frame_ = transport.receive()
@@ -90,7 +90,7 @@ class StompFrameTransportTest(unittest.TestCase):
         headers = {StompSpec.CONTENT_LENGTH_HEADER: str(len(body))}
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
-        transport = self._get_receive_mock(frame.__str__())
+        transport = self._get_receive_mock(binaryType(frame))
         frame_ = transport.receive()
         self.assertEqual(frame, frame_)
         self.assertEqual(1, transport._socket.recv.call_count)
