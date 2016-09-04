@@ -3,7 +3,7 @@ import collections
 from io import BytesIO as IO
 
 from stompest.error import StompFrameError
-from stompest.python3 import makeCharacter, makeBytes
+from stompest.six import characterType, makeBytesFromString
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec
@@ -24,9 +24,9 @@ class StompParser(object):
     ... 
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-    stompest.error.StompFrameError: Invalid command: u'NACK'
+    stompest.error.StompFrameError: Invalid command: 'NACK'
     >>> parser.get()
-    StompFrame(command=u'RECEIPT', rawHeaders=[(u'receipt-id', u'message-12345')])
+    StompFrame(command='RECEIPT', rawHeaders=[('receipt-id', 'message-12345')])
     >>> parser.canRead()
     False
     >>> parser.get()
@@ -34,7 +34,7 @@ class StompParser(object):
     >>> parser = StompParser('1.1')
     >>> parser.add(messages[1])
     >>> parser.get()
-    StompFrame(command=u'NACK', rawHeaders=[(u'subscription', u'0'), (u'message-id', u'007')], version='1.1')    
+    StompFrame(command='NACK', rawHeaders=[('subscription', '0'), ('message-id', '007')], version='1.1')    
     
     """
     SENTINEL = None
@@ -67,7 +67,7 @@ class StompParser(object):
         :param data: A byte-stream, i.e., a :class:`str`-like (Python 2) or :class:`bytes`-like (Python 3) object.
         """
         for byte in data:
-            self.parse(makeCharacter(byte))
+            self.parse(characterType(byte))
 
     def reset(self):
         """Reset internal state, including all fully or partially parsed frames.
@@ -147,7 +147,7 @@ class StompParser(object):
         raise StompFrameError(message)
 
     def _write(self, character):
-        self._buffer.write(makeBytes(character))
+        self._buffer.write(makeBytesFromString(character))
 
     def _decode(self, data):
         text = StompSpec.CODECS[self.version].decode(data)[0]

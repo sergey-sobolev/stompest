@@ -11,9 +11,9 @@ Examples:
 >>> commands.connect(versions=versions)
 StompFrame(command='CONNECT', headers={'host': '', 'accept-version': '1.0,1.1'})
 >>> frame, token = commands.subscribe('/queue/test', {StompSpec.ACK_HEADER: 'client-individual', 'activemq.prefetchSize': '100'})
->>> frame = StompFrame(StompSpec.MESSAGE, {StompSpec.DESTINATION_HEADER: '/queue/test', StompSpec.MESSAGE_ID_HEADER: '007'}, 'hello')
+>>> frame = StompFrame(StompSpec.MESSAGE, {StompSpec.DESTINATION_HEADER: '/queue/test', StompSpec.MESSAGE_ID_HEADER: '007'}, b'hello')
 >>> frame
-StompFrame(command='MESSAGE', headers={'destination': '/queue/test', 'message-id': '007'}, body='hello')
+StompFrame(command='MESSAGE', headers={'destination': '/queue/test', 'message-id': '007'}, body=b'hello')
 >>> commands.message(frame) == token # This message matches your subscription.
 True
 >>> commands.message(frame)
@@ -30,7 +30,7 @@ StompFrame(command='DISCONNECT', headers={'receipt': 'message-12345'})
 """
 
 from stompest.error import StompProtocolError
-from stompest.python3 import toText
+from stompest.six import textType
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec
@@ -90,11 +90,11 @@ def disconnect(receipt=None, version=None):
     _addReceiptHeader(frame, receipt)
     return frame
 
-def send(destination, body='', headers=None, receipt=None, version=None):
+def send(destination, body=b'', headers=None, receipt=None, version=None):
     """Create a **SEND** frame.
     
     :param destination: Destination for the frame.
-    :param body: Message body. Binary content is allowed but must be accompanied by the STOMP header **content-length** which specifies the number of bytes in the message body.
+    :param body: Binary message body. If the body contains null-bytes, it must be accompanied by the STOMP header **content-length** which specifies the number of bytes in the message body.
     :param headers: Additional STOMP headers.
     :param receipt: See :func:`disconnect`.
     """
@@ -121,7 +121,7 @@ def subscribe(destination, headers, receipt=None, version=None):
         if (version != StompSpec.VERSION_1_0):
             raise
     token = (StompSpec.DESTINATION_HEADER, destination) if (subscription is None) else (StompSpec.ID_HEADER, subscription)
-    return frame, tuple(map(toText, token))
+    return frame, tuple(map(textType, token))
 
 def unsubscribe(token, receipt=None, version=None):
     """Create an **UNSUBSCRIBE** frame.
@@ -308,7 +308,7 @@ def _addReceiptHeader(frame, receipt):
     if not receipt:
         return
     try:
-        frame.headers[StompSpec.RECEIPT_HEADER] = toText(receipt)
+        frame.headers[StompSpec.RECEIPT_HEADER] = textType(receipt)
     except:
         raise StompProtocolError('Invalid receipt (not a string): %s' % repr(receipt))
 

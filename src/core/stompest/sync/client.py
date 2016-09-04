@@ -75,7 +75,7 @@ class Stomp(object):
         
         .. seealso :: The :mod:`.protocol.failover` and :mod:`.protocol.session` modules for the details of subscription replay and failover transport.
         """
-        try:  # preserve existing connection
+        try: # preserve existing connection
             self._transport
         except StompConnectionError:
             pass
@@ -131,8 +131,8 @@ class Stomp(object):
     # STOMP frames
 
     @connected
-    def send(self, destination, body='', headers=None, receipt=None):
-        """send(destination, body='', headers=None, receipt=None)
+    def send(self, destination, body=b'', headers=None, receipt=None):
+        """send(destination, body=b'', headers=None, receipt=None)
         
         Send a **SEND** frame.
         """
@@ -208,24 +208,24 @@ class Stomp(object):
         >>> client = Stomp(StompConfig('tcp://localhost:61613'))
         >>> client.connect()
         >>> client.subscribe('/queue/test', {'ack': 'client-individual'})
-        (u'destination', u'/queue/test')
+        ('destination', '/queue/test')
         >>> client.canRead(0) # Check that queue is empty.
         False
         >>> with client.transaction(receipt='important') as transaction:
-        ...     client.send('/queue/test', 'message with transaction header', {StompSpec.TRANSACTION_HEADER: transaction})
-        ...     client.send('/queue/test', 'message without transaction header')
+        ...     client.send('/queue/test', b'message with transaction header', {StompSpec.TRANSACTION_HEADER: transaction})
+        ...     client.send('/queue/test', b'message without transaction header')
         ...     raise RuntimeError('poof')
         ... 
         Traceback (most recent call last):
           File "<stdin>", line 4, in <module>
         RuntimeError: poof
         >>> client.receiveFrame()
-        StompFrame(command=u'RECEIPT', headers={u'receipt-id': u'important-begin'}, body='')
+        StompFrame(command=u'RECEIPT', headers={'receipt-id': 'important-begin'})
         >>> client.receiveFrame()
-        StompFrame(command=u'RECEIPT', headers={u'receipt-id': u'important-abort'}, body='')
+        StompFrame(command=u'RECEIPT', headers={'receipt-id': 'important-abort'})
         >>> frame = client.receiveFrame()
         >>> frame.command, frame.body
-        (u'MESSAGE', 'message without transaction header')
+        ('MESSAGE', b'message without transaction header')
         >>> client.ack(frame)
         >>> client.canRead(0) # frame with transaction header was dropped by the broker
         False
@@ -294,7 +294,7 @@ class Stomp(object):
             self.session.received()
             if self.log.isEnabledFor(logging.DEBUG):
                 self.log.debug('Received %s' % frame.info())
-            if isinstance(frame, StompFrame):  # there's a real STOMP frame on the wire, not a heart-beat (duck-typing didn't work in Py3)
+            if isinstance(frame, StompFrame): # there's a real STOMP frame on the wire, not a heart-beat (duck-typing didn't work in Py3)
                 self._messages.append(frame)
                 return True
 

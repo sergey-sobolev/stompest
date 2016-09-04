@@ -7,12 +7,12 @@ class StompSessionTest(unittest.TestCase):
     def test_session_init(self):
         session = StompSession(check=False)
         self.assertEqual(session.version, StompSpec.DEFAULT_VERSION)
-        session.send('', '', {})
+        session.send('', b'', {})
         session.subscribe('bla1', {'bla2': 'bla3'})
         session.unsubscribe((StompSpec.DESTINATION_HEADER, 'bla1'))
 
         session = StompSession()
-        self.assertRaises(StompProtocolError, lambda: session.send('', '', {}))
+        self.assertRaises(StompProtocolError, lambda: session.send('', b'', {}))
         self.assertRaises(StompProtocolError, lambda: session.subscribe('bla1', {'bla2': 'bla3'}))
         self.assertRaises(StompProtocolError, lambda: session.unsubscribe((StompSpec.DESTINATION_HEADER, 'bla1')))
 

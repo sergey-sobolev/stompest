@@ -2,7 +2,6 @@
 
 .. note:: Please restrict your imports to the main package :mod:`stompest.protocol`. The subpackage structure is potentially unstable.
 """
-import stompest.protocol.commands
 from stompest.protocol.failover import StompFailoverTransport, StompFailoverUri
 from stompest.protocol.frame import StompFrame
 from stompest.protocol.parser import StompParser

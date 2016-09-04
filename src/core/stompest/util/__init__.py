@@ -3,7 +3,7 @@ import functools
 import sys
 
 from stompest.protocol import StompSpec
-from stompest.python3 import toText
+from stompest.six import textType
 
 _RESERVED_HEADERS = set([StompSpec.MESSAGE_ID_HEADER, StompSpec.DESTINATION_HEADER, 'timestamp', 'expires', 'priority'])
 
@@ -24,6 +24,6 @@ def cloneFrame(frame, persistent=None):
     frame.unraw()
     headers = filterReservedHeaders(frame.headers)
     if persistent is not None:
-        headers['persistent'] = toText(bool(persistent)).lower()
+        headers['persistent'] = textType(bool(persistent)).lower()
     frame.headers = headers
     return frame

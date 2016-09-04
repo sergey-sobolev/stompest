@@ -4,7 +4,7 @@ import unittest
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import commands, StompFrame, StompSpec
-from stompest.python3 import mock
+from stompest.six import mock
 from stompest.sync import Stomp
 
 logging.basicConfig(level=logging.DEBUG)
@@ -33,7 +33,7 @@ class SimpleStompTest(unittest.TestCase):
         return stomp
 
     def test_receiveFrame(self):
-        frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, 'testing 1 2 3')
+        frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, b'testing 1 2 3')
         stomp = self._get_transport_mock(frame_)
         frame = stomp.receiveFrame()
         self.assertEqual(frame_, frame)
@@ -60,7 +60,7 @@ class SimpleStompTest(unittest.TestCase):
         self.assertRaises(Exception, stomp.connect)
 
     def test_error_frame_after_connect_raises_StompProtocolError(self):
-        stomp = self._get_connect_mock(StompFrame(StompSpec.ERROR, body='fake error'))
+        stomp = self._get_connect_mock(StompFrame(StompSpec.ERROR, body=b'fake error'))
         self.assertRaises(StompProtocolError, stomp.connect)
         self.assertEqual(stomp._transport.receive.call_count, 1)
 
@@ -81,7 +81,7 @@ class SimpleStompTest(unittest.TestCase):
 
     def test_send_writes_correct_frame(self):
         destination = '/queue/foo'
-        message = 'test message'
+        message = b'test message'
         headers = {'foo': 'bar', 'fuzz': 'ball'}
         stomp = self._get_transport_mock()
         stomp.send(destination, message, headers)
@@ -123,7 +123,7 @@ class SimpleStompTest(unittest.TestCase):
     def test_ack_writes_correct_frame(self):
         id_ = '12345'
         stomp = self._get_transport_mock()
-        stomp.ack(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: id_}, 'blah'))
+        stomp.ack(StompFrame(StompSpec.MESSAGE, {StompSpec.MESSAGE_ID_HEADER: id_}, b'blah'))
         args, _ = stomp._transport.send.call_args
         sentFrame = args[0]
         self.assertEqual(StompFrame(StompSpec.ACK, {StompSpec.MESSAGE_ID_HEADER: id_}), sentFrame)

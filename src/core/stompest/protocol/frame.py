@@ -1,6 +1,7 @@
+# -*- coding: iso-8859-1 -*-
 from __future__ import unicode_literals
 
-from stompest.python3 import toText
+from stompest.six import binaryType, textType
 
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape
@@ -10,7 +11,7 @@ class StompFrame(object):
     
     :param command: A valid STOMP command.
     :param headers: The STOMP headers (represented as a :class:`dict`), or :obj:`None` (no headers).
-    :param body: The frame body.
+    :param body: The frame body. The bodywill be cast as a binary string :class:`str` (Python 2) or :class:`bytes` (Python 3).
     :param rawHeaders: The raw STOMP headers (represented as a collection of (header, value) pairs), or :obj:`None` (no raw headers).
     :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
         
@@ -21,43 +22,42 @@ class StompFrame(object):
     >>> from stompest.protocol import StompFrame, StompSpec
     >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
     >>> frame
-    StompFrame(command=u'SEND', rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
-    >>> str(frame)
-    'SEND\\nfoo:bar1\\nfoo:bar2\\n\\n\\x00'
+    StompFrame(command='SEND', rawHeaders=[('foo', 'bar1'), ('foo', 'bar2')])
+    >>> frame.__str__()
+    b'SEND\\nfoo:bar1\\nfoo:bar2\\n\\n\\x00'
     >>> dict(frame)
-    {'command': u'SEND', 'rawHeaders': [('foo', 'bar1'), ('foo', 'bar2')]}
-    >>> str(frame)
-    'SEND\\nfoo:bar1\\nfoo:bar2\\n\\n\\x00'
+    {'command': 'SEND', 'rawHeaders': [('foo', 'bar1'), ('foo', 'bar2')]}
     >>> frame.headers
     {'foo': 'bar1'}
     >>> frame.headers = {'foo': 'bar3'}
     >>> frame.headers
     {'foo': 'bar1'}
+    >>> frame.unraw()
     >>> frame
     StompFrame(command=u'SEND', headers={'foo': 'bar1'})
-    >>> str(frame)
-    'SEND\\nfoo:bar1\\n\\n\\x00'
+    >>> frame.__str__()
+    b'SEND\\nfoo:bar1\\n\\n\\x00'
     >>> frame.headers = {'foo': 'bar4'}
     >>> frame.headers
     {'foo': 'bar4'}
-    >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', u'fen\\xeatre')], version=StompSpec.VERSION_1_0)
-    >>> str(frame)
+    >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', b'fen\xc3\xaatre'.decode('utf-8'))], version=StompSpec.VERSION_1_0)
+    >>> frame.__str__()
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-    UnicodeEncodeError: 'ascii' codec can't encode character u'\\xea' in position 3: ordinal not in range(128)
+    UnicodeEncodeError: 'ascii' codec can't encode character '\xea' in position 3: ordinal not in range(128)
     >>> frame.version = StompSpec.VERSION_1_1
-    >>> str(frame)
-    'SEND\\nsome french:fen\\xc3\\xaatre\\n\\n\\x00'
+    >>> frame.__str__()
+    b'SEND\\nsome french:fen\\xc3\\xaatre\\n\\n\\x00'
     >>> import codecs
     >>> c = codecs.lookup('utf-8')
-    >>> c.decode(str(frame))
-    (u'SEND\\nsome french:fen\\xeatre\\n\\n\\x00', 28)
-
+    >>> c.decode(frame.__str__())
+    ('SEND\nsome french:fenêtre\n\n\x00', 28)
+    
     """
     INFO_LENGTH = 20
     _KEYWORDS_AND_FIELDS = [('headers', '_headers', {}), ('body', 'body', b''), ('rawHeaders', 'rawHeaders', None), ('version', 'version', StompSpec.DEFAULT_VERSION)]
 
-    def __init__(self, command, headers=None, body='', rawHeaders=None, version=None):
+    def __init__(self, command, headers=None, body=b'', rawHeaders=None, version=None):
         self.version = version
 
         self.command = command
@@ -90,8 +90,8 @@ class StompFrame(object):
     def __str__(self):
         """Render the wire-level representation of a STOMP frame."""
         headers = sorted(self.headers.items()) if self.rawHeaders is None else self.rawHeaders
-        headers = ''.join('%s:%s%s' % (self._escape(toText(key)), self._escape(toText(value)), StompSpec.LINE_DELIMITER) for (key, value) in headers)
-        return self._encode(StompSpec.LINE_DELIMITER).join([self._encode(self.command), self._encode(headers), b'%s%s' % (self.body, self._encode(StompSpec.FRAME_DELIMITER))])
+        headers = ''.join('%s:%s%s' % (self._escape(textType(key)), self._escape(textType(value)), StompSpec.LINE_DELIMITER) for (key, value) in headers)
+        return self._encode(StompSpec.LINE_DELIMITER).join([self._encode(self.command), self._encode(headers), b''.join([self.body, self._encode(StompSpec.FRAME_DELIMITER)])])
 
     def __unicode__(self):
         return self._decode(self.__str__())
@@ -121,7 +121,7 @@ class StompFrame(object):
 
     @command.setter
     def command(self, value):
-        self._command = toText(value)
+        self._command = textType(value)
 
     @property
     def headers(self):
@@ -137,12 +137,7 @@ class StompFrame(object):
 
     @body.setter
     def body(self, value):
-        try:
-            value = self._encode(value)
-        except:
-            if not hasattr(value, 'decode'):
-                raise TypeError('Body is not a byte string: %s' % repr(value))
-        self._body = value
+        self._body = binaryType(value)
 
     def unraw(self):
         """If the frame has raw headers, copy their deduplicated version to the :attr:`headers` attribute, and remove the raw headers afterwards."""

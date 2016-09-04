@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import binascii
 import unittest
 
 from stompest.protocol import StompFrame, StompSpec
@@ -52,7 +51,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertRaises(UnicodeEncodeError, frame.__str__)
 
     def test_binary_body(self):
-        body = binascii.a2b_hex('f0000a09')
+        body = b'\xf0\x00\x0a\x09'
         headers = {'content-length': str(len(body))}
         frame = StompFrame('MESSAGE', headers, body)
         self.assertEqual(frame.body, body)
@@ -63,7 +62,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         headers = dict(reversed(rawHeaders))
         message = {
             'command': 'SEND',
-            'body': 'some stuff\nand more',
+            'body': b'some stuff\nand more',
             'rawHeaders': rawHeaders
         }
         frame = StompFrame(**message)
@@ -85,9 +84,6 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(frame.headers, {123: 456})
         self.assertEqual(dict(frame), {'command': '0', 'headers': {123: 456}})
         self.assertEqual(frame.__str__(), b'0\n123:456\n\n\x00')
-
-        message = {'command': 'bla', 'body': 789}
-        self.assertRaises(TypeError, StompFrame, **message)
 
         message = {'command': 'bla', 'headers': {123: 456}}
         frame = StompFrame(**message)

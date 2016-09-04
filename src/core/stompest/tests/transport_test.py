@@ -1,12 +1,12 @@
 import binascii
 import itertools
 import logging
-import select
+import select # @UnresolvedImport
 import unittest
 
 from stompest.error import StompConnectionError
 from stompest.protocol import StompFrame, StompSpec
-from stompest.python3 import makeBytesFromSequence, mock
+from stompest.six import makeBytesFromSequence, mock
 from stompest.sync.transport import StompFrameTransport
 
 logging.basicConfig(level=logging.DEBUG)
@@ -54,7 +54,7 @@ class StompFrameTransportTest(unittest.TestCase):
 
     def test_receive(self):
         headers = {'x': 'y'}
-        body = 'testing 1 2 3'
+        body = b'testing 1 2 3'
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
         transport = self._get_receive_mock(frame.__str__())
         frame_ = transport.receive()
@@ -72,7 +72,7 @@ class StompFrameTransportTest(unittest.TestCase):
 
     def test_receive_multiple_frames_extra_newlines(self):
         headers = {'x': 'y'}
-        body = 'testing 1 2 3'
+        body = b'testing 1 2 3'
         frame = StompFrame(StompSpec.MESSAGE, headers, body)
 
         transport = self._get_receive_mock(b'\n\n%s\n%s\n' % (frame.__str__(), frame.__str__()))

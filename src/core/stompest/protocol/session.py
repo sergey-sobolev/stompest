@@ -9,18 +9,18 @@
 >>> from stompest.protocol import StompFrame, StompSession, StompSpec
 >>> session = StompSession(StompSpec.VERSION_1_1)
 >>> session.connect(login='', passcode='')
-StompFrame(command=u'CONNECT', headers={u'passcode': '', u'login': '', u'host': '', u'accept-version': '1.0,1.1'})
->>> print session.version, session.state
+StompFrame(command='CONNECT', headers={'passcode': '', 'login': '', 'host': '', 'accept-version': '1.0,1.1'})
+>>> print(session.version, session.state)
 1.1 connecting
 >>> session.connected(StompFrame(StompSpec.CONNECTED, {StompSpec.SESSION_HEADER: 'tete-a-tete'})) # The broker only understands STOMP 1.0.
->>> print session.version, session.state
+>>> print(session.version, session.state)
 1.0 connected
 >>> session.disconnect()
-StompFrame(command=u'DISCONNECT')
->>> print session.version, session.state
+StompFrame(command='DISCONNECT')
+>>> print(session.version, session.state)
 1.0 disconnecting
 >>> session.close()
->>> print session.version, session.state
+>>> print(session.version, session.state)
 1.1 disconnected
 
 """
@@ -30,7 +30,7 @@ import time
 import uuid
 
 from stompest.error import StompProtocolError
-from stompest.python3 import nextMethod
+from stompest.six import nextMethod
 
 import stompest.protocol.commands
 
@@ -110,7 +110,7 @@ class StompSession(object):
         if flush:
             self._flush()
 
-    def send(self, destination, body='', headers=None, receipt=None):
+    def send(self, destination, body=b'', headers=None, receipt=None):
         """Create a **SEND** frame."""
         self.__check('send', [self.CONNECTED])
         frame = stompest.protocol.commands.send(destination, body, headers, receipt, version=self.version)

@@ -16,7 +16,7 @@ class StompParserTest(unittest.TestCase):
         frame = StompFrame(
             StompSpec.SEND,
             {'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
-            'some stuff\nand more'
+            b'some stuff\nand more'
         )
 
         parser = StompParser()
@@ -54,7 +54,7 @@ class StompParserTest(unittest.TestCase):
         frame = StompFrame(
             command=StompSpec.SEND,
             headers={'foo': 'bar', 'hello ': 'there-world with space ', 'empty-value':'', '':'empty-header', StompSpec.DESTINATION_HEADER: '/queue/blah'},
-            body='some stuff\nand more'
+            body=b'some stuff\nand more'
         )
         parser = StompParser()
 

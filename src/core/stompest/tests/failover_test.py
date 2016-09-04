@@ -4,7 +4,7 @@ import unittest
 
 from stompest.error import StompConnectTimeout
 from stompest.protocol import StompFailoverUri, StompFailoverTransport
-from stompest.python3 import nextMethod, mock
+from stompest.six import mock, nextMethod
 
 class StompFailoverUriTest(unittest.TestCase):
     def test_configuration(self):
