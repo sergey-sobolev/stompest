@@ -4,10 +4,12 @@ import logging
 import select # @UnresolvedImport
 import unittest
 
+from stompest._backwards import binaryType, makeBytesFromSequence
 from stompest.error import StompConnectionError
 from stompest.protocol import StompFrame, StompSpec
-from stompest.six import binaryType, makeBytesFromSequence, mock
 from stompest.sync.transport import StompFrameTransport
+
+from stompest.tests import mock
 
 logging.basicConfig(level=logging.DEBUG)
 

@@ -3,10 +3,11 @@ import logging
 
 from twisted.internet import reactor, defer
 
-from stompest.async import Stomp
-from stompest.async.listener import SubscriptionListener
 from stompest.config import StompConfig
 from stompest.protocol import StompSpec
+
+from stompest.async import Stomp
+from stompest.async.listener import SubscriptionListener
 
 class IncrementTransformer(object):
     IN_QUEUE = '/queue/testIn'
@@ -20,7 +21,8 @@ class IncrementTransformer(object):
 
     @defer.inlineCallbacks
     def run(self):
-        client = yield Stomp(self.config).connect()
+        client = Stomp(self.config)
+        yield client.connect()
         headers = {
             # client-individual mode is necessary for concurrent processing
             # (requires ActiveMQ >= 5.2)
@@ -34,7 +36,7 @@ class IncrementTransformer(object):
         """
         NOTE: you can return a Deferred here
         """
-        data = json.loads(frame.body)
+        data = json.loads(frame.body.decode())
         data['count'] += 1
         client.send(self.OUT_QUEUE, json.dumps(data).encode())
 

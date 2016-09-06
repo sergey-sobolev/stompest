@@ -2,8 +2,8 @@ import collections
 
 from io import BytesIO as IO
 
+from stompest._backwards import characterType, makeBytesFromString
 from stompest.error import StompFrameError
-from stompest.six import characterType, makeBytesFromString
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec

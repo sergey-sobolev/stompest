@@ -1,12 +1,13 @@
 import json
 import logging
 
-from twisted.internet import reactor, defer
+from twisted.internet import defer, reactor
+
+from stompest.config import StompConfig
+from stompest.protocol import StompSpec
 
 from stompest.async import Stomp
 from stompest.async.listener import SubscriptionListener
-from stompest.config import StompConfig
-from stompest.protocol import StompSpec
 
 
 class Consumer(object):
@@ -20,7 +21,8 @@ class Consumer(object):
 
     @defer.inlineCallbacks
     def run(self):
-        client = yield Stomp(self.config).connect()
+        client = Stomp(self.config)
+        yield client.connect()
         headers = {
             # client-individual mode is necessary for concurrent processing
             # (requires ActiveMQ >= 5.2)
@@ -35,7 +37,7 @@ class Consumer(object):
         NOTE: you can return a Deferred here
         """
         data = json.loads(frame.body.decode())
-        print 'Received frame with count %d' % data['count']
+        print('Received frame with count %d' % data['count'])
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)

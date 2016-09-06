@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import unittest
 
+from stompest._backwards import binaryType
 from stompest.protocol import StompFrame, StompSpec
-from stompest.six import binaryType
 
 class StompFrameTest(unittest.TestCase):
     def test_frame(self):

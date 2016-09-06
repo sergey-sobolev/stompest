@@ -30,7 +30,7 @@ StompFrame(command='DISCONNECT', headers={'receipt': 'message-12345'})
 """
 
 from stompest.error import StompProtocolError
-from stompest.six import textType
+from stompest._backwards import textType
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
 from stompest.protocol.spec import StompSpec

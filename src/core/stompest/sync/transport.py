@@ -5,9 +5,9 @@ import select # @UnresolvedImport
 import socket
 import time
 
+from stompest._backwards import binaryType
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
-from stompest.six import binaryType
 
 class StompFrameTransport(object):
     factory = StompParser

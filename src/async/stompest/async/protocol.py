@@ -3,8 +3,8 @@ import logging
 from twisted.internet import defer, reactor, task
 from twisted.internet.protocol import Factory, Protocol
 
+from stompest._backwards import binaryType
 from stompest.protocol import StompFailoverTransport, StompParser
-from stompest.six import binaryType
 
 LOG_CATEGORY = __name__
 
@@ -19,7 +19,6 @@ class StompProtocol(Protocol):
             Protocol.connectionLost(self, reason)
 
     def dataReceived(self, data):
-        # self.log.debug('Received data: %s' % repr(data))
         self._parser.add(data)
         for frame in iter(self._parser.get, self._parser.SENTINEL):
             if self.log.isEnabledFor(logging.DEBUG):
@@ -84,6 +83,7 @@ class StompProtocolCreator(object):
                 self.log.warning('%s [%s]' % ('Could not connect to %(host)s:%(port)d' % broker, e))
             else:
                 defer.returnValue(protocol)
+        raise e
 
     def _sleep(self, delay):
         if not delay:

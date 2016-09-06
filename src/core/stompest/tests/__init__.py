@@ -8,3 +8,8 @@ LOGIN, PASSCODE, VIRTUALHOST = {
     'apollo': ('admin', 'password', 'mybroker'),
     'rabbitmq': ('guest', 'guest', '/')
 }[BROKER]
+
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock # @UnusedImport

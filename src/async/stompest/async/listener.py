@@ -30,9 +30,6 @@ class Listener(object):
     def onConnectionLost(self, connection, reason):
         pass
 
-    def onCleanup(self, connection):
-        pass
-
     def onDisconnect(self, connection, failure, timeout):
         pass
 
@@ -60,6 +57,9 @@ class Listener(object):
 class ConnectListener(Listener):
     """Waits for the **CONNECTED** frame to arrive.
     """
+    def onAdd(self, connection): # @UnusedVariable
+        self._waiting = None
+
     @defer.inlineCallbacks
     def onConnect(self, connection, frame, connectedTimeout): # @UnusedVariable
         self._waiting = WaitingDeferred()
@@ -71,7 +71,7 @@ class ConnectListener(Listener):
 
     def onConnectionLost(self, connection, reason):
         connection.remove(self)
-        if not self._waiting.called:
+        if self._waiting and not self._waiting.called:
             self._waiting.errback(reason)
 
     def onError(self, connection, frame):
@@ -95,30 +95,29 @@ class DisconnectListener(Listener):
         self._disconnectReason = None
         connection.disconnected = defer.Deferred()
 
-    def onConnectionLost(self, connection, reason): # @UnusedVariable
+    def onConnectionLost(self, connection, reason):
         self.log.info('Disconnected: %s' % reason.getErrorMessage())
         if not self._disconnecting:
             self._disconnectReason = StompConnectionError('Unexpected connection loss [%s]' % reason.getErrorMessage())
 
-    def onCleanup(self, connection):
-        connection.session.close(flush=not self._disconnectReason)
         connection.remove(self)
+        connection.session.close(flush=not self._disconnectReason)
 
         if self._disconnectReason:
-            # self.log.debug('Calling disconnected errback: %s' % self._disconnectReason)
+            if self.log.isEnabledFor(logging.DEBUG):
+                self.log.debug('Calling disconnected errback: %s' % self._disconnectReason)
             connection.disconnected.errback(self._disconnectReason)
         else:
-            # self.log.debug('Calling disconnected callback')
+            if self.log.isEnabledFor(logging.DEBUG):
+                self.log.debug('Calling disconnected callback')
             connection.disconnected.callback(None)
-        connection.disconnected = None
 
     def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
-        if failure:
-            self._disconnectReason = failure
+        self._disconnectReason = failure
         if self._disconnecting:
             return
         self._disconnecting = True
-        self.log.info('Disconnecting ...%s' % ('' if (not failure) else  ('[reason=%s]' % failure)))
+        self.log.info('Disconnecting ...%s' % ((' [reason=%s]' % failure) if failure else ''))
 
     def onMessage(self, connection, frame, context): # @UnusedVariable
         if not self._disconnecting:
@@ -132,10 +131,12 @@ class DisconnectListener(Listener):
 
     @_disconnectReason.setter
     def _disconnectReason(self, reason):
-        if reason:
-            self.log.error('Disconnect failure: %s' % reason)
-            reason = self._disconnectReason or reason # existing reason wins
-        self.__disconnectReason = reason
+        if reason is None:
+            self.__disconnectReason = reason
+        else:
+            self.log.error('Disconnect because of failure: %s' % reason)
+            if self.__disconnectReason is None:
+                self.__disconnectReason = reason
 
 class ReceiptListener(Listener):
     """:param timeout: When a STOMP frame was sent to the broker and a **RECEIPT** frame was requested, this is the time (in seconds) to wait for **RECEIPT** frames to arrive. If :obj:`None`, we will wait indefinitely.

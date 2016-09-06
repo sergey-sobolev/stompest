@@ -1,58 +1,15 @@
 import logging
 
-from twisted.internet import defer, reactor, task
+from twisted.internet import defer, reactor
 from twisted.internet.defer import CancelledError
 from twisted.trial import unittest
 
-from stompest.async.util import exclusive, InFlightOperations
-from stompest.error import StompAlreadyRunningError, StompCancelledError
+from stompest.async.util import InFlightOperations
+from stompest.error import StompCancelledError
 
 logging.basicConfig(level=logging.DEBUG)
 
 LOG_CATEGORY = __name__
-
-class ExclusiveWrapperTest(unittest.TestCase):
-    @defer.inlineCallbacks
-    def test_exclusive_wrapper(self):
-        @exclusive
-        @defer.inlineCallbacks
-        def f(d):
-            result = yield task.deferLater(reactor, 0, lambda: (d.errback(RuntimeError('hi')) or 4711))
-            defer.returnValue(result)
-
-        d = defer.Deferred()
-        running = f(d)
-        self.assertRaises(StompAlreadyRunningError, lambda: f(d))
-        self.assertFalse(running.called)
-        result = yield running
-        self.assertEquals(result, 4711)
-        self.assertFailure(d, RuntimeError)
-
-        @exclusive
-        @defer.inlineCallbacks
-        def g():
-            yield task.deferLater(reactor, 0, lambda: {}[None])
-
-        for _ in range(5):
-            running = g()
-            for _ in range(5):
-                self.assertRaises(StompAlreadyRunningError, g)
-            try:
-                yield running
-            except KeyError:
-                pass
-            else:
-                raise
-
-        @exclusive
-        def h(*args, **kwargs):
-            return task.deferLater(reactor, 0, lambda: (args, kwargs))
-
-        running = h(1, 2, a=3, b=4)
-        self.assertRaises(StompAlreadyRunningError, h)
-
-        result = yield running
-        self.assertEquals(result, ((1, 2), {'a': 3, 'b': 4}))
 
 class InFlightOperationsTest(unittest.TestCase):
     def test_dict_interface(self):

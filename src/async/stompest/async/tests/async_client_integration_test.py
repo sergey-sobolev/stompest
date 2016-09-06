@@ -160,7 +160,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
 
         # reconnect and subscribe again - consuming second message then disconnecting
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         headers.pop('selector')
 
         client.subscribe(self.queue, headers, listener=SubscriptionListener(self._eatOneFrameAndDisconnect, errorDestination=self.errorQueue))
@@ -169,7 +169,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         yield client.disconnected
 
         # reconnect and subscribe to error queue
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.errorQueue, defaultHeaders, listener=SubscriptionListener(self._saveErrorFrameAndDisconnect))
 
         # wait for disconnect
@@ -208,7 +208,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
         yield client.disconnected
 
         # reconnect and subscribe to error queue
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.errorQueue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._saveErrorFrameAndDisconnect))
 
         # wait for disconnect
@@ -243,7 +243,7 @@ class HandlerExceptionWithErrorQueueIntegrationTestCase(AsyncClientBaseTestCase)
 
         # reconnect and subscribe again - consuming retried message and disconnecting
         client = async.Stomp(config) # take a fresh client to prevent replay (we were disconnected by an error)
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatOneFrameAndDisconnect))
 
         # client disconnects without error
@@ -266,7 +266,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         client.add(ReceiptListener(1.0))
 
         # connect
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         yield task.cooperate(iter([client.send(self.queue, self.frame, receipt='message-%d' % j) for j in range(self.numMsgs)])).whenDone()
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._frameHandler))
 
@@ -274,7 +274,7 @@ class GracefulDisconnectTestCase(AsyncClientBaseTestCase):
         yield client.disconnected
 
         # reconnect and subscribe again to make sure that all messages in the queue were ack'ed
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         self.timeExpired = False
         self.timeoutDelayedCall = reactor.callLater(1, self._timesUp, client) # @UndefinedVariable
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatOneFrameAndDisconnect))
@@ -308,7 +308,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         config = self.getConfig(StompSpec.VERSION_1_0)
         client = async.Stomp(config)
 
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
 
         token = yield client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatFrame))
         client.send(self.queue, self.frame)
@@ -331,7 +331,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         config = self.getConfig(StompSpec.VERSION_1_0)
 
         client = async.Stomp(config)
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL}, listener=SubscriptionListener(self._eatFrame))
         client.send(self.queue, self.frame)
         while self.framesHandled != 1:
@@ -341,7 +341,10 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
             yield client.disconnected
         except StompConnectionError:
             pass
-        client = yield client.connect(host=VIRTUALHOST)
+        else:
+            raise
+
+        yield client.connect(host=VIRTUALHOST)
         client.send(self.queue, self.frame)
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -351,8 +354,10 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
             yield client.disconnected
         except RuntimeError as e:
             self.assertEquals(str(e), 'Hi')
+        else:
+            raise
 
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         client.send(self.queue, self.frame)
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
@@ -379,7 +384,7 @@ class NackTestCase(AsyncClientBaseTestCase):
         config = self.getConfig(version)
         client = async.Stomp(config)
         try:
-            client = yield client.connect(host=VIRTUALHOST, versions=[version])
+            yield client.connect(host=VIRTUALHOST, versions=[version])
 
         except StompProtocolError as e:
             print('Broker does not support STOMP protocol %s. Skipping this test case. [%s]' % (version, e))
@@ -398,7 +403,7 @@ class NackTestCase(AsyncClientBaseTestCase):
             return
 
         self.framesHandled = 0
-        client = yield client.connect(host=VIRTUALHOST)
+        yield client.connect(host=VIRTUALHOST)
         client.subscribe(self.queue, {StompSpec.ACK_HEADER: StompSpec.ACK_CLIENT_INDIVIDUAL, StompSpec.ID_HEADER: '4711'}, listener=SubscriptionListener(self._eatFrame, ack=True))
         while self.framesHandled != 1:
             yield task.deferLater(reactor, 0.01, lambda: None)

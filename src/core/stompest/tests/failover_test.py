@@ -2,9 +2,11 @@ import itertools
 import socket
 import unittest
 
+from stompest._backwards import nextMethod
 from stompest.error import StompConnectTimeout
 from stompest.protocol import StompFailoverUri, StompFailoverTransport
-from stompest.six import mock, nextMethod
+
+from stompest.tests import mock
 
 class StompFailoverUriTest(unittest.TestCase):
     def test_configuration(self):

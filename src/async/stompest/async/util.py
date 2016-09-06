@@ -1,8 +1,7 @@
 import collections
 import contextlib
-import functools
 
-from twisted.internet import defer, reactor, task
+from twisted.internet import defer, reactor
 from twisted.internet.endpoints import clientFromString
 
 from stompest.error import StompAlreadyRunningError, StompNotRunningError
@@ -69,23 +68,6 @@ class WaitingDeferred(defer.Deferred):
             if timeout and not timeout.called:
                 timeout.cancel()
         defer.returnValue(result)
-
-def exclusive(f):
-    @functools.wraps(f)
-    def _exclusive(*args, **kwargs):
-        if _exclusive.running:
-            raise StompAlreadyRunningError('%s still running' % f.__name__)
-        _exclusive.running = True
-        task.deferLater(reactor, 0, f, *args, **kwargs).addBoth(_reload).chainDeferred(_exclusive.result)
-        return _exclusive.result
-
-    def _reload(result=None):
-        _exclusive.running = False
-        _exclusive.result = defer.Deferred()
-        return result
-    _reload()
-
-    return _exclusive
 
 def endpointFactory(broker, timeout=None):
     timeout = (':timeout=%d' % timeout) if timeout else ''

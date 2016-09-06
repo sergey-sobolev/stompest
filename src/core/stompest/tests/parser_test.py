@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 import binascii
 import unittest
 
+from stompest._backwards import binaryType
 from stompest.error import StompFrameError
 from stompest.protocol import commands, StompFrame, StompParser, StompSpec
 from stompest.protocol.frame import StompHeartBeat
-from stompest.six import binaryType
 
 class StompParserTest(unittest.TestCase):
     def _generate_bytes(self, stream):

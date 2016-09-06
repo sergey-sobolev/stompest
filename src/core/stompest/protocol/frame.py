@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from stompest.six import binaryType, textType
+from stompest._backwards import binaryType, textType
 
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape

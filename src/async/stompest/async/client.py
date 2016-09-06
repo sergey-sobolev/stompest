@@ -79,14 +79,14 @@ class Stomp(object):
         """Add a listener to this client. For the interface definition, cf. :class:`~.async.listener.Listener`. 
         """
         if listener not in self._listeners:
-            # self.log.debug('adding listener: %s' % listener)
+            # self.log.debug('Adding listener: %s' % listener)
             self._listeners.append(listener)
             listener.onAdd(self)
 
     def remove(self, listener):
         """Remove a listener from this client. 
         """
-        # self.log.debug('removing listener: %s' % listener)
+        # self.log.debug('Removing listener: %s' % listener)
         self._listeners.remove(listener)
 
     @property
@@ -97,6 +97,7 @@ class Stomp(object):
 
     @disconnected.setter
     def disconnected(self, value):
+        # self.log.debug('Setting disconnected: %s' % value)
         self._disconnected = value
 
     @property
@@ -132,23 +133,18 @@ class Stomp(object):
     #
     # STOMP commands
     #
-    @util.exclusive
     @defer.inlineCallbacks
     def connect(self, headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None):
         """connect(headers=None, versions=None, host=None, heartBeats=None, connectTimeout=None, connectedTimeout=None)
 
-        Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.async.client.Stomp.session`, replay them when the STOMP connection is established. This method returns a :class:`twisted.internet.defer.Deferred` object which calls back with :obj:`self` when the STOMP connection has been established and all subscriptions (if any) were replayed. In case of an error, it will err back with the reason of the failure.
+        Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client's :class:`~.StompConfig` object. If there are active subscriptions in the :attr:`~.async.client.Stomp.session`, replay them when the STOMP connection is established.
 
         :param versions: The STOMP protocol versions we wish to support. The default behavior (:obj:`None`) is the same as for the :func:`~.commands.connect` function of the commands API, but the highest supported version will be the one you specified in the :class:`~.StompConfig` object. The version which is valid for the connection about to be initiated will be stored in the :attr:`~.async.client.Stomp.session`.
         :param connectTimeout: This is the time (in seconds) to wait for the wire-level connection to be established. If :obj:`None`, we will wait indefinitely.
         :param connectedTimeout: This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker's **CONNECTED** frame to arrive). If :obj:`None`, we will wait indefinitely.
 
-        .. note :: Only one connect attempt may be pending at a time. Any other attempt will result in a :class:`~.StompAlreadyRunningError`.
-
         .. seealso :: The :mod:`.protocol.failover` and :mod:`~.protocol.session` modules for the details of subscription replay and failover transport.
         """
-        frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host, heartBeats)
-
         try:
             self._protocol
         except:
@@ -161,21 +157,14 @@ class Stomp(object):
 
         try:
             self._protocol = yield self._protocolCreator.connect(connectTimeout, self._onFrame, self._onConnectionLost)
-        except Exception as e:
-            self.log.error('Endpoint connect failed')
-            raise
-
-        try:
+            frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host, heartBeats)
             self.sendFrame(frame)
             yield self._notify(lambda l: l.onConnect(self, frame, connectedTimeout))
-
         except Exception as e:
             self.disconnect(failure=e)
             yield self.disconnected
-
-        yield self._replay()
-
-        defer.returnValue(self)
+        else:
+            yield self._replay()
 
     @connected
     @defer.inlineCallbacks
@@ -189,17 +178,11 @@ class Stomp(object):
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
-        try:
-            yield self._notify(lambda l: l.onDisconnect(self, failure, timeout))
-        except Exception as e:
-            self.disconnect(failure=e)
-
         protocol = self._protocol
         try:
-            if (self.session.state == self.session.CONNECTED):
+            yield self._notify(lambda l: l.onDisconnect(self, failure, timeout))
+            if self.session.state == self.session.CONNECTED:
                 yield self.sendFrame(self.session.disconnect(receipt))
-        except Exception as e:
-            self.disconnect(failure=e)
         finally:
             protocol.loseConnection()
 
@@ -210,8 +193,7 @@ class Stomp(object):
 
         Send a **SEND** frame.
         """
-        frame = self.session.send(destination, body, headers, receipt)
-        yield self.sendFrame(frame)
+        yield self.sendFrame(self.session.send(destination, body, headers, receipt))
 
     @connected
     @defer.inlineCallbacks
@@ -220,8 +202,7 @@ class Stomp(object):
 
         Send an **ACK** frame for a received **MESSAGE** frame.
         """
-        frame = self.session.ack(frame, receipt)
-        yield self.sendFrame(frame)
+        yield self.sendFrame(self.session.ack(frame, receipt))
 
     @connected
     @defer.inlineCallbacks
@@ -230,8 +211,7 @@ class Stomp(object):
 
         Send a **NACK** frame for a received **MESSAGE** frame.
         """
-        frame = self.session.nack(frame, receipt)
-        yield self.sendFrame(frame)
+        yield self.sendFrame(self.session.nack(frame, receipt))
 
     @connected
     @defer.inlineCallbacks
@@ -240,8 +220,7 @@ class Stomp(object):
 
         Send a **BEGIN** frame to begin a STOMP transaction.
         """
-        frame = self.session.begin(transaction, receipt)
-        yield self.sendFrame(frame)
+        yield self.sendFrame(self.session.begin(transaction, receipt))
 
     @connected
     @defer.inlineCallbacks
@@ -250,8 +229,7 @@ class Stomp(object):
 
         Send an **ABORT** frame to abort a STOMP transaction.
         """
-        frame = self.session.abort(transaction, receipt)
-        yield self.sendFrame(frame)
+        yield self.sendFrame(self.session.abort(transaction, receipt))
 
     @connected
     @defer.inlineCallbacks
@@ -260,8 +238,7 @@ class Stomp(object):
 
         Send a **COMMIT** frame to commit a STOMP transaction.
         """
-        frame = self.session.commit(transaction, receipt)
-        yield self.sendFrame(frame)
+        yield self.sendFrame(self.session.commit(transaction, receipt))
 
     @connected
     @defer.inlineCallbacks
@@ -346,16 +323,20 @@ class Stomp(object):
     #
     @defer.inlineCallbacks
     def _notify(self, notify):
+        failed = None
         for listener in list(self._listeners):
-            yield notify(listener)
+            try:
+                yield notify(listener)
+            except Exception as e:
+                if not failed:
+                    failed = e
+        if failed:
+            raise failed
 
     @defer.inlineCallbacks
     def _onConnectionLost(self, reason):
         self._protocol = None
-        try:
-            yield self._notify(lambda l: l.onConnectionLost(self, reason))
-        finally:
-            yield self._notify(lambda l: l.onCleanup(self))
+        yield self._notify(lambda l: l.onConnectionLost(self, reason))
 
     def _replay(self):
         def replay():

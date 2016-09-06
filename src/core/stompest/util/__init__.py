@@ -2,8 +2,8 @@ import copy
 import functools
 import sys
 
+from stompest._backwards import textType
 from stompest.protocol import StompSpec
-from stompest.six import textType
 
 _RESERVED_HEADERS = set([StompSpec.MESSAGE_ID_HEADER, StompSpec.DESTINATION_HEADER, 'timestamp', 'expires', 'priority'])
 

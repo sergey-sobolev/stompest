@@ -29,8 +29,8 @@ import itertools
 import time
 import uuid
 
+from stompest._backwards import nextMethod
 from stompest.error import StompProtocolError
-from stompest.six import nextMethod
 
 import stompest.protocol.commands
 
@@ -316,9 +316,7 @@ class StompSession(object):
     # helpers
 
     def _flush(self):
-        self._receipts = set()
         self._subscriptions = {}
-        self._transactions = set()
 
     def _receipt(self, receipt):
         if not receipt:
@@ -335,6 +333,8 @@ class StompSession(object):
         self._clientSendHeartBeat = self._clientReceiveHeartBeat = self._serverSendHeartBeat = self._serverReceiveHeartBeat = 0
         self.version = self.__version
         self._versions = None
+        self._receipts = set()
+        self._transactions = set()
 
     def __check(self, command, states):
         if self._check and (self.state not in states):

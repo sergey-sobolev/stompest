@@ -5,9 +5,9 @@ import logging
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory, Protocol
 
+from stompest._backwards import binaryType
 from stompest.error import StompFrameError
 from stompest.protocol import StompFrame, StompParser, StompSpec
-from stompest.six import binaryType
 
 LOG_CATEGORY = __name__
 

@@ -1,18 +1,18 @@
 from __future__ import unicode_literals
 
 import logging
+import time
 import unittest
 
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
 from stompest.protocol import StompFrame, StompSpec
 from stompest.sync import Stomp
-import time
 
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from stompest.tests.__init__ import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
+from stompest.tests import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
 
 class SimpleStompIntegrationTest(unittest.TestCase):
     DESTINATION = '/queue/stompUnitTest'

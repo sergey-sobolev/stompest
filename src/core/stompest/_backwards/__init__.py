@@ -1,10 +1,5 @@
 import sys
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
-
 _PY2 = sys.version_info[0] == 2
 
 def makeBytesFromString(bytestring):
