@@ -11,7 +11,7 @@ class StompFrame(object):
     
     :param command: A valid STOMP command.
     :param headers: The STOMP headers (represented as a :class:`dict`), or :obj:`None` (no headers).
-    :param body: The frame body. The bodywill be cast as a binary string :class:`str` (Python 2) or :class:`bytes` (Python 3).
+    :param body: The frame body. The body will be cast as a binary string :class:`str` (Python 2) or :class:`bytes` (Python 3).
     :param rawHeaders: The raw STOMP headers (represented as a collection of (header, value) pairs), or :obj:`None` (no raw headers).
     :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
         
@@ -34,7 +34,7 @@ class StompFrame(object):
     {'foo': 'bar1'}
     >>> frame.unraw()
     >>> frame
-    StompFrame(command=u'SEND', headers={'foo': 'bar1'})
+    StompFrame(command='SEND', headers={'foo': 'bar1'})
     >>> bytes(frame)
     b'SEND\\nfoo:bar1\\n\\n\\x00'
     >>> frame.headers = {'foo': 'bar4'}
@@ -44,14 +44,12 @@ class StompFrame(object):
     >>> bytes(frame)
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
-    UnicodeEncodeError: 'ascii' codec can't encode character '\xea' in position 3: ordinal not in range(128)
+    UnicodeEncodeError: 'ascii' codec can't encode character '\xea' in position 15: ordinal not in range(128)
     >>> frame.version = StompSpec.VERSION_1_1
     >>> bytes(frame)
-    b'SEND\\nsome french:fen\\xc3\\xaatre\\n\\n\\x00'
-    >>> import codecs
-    >>> c = codecs.lookup('utf-8')
-    >>> c.decode(binaryType(frame))
-    ('SEND\nsome french:fenêtre\n\n\x00', 28)
+    b'SEND\nsome french:fen\xc3\xaatre\n\n\x00'
+    >>> frame.headers
+    {'some french': 'fenêtre'}
     
     """
     INFO_LENGTH = 20

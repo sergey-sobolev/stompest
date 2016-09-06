@@ -34,7 +34,7 @@ class Consumer(object):
         """
         NOTE: you can return a Deferred here
         """
-        data = json.loads(frame.body)
+        data = json.loads(frame.body.decode())
         print 'Received frame with count %d' % data['count']
 
 if __name__ == '__main__':

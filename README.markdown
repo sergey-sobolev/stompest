@@ -1,7 +1,7 @@
 stomp, stomper, stompest!
 =========================
 
-stompest is a full-featured [STOMP](http://stomp.github.com/) [1.0](http://stomp.github.com//stomp-specification-1.0.html), [1.1](http://stomp.github.com//stomp-specification-1.1.html), and [1.2](http://stomp.github.com//stomp-specification-1.2.html) implementation for Python including both synchronous and asynchronous clients:
+stompest is a full-featured [STOMP](http://stomp.github.com/) [1.0](http://stomp.github.com//stomp-specification-1.0.html), [1.1](http://stomp.github.com//stomp-specification-1.1.html), and [1.2](http://stomp.github.com//stomp-specification-1.2.html) implementation for Python 2.7 and Python 3 (versions 3.3 and higher) including both synchronous and asynchronous clients:
 
 * The `sync.Stomp` client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.
 * The `async.Stomp` client is based on [Twisted](http://twistedmatrix.com/), a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default "poison pill" error handling), concurrent message processing, graceful shutdown, and connect and disconnect timeouts.
@@ -16,7 +16,7 @@ Both clients make use of a generic set of components in the `protocol` module ea
 
 * and `protocol.StompFailoverTransport`, a [failover transport](http://activemq.apache.org/failover-transport-reference.html) URI scheme akin to the one used in ActiveMQ.
 
-This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
+This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by [Mozes](http://www.mozes.com/) — persistent queueing on [ActiveMQ](http://activemq.apache.org/). Minor enhancements may be required to use this STOMP adapter with other brokers.
 
 Installation
 ============
@@ -50,7 +50,7 @@ Session layer
 
 Failover layer
 --------------
-* Mimics the [failover transport](http://activemq.apache.org/failover-transport-reference.html) behavior of the native ActiveMQ Java client.
+* Mimicks the [failover transport](http://activemq.apache.org/failover-transport-reference.html) behavior of the native ActiveMQ Java client.
 * Produces a (possibly infinite) sequence of broker network addresses and connect delay times.
 
 Parser layer
@@ -82,11 +82,6 @@ Acknowledgements
 * Version 1.x of stompest was written by [Roger Hoover (@theduderog)](http://github.com/theduderog) at [Mozes](http://www.mozes.com/) and deployed in their production environment.
 * Kudos to [Oisin Mulvihill](https://github.com/oisinmulvihill), the developer of [stomper] (https://github.com/oisinmulvihill/stomper)! His idea of an abstract representation of the STOMP protocol lives on in stompest.
 
-Caveats
-=======
-* Requires Python 2.6 or higher. Not yet tested with Python 3.x.
-* This package is thoroughly unit tested and production hardened for the functionality used by the current maintainer and by [Mozes](http://www.mozes.com/) --- persistent queueing on [ActiveMQ](http://activemq.apache.org/). It is tested with Python 2.6 and 2.7, Twisted 11 and 12 (it should work with Twisted 10.1 and higher), ActiveMQ 5.8 (it should work with 5.5.1 and higher), and [Apollo](http://activemq.apache.org/apollo/) 1.6. Some of the integration tests also pass against [RabbitMQ](http://www.rabbitmq.com/) 3.0.2 (RabbitMQ does not support all extended STOMP features). All of these brokers were tested with STOMP protocols 1.0, 1.1, and 1.2 (if applicable).  Minor enhancements may be required to use this STOMP adapter with other brokers.
-
 To Do
 =====
-* see [proprosed enhancements](https://github.com/nikipore/stompest/issues?labels=enhancement&state=open)
+* see [proposed enhancements](https://github.com/nikipore/stompest/issues?labels=enhancement&state=open)

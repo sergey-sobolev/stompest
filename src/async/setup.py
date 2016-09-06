@@ -4,13 +4,16 @@ import sys
 
 from setuptools import setup, find_packages
 
-from stompest import FULL_VERSION
+from stompest.async import FULL_VERSION
 
 def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
 
 if sys.version_info[:2] < (2, 7):
     print('stompest requires Python version 2.7 or later (%s detected).' % '.'.join(sys.version_info[:2]))
+    sys.exit(-1)
+if sys.version_info[0] == 3 and sys.version_info[:2] < (3, 3):
+    print('stompest requires Python version 3.3 or later (%s detected).' % '.'.join(sys.version_info[:2]))
     sys.exit(-1)
 
 setup(
