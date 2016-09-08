@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Synchronous Client &mdash; stompest documentation - v2.1.6</title>
+    <title>Synchronous Client &mdash; stompest documentation - v2.2.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.1.6',
+        VERSION:     '2.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,12 +23,12 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.1.6" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.2.0" href="index.html" />
     <link rel="next" title="Asynchronous Client" href="async.html" />
     <link rel="prev" title="Contents" href="index.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,10 +43,10 @@
         <li class="right" >
           <a href="index.html" title="Contents"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.0</a> &raquo;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -67,12 +67,14 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="async.html"
                         title="next chapter">Asynchronous Client</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/sync.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/sync.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -91,7 +93,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-stompest.sync.client">
 <span id="synchronous-client"></span><span id="sync"></span><h1>Synchronous Client<a class="headerlink" href="#module-stompest.sync.client" title="Permalink to this headline">¶</a></h1>
@@ -99,49 +101,49 @@
 <div class="section" id="module-stompest.sync.examples">
 <span id="examples"></span><h2>Examples<a class="headerlink" href="#module-stompest.sync.examples" title="Permalink to this headline">¶</a></h2>
 <p>If you use ActiveMQ to run these examples, make sure you enable the STOMP connector, (see <a class="reference external" href="http://activemq.apache.org/stomp.html">here</a> for details):</p>
-<div class="highlight-xml"><div class="highlight"><pre><span class="c">&lt;!-- add this to the config file &quot;activemq.xml&quot; --&gt;</span>
+<div class="highlight-xml"><div class="highlight"><pre><span></span><span class="c">&lt;!-- add this to the config file &quot;activemq.xml&quot; --&gt;</span>
 <span class="nt">&lt;transportConnector</span> <span class="na">name=</span><span class="s">&quot;stomp&quot;</span> <span class="na">uri=</span><span class="s">&quot;stomp://0.0.0.0:61613&quot;</span><span class="nt">/&gt;</span>
 </pre></div>
 </div>
-<p>For debugging purposes, it is highly recommended to turn on the logger on level <tt class="xref py py-attr docutils literal"><span class="pre">DEBUG</span></tt>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">logging</span>
+<p>For debugging purposes, it is highly recommended to turn on the logger on level <code class="xref py py-attr docutils literal"><span class="pre">DEBUG</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="producer">
 <h3>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
 <span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
 
-<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-<span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/test&#39;</span>
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
+<span class="n">QUEUE</span> <span class="o">=</span> <span class="s1">&#39;/queue/test&#39;</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s">&#39;test message 1&#39;</span><span class="p">)</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s">&#39;test message 2&#39;</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s1">&#39;test message 1&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s1">&#39;test message 2&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
     <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="consumer">
 <h3>Consumer<a class="headerlink" href="#consumer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
 <span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
 <span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
 
-<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
-<span class="n">QUEUE</span> <span class="o">=</span> <span class="s">&#39;/queue/test&#39;</span>
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
+<span class="n">QUEUE</span> <span class="o">=</span> <span class="s1">&#39;/queue/test&#39;</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
     <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_CLIENT_INDIVIDUAL</span><span class="p">})</span>
     <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
-        <span class="k">print</span> <span class="s">&#39;Got </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
         <span class="n">client</span><span class="o">.</span><span class="n">ack</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 </pre></div>
@@ -152,49 +154,49 @@
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="stompest.sync.client.Stomp">
-<em class="property">class </em><tt class="descclassname">stompest.sync.client.</tt><tt class="descname">Stomp</tt><big>(</big><em>config</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">stompest.sync.client.</code><code class="descname">Stomp</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp" title="Permalink to this definition">¶</a></dt>
 <dd><p>A synchronous STOMP client. This is the successor of the simple STOMP client in stompest 1.x, but the API is not backward compatible.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> &#8211; A <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>config</strong> &#8211; A <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><code class="xref py py-class docutils literal"><span class="pre">StompConfig</span></code></a> object</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last"><a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> for how to set session configuration options, <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> for session state, <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></tt></a> for all API options which are documented here.</p>
+<p class="last"><a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><code class="xref py py-class docutils literal"><span class="pre">StompConfig</span></code></a> for how to set session configuration options, <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><code class="xref py py-class docutils literal"><span class="pre">StompSession</span></code></a> for session state, <a class="reference internal" href="protocol.html#module-stompest.protocol.commands" title="stompest.protocol.commands"><code class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></code></a> for all API options which are documented here.</p>
 </div>
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.abort">
-<tt class="descname">abort</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
+<code class="descname">abort</code><span class="sig-paren">(</span><em>transaction=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.abort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send an <strong>ABORT</strong> frame to abort a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.ack">
-<tt class="descname">ack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.ack" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ack</code><span class="sig-paren">(</span><em>frame</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send an <strong>ACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.beat">
-<tt class="descname">beat</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.beat" title="Permalink to this definition">¶</a></dt>
+<code class="descname">beat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.beat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a STOMP heart-beat.</p>
 <p><strong>Example</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># you might want to enable logging to trace the wire-level traffic</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># you might want to enable logging to trace the wire-level traffic</span>
 <span class="gp">... </span><span class="kn">import</span> <span class="nn">time</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61612&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">heartBeats</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">elapsed</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">None</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">start</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="s">&#39;elapsed: </span><span class="si">%.2f</span><span class="s">, last received: </span><span class="si">%.2f</span><span class="s">, last sent: </span><span class="si">%.2f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;elapsed: </span><span class="si">%.2f</span><span class="s1">, last received: </span><span class="si">%.2f</span><span class="s1">, last sent: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
 <span class="gp">... </span>    <span class="n">elapsed</span><span class="p">(),</span> <span class="n">elapsed</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">lastReceived</span><span class="p">),</span> <span class="n">elapsed</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">lastSent</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="n">elapsed</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">clientHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">serverHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span> <span class="c"># poll server heart-beats</span>
-<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">beat</span><span class="p">()</span> <span class="c"># send client heart-beat</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">serverHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span> <span class="c1"># poll server heart-beats</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">beat</span><span class="p">()</span> <span class="c1"># send client heart-beat</span>
 <span class="gp">... </span>    <span class="k">print</span> <span class="n">times</span><span class="p">()</span>
 <span class="gp">... </span>
 <span class="go">False</span>
@@ -203,7 +205,7 @@
 <span class="go">elapsed: 0.17, last received: 0.00, last sent: 0.17</span>
 <span class="go">False</span>
 <span class="go">elapsed: 0.25, last received: 0.20, last sent: 0.25</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span> <span class="c"># server will disconnect us because we&#39;re not heart-beating any more</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">()</span> <span class="c1"># server will disconnect us because we&#39;re not heart-beating any more</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
 <span class="gr">stompest.error.StompConnectionError</span>: <span class="n">Connection closed [No more data]</span>
@@ -215,77 +217,77 @@
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.begin">
-<tt class="descname">begin</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
+<code class="descname">begin</code><span class="sig-paren">(</span><em>transaction=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.begin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>BEGIN</strong> frame to begin a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.canRead">
-<tt class="descname">canRead</tt><big>(</big><em>timeout=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.canRead" title="Permalink to this definition">¶</a></dt>
+<code class="descname">canRead</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.canRead" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tell whether there is an incoming STOMP frame available for us to read.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> &#8211; This is the time (in seconds) to wait for a frame to become available. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> &#8211; This is the time (in seconds) to wait for a frame to become available. If <code class="xref py py-obj docutils literal"><span class="pre">None</span></code>, we will wait indefinitely.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If the wire-level connection is not available, this method will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></tt>!</p>
+<p class="last">If the wire-level connection is not available, this method will raise a <a class="reference internal" href="error.html#stompest.error.StompConnectionError" title="stompest.error.StompConnectionError"><code class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></code></a>!</p>
 </div>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="stompest.sync.client.Stomp.clientHeartBeat">
-<tt class="descname">clientHeartBeat</tt><a class="headerlink" href="#stompest.sync.client.Stomp.clientHeartBeat" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clientHeartBeat</code><a class="headerlink" href="#stompest.sync.client.Stomp.clientHeartBeat" title="Permalink to this definition">¶</a></dt>
 <dd><p>The negotiated client heart-beat period in ms.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.close">
-<tt class="descname">close</tt><big>(</big><em>flush=True</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Close both the client&#8217;s <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt></a> and transport (that is, the wire-level connection with the broker).</p>
+<code class="descname">close</code><span class="sig-paren">(</span><em>flush=True</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close both the client&#8217;s <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><code class="xref py py-attr docutils literal"><span class="pre">session</span></code></a> and transport (that is, the wire-level connection with the broker).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>flush</strong> &#8211; Decides whether the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt></a> should forget its active subscriptions or not.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>flush</strong> &#8211; Decides whether the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><code class="xref py py-attr docutils literal"><span class="pre">session</span></code></a> should forget its active subscriptions or not.</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If you do not flush the subscriptions, they will be replayed upon this client&#8217;s next <a class="reference internal" href="#stompest.sync.client.Stomp.connect" title="stompest.sync.client.Stomp.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a>!</p>
+<p class="last">If you do not flush the subscriptions, they will be replayed upon this client&#8217;s next <a class="reference internal" href="#stompest.sync.client.Stomp.connect" title="stompest.sync.client.Stomp.connect"><code class="xref py py-meth docutils literal"><span class="pre">connect()</span></code></a>!</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.commit">
-<tt class="descname">commit</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">commit</code><span class="sig-paren">(</span><em>transaction=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.commit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>COMMIT</strong> frame to commit a STOMP transaction.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.connect">
-<tt class="descname">connect</tt><big>(</big><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>heartBeats=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client&#8217;s <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. If there are active subscriptions in the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt></a>, replay them when the STOMP connection is established.</p>
+<code class="descname">connect</code><span class="sig-paren">(</span><em>headers=None</em>, <em>versions=None</em>, <em>host=None</em>, <em>heartBeats=None</em>, <em>connectTimeout=None</em>, <em>connectedTimeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Establish a connection to a STOMP broker. If the wire-level connect fails, attempt a failover according to the settings in the client&#8217;s <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><code class="xref py py-class docutils literal"><span class="pre">StompConfig</span></code></a> object. If there are active subscriptions in the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><code class="xref py py-attr docutils literal"><span class="pre">session</span></code></a>, replay them when the STOMP connection is established.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>versions</strong> &#8211; The STOMP protocol versions we wish to support. The default behavior (<tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>) is the same as for the <a class="reference internal" href="protocol.html#stompest.protocol.commands.connect" title="stompest.protocol.commands.connect"><tt class="xref py py-func docutils literal"><span class="pre">connect()</span></tt></a> function of the commands API, but the highest supported version will be the one you specified in the <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><tt class="xref py py-class docutils literal"><span class="pre">StompConfig</span></tt></a> object. The version which is valid for the connection about to be initiated will be stored in the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><tt class="xref py py-attr docutils literal"><span class="pre">session</span></tt></a>.</li>
-<li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
-<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <strong>CONNECTED</strong> frame to arrive). If <tt class="xref py py-obj docutils literal"><span class="pre">None</span></tt>, we will wait indefinitely.</li>
+<li><strong>versions</strong> &#8211; The STOMP protocol versions we wish to support. The default behavior (<code class="xref py py-obj docutils literal"><span class="pre">None</span></code>) is the same as for the <a class="reference internal" href="protocol.html#stompest.protocol.commands.connect" title="stompest.protocol.commands.connect"><code class="xref py py-func docutils literal"><span class="pre">connect()</span></code></a> function of the commands API, but the highest supported version will be the one you specified in the <a class="reference internal" href="config.html#stompest.config.StompConfig" title="stompest.config.StompConfig"><code class="xref py py-class docutils literal"><span class="pre">StompConfig</span></code></a> object. The version which is valid for the connection about to be initiated will be stored in the <a class="reference internal" href="#stompest.sync.client.Stomp.session" title="stompest.sync.client.Stomp.session"><code class="xref py py-attr docutils literal"><span class="pre">session</span></code></a>.</li>
+<li><strong>connectTimeout</strong> &#8211; This is the time (in seconds) to wait for the wire-level connection to be established. If <code class="xref py py-obj docutils literal"><span class="pre">None</span></code>, we will wait indefinitely.</li>
+<li><strong>connectedTimeout</strong> &#8211; This is the time (in seconds) to wait for the STOMP connection to be established (that is, the broker&#8217;s <strong>CONNECTED</strong> frame to arrive). If <code class="xref py py-obj docutils literal"><span class="pre">None</span></code>, we will wait indefinitely.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">version</span>
 <span class="go">&#39;1.1&#39;</span>
@@ -300,35 +302,35 @@
 </div>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
-<p class="last">The <a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></tt></a> and <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><tt class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></tt></a> modules for the details of subscription replay and failover transport.</p>
+<p class="last">The <a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><code class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></code></a> and <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><code class="xref py py-mod docutils literal"><span class="pre">protocol.session</span></code></a> modules for the details of subscription replay and failover transport.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.disconnect">
-<tt class="descname">disconnect</tt><big>(</big><em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a STOMP <strong>DISCONNECT</strong> command and terminate the STOMP connection.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <strong>RECEIPT</strong> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <tt class="docutils literal"><span class="pre">self.close(flush=True)</span></tt>.</p>
+<p class="last">Calling this method will clear the session&#8217;s active subscriptions unless you request a <strong>RECEIPT</strong> response from the broker. In the latter case, you have to disconnect the wire-level connection and flush the subscriptions yourself by calling <code class="docutils literal"><span class="pre">self.close(flush=True)</span></code>.</p>
 </div>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="stompest.sync.client.Stomp.lastReceived">
-<tt class="descname">lastReceived</tt><a class="headerlink" href="#stompest.sync.client.Stomp.lastReceived" title="Permalink to this definition">¶</a></dt>
+<code class="descname">lastReceived</code><a class="headerlink" href="#stompest.sync.client.Stomp.lastReceived" title="Permalink to this definition">¶</a></dt>
 <dd><p>The last time when data was received.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="stompest.sync.client.Stomp.lastSent">
-<tt class="descname">lastSent</tt><a class="headerlink" href="#stompest.sync.client.Stomp.lastSent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">lastSent</code><a class="headerlink" href="#stompest.sync.client.Stomp.lastSent" title="Permalink to this definition">¶</a></dt>
 <dd><p>The last time when data was sent.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.message">
-<tt class="descname">message</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.message" title="Permalink to this definition">¶</a></dt>
+<code class="descname">message</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.message" title="Permalink to this definition">¶</a></dt>
 <dd><p>If you received a <strong>MESSAGE</strong> frame, this method will produce a token which allows you to match it against its subscription.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -340,114 +342,114 @@
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If the client is not aware of the subscription, or if we are not connected, this method will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
+<p class="last">If the client is not aware of the subscription, or if we are not connected, this method will raise a <a class="reference internal" href="error.html#stompest.error.StompProtocolError" title="stompest.error.StompProtocolError"><code class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></code></a>.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.nack">
-<tt class="descname">nack</tt><big>(</big><em>frame</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.nack" title="Permalink to this definition">¶</a></dt>
+<code class="descname">nack</code><span class="sig-paren">(</span><em>frame</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.nack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>NACK</strong> frame for a received <strong>MESSAGE</strong> frame.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.receipt">
-<tt class="descname">receipt</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.receipt" title="Permalink to this definition">¶</a></dt>
+<code class="descname">receipt</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.receipt" title="Permalink to this definition">¶</a></dt>
 <dd><p>If you received a <strong>RECEIPT</strong> frame, this method will extract the receipt id which you employed to request that receipt.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A <strong>MESSAGE</strong> frame (a <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> object).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A <strong>MESSAGE</strong> frame (a <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><code class="xref py py-class docutils literal"><span class="pre">StompFrame</span></code></a> object).</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If the client is not aware of the outstanding receipt, this method will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></tt>.</p>
+<p class="last">If the client is not aware of the outstanding receipt, this method will raise a <a class="reference internal" href="error.html#stompest.error.StompProtocolError" title="stompest.error.StompProtocolError"><code class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></code></a>.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.receiveFrame">
-<tt class="descname">receiveFrame</tt><big>(</big><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.receiveFrame" title="Permalink to this definition">¶</a></dt>
+<code class="descname">receiveFrame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.receiveFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch the next available frame.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If we are not connected, this method will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></tt>. Keep in mind that this method will block forever if there are no frames incoming on the wire. Be sure to use peek with <tt class="docutils literal"><span class="pre">self.canRead(timeout)</span></tt> before!</p>
+<p class="last">If we are not connected, this method will raise a <a class="reference internal" href="error.html#stompest.error.StompConnectionError" title="stompest.error.StompConnectionError"><code class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></code></a>. Keep in mind that this method will block forever if there are no frames incoming on the wire. Be sure to use peek with <code class="docutils literal"><span class="pre">self.canRead(timeout)</span></code> before!</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.send">
-<tt class="descname">send</tt><big>(</big><em>destination</em>, <em>body=''</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.send" title="Permalink to this definition">¶</a></dt>
+<code class="descname">send</code><span class="sig-paren">(</span><em>destination</em>, <em>body=b''</em>, <em>headers=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.send" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>SEND</strong> frame.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.sendFrame">
-<tt class="descname">sendFrame</tt><big>(</big><em>frame</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.sendFrame" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sendFrame</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.sendFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a raw STOMP frame.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; Any STOMP frame (represented as a <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><tt class="xref py py-class docutils literal"><span class="pre">StompFrame</span></tt></a> object).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; Any STOMP frame (represented as a <a class="reference internal" href="protocol.html#stompest.protocol.frame.StompFrame" title="stompest.protocol.frame.StompFrame"><code class="xref py py-class docutils literal"><span class="pre">StompFrame</span></code></a> object).</td>
 </tr>
 </tbody>
 </table>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If we are not connected, this method, and all other API commands for sending STOMP frames except <a class="reference internal" href="#stompest.sync.client.Stomp.connect" title="stompest.sync.client.Stomp.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a>, will raise a <tt class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></tt>. Use this command only if you have to bypass the <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> logic and you know what you&#8217;re doing!</p>
+<p class="last">If we are not connected, this method, and all other API commands for sending STOMP frames except <a class="reference internal" href="#stompest.sync.client.Stomp.connect" title="stompest.sync.client.Stomp.connect"><code class="xref py py-meth docutils literal"><span class="pre">connect()</span></code></a>, will raise a <a class="reference internal" href="error.html#stompest.error.StompConnectionError" title="stompest.error.StompConnectionError"><code class="xref py py-class docutils literal"><span class="pre">StompConnectionError</span></code></a>. Use this command only if you have to bypass the <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><code class="xref py py-class docutils literal"><span class="pre">StompSession</span></code></a> logic and you know what you&#8217;re doing!</p>
 </div>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="stompest.sync.client.Stomp.serverHeartBeat">
-<tt class="descname">serverHeartBeat</tt><a class="headerlink" href="#stompest.sync.client.Stomp.serverHeartBeat" title="Permalink to this definition">¶</a></dt>
+<code class="descname">serverHeartBeat</code><a class="headerlink" href="#stompest.sync.client.Stomp.serverHeartBeat" title="Permalink to this definition">¶</a></dt>
 <dd><p>The negotiated server heart-beat period in ms.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="stompest.sync.client.Stomp.session">
-<tt class="descname">session</tt><a class="headerlink" href="#stompest.sync.client.Stomp.session" title="Permalink to this definition">¶</a></dt>
-<dd><p>The <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><tt class="xref py py-class docutils literal"><span class="pre">StompSession</span></tt></a> associated to this client.</p>
+<code class="descname">session</code><a class="headerlink" href="#stompest.sync.client.Stomp.session" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><code class="xref py py-class docutils literal"><span class="pre">StompSession</span></code></a> associated to this client.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.subscribe">
-<tt class="descname">subscribe</tt><big>(</big><em>destination</em>, <em>headers=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.subscribe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a <strong>SUBSCRIBE</strong> frame to subscribe to a STOMP destination. This method returns a token which you have to keep if you wish to match incoming <strong>MESSAGE</strong> frames to this subscription or to <a class="reference internal" href="#stompest.sync.client.Stomp.unsubscribe" title="stompest.sync.client.Stomp.unsubscribe"><tt class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></tt></a> later.</p>
+<code class="descname">subscribe</code><span class="sig-paren">(</span><em>destination</em>, <em>headers=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.subscribe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a <strong>SUBSCRIBE</strong> frame to subscribe to a STOMP destination. This method returns a token which you have to keep if you wish to match incoming <strong>MESSAGE</strong> frames to this subscription or to <a class="reference internal" href="#stompest.sync.client.Stomp.unsubscribe" title="stompest.sync.client.Stomp.unsubscribe"><code class="xref py py-meth docutils literal"><span class="pre">unsubscribe()</span></code></a> later.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.transaction">
-<tt class="descname">transaction</tt><big>(</big><em>transaction=None</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.transaction" title="Permalink to this definition">¶</a></dt>
-<dd><p>A context manager for STOMP transactions. Upon entering the <tt class="xref py py-obj docutils literal"><span class="pre">with</span></tt> block, a transaction will be begun and upon exiting, that transaction will be committed or (if an error occurred) aborted.</p>
+<code class="descname">transaction</code><span class="sig-paren">(</span><em>transaction=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.transaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>A context manager for STOMP transactions. Upon entering the <code class="xref py py-obj docutils literal"><span class="pre">with</span></code> block, a transaction will be begun and upon exiting, that transaction will be committed or (if an error occurred) aborted.</p>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s">&#39;tcp://localhost:61613&#39;</span><span class="p">))</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;ack&#39;</span><span class="p">:</span> <span class="s">&#39;client-individual&#39;</span><span class="p">})</span>
-<span class="go">(u&#39;destination&#39;, u&#39;/queue/test&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c"># Check that queue is empty.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;ack&#39;</span><span class="p">:</span> <span class="s1">&#39;client-individual&#39;</span><span class="p">})</span>
+<span class="go">(&#39;destination&#39;, &#39;/queue/test&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Check that queue is empty.</span>
 <span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">client</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s">&#39;important&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">transaction</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="s">&#39;message with transaction header&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">TRANSACTION_HEADER</span><span class="p">:</span> <span class="n">transaction</span><span class="p">})</span>
-<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="s">&#39;message without transaction header&#39;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;poof&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">client</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s1">&#39;important&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">transaction</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;message with transaction header&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">TRANSACTION_HEADER</span><span class="p">:</span> <span class="n">transaction</span><span class="p">})</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;message without transaction header&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;poof&#39;</span><span class="p">)</span>
 <span class="gp">... </span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">4</span>, in <span class="n">&lt;module&gt;</span>
 <span class="gr">RuntimeError</span>: <span class="n">poof</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
-<span class="go">StompFrame(command=u&#39;RECEIPT&#39;, headers={u&#39;receipt-id&#39;: u&#39;important-begin&#39;}, body=&#39;&#39;)</span>
+<span class="go">StompFrame(command=&#39;RECEIPT&#39;, headers={&#39;receipt-id&#39;: &#39;important-begin&#39;})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
-<span class="go">StompFrame(command=u&#39;RECEIPT&#39;, headers={u&#39;receipt-id&#39;: u&#39;important-abort&#39;}, body=&#39;&#39;)</span>
+<span class="go">StompFrame(command=&#39;RECEIPT&#39;, headers={&#39;receipt-id&#39;: &#39;important-abort&#39;})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">body</span>
-<span class="go">(u&#39;MESSAGE&#39;, &#39;message without transaction header&#39;)</span>
+<span class="go">(&#39;MESSAGE&#39;, b&#39;message without transaction header&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">ack</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c"># frame with transaction header was dropped by the broker</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># frame with transaction header was dropped by the broker</span>
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 </pre></div>
@@ -456,7 +458,7 @@
 
 <dl class="method">
 <dt id="stompest.sync.client.Stomp.unsubscribe">
-<tt class="descname">unsubscribe</tt><big>(</big><em>token</em>, <em>receipt=None</em><big>)</big><a class="headerlink" href="#stompest.sync.client.Stomp.unsubscribe" title="Permalink to this definition">¶</a></dt>
+<code class="descname">unsubscribe</code><span class="sig-paren">(</span><em>token</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.unsubscribe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send an <strong>UNSUBSCRIBE</strong> frame to terminate an existing subscription.</p>
 </dd></dl>
 
@@ -471,7 +473,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -486,12 +488,12 @@
         <li class="right" >
           <a href="index.html" title="Contents"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.0</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2013, Jan Müller.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Jan Müller.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>

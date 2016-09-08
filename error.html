@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Error Codes &mdash; stompest documentation - v2.1.6</title>
+    <title>Error Codes &mdash; stompest documentation - v2.2.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.1.6',
+        VERSION:     '2.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,11 +23,11 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.1.6" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.2.0" href="index.html" />
     <link rel="prev" title="Configuration" href="config.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,20 +39,22 @@
         <li class="right" >
           <a href="config.html" title="Configuration"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.0</a> &raquo;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="config.html"
                         title="previous chapter">Configuration</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/error.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/error.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -71,61 +73,61 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-stompest.error">
 <span id="error-codes"></span><h1>Error Codes<a class="headerlink" href="#module-stompest.error" title="Permalink to this headline">¶</a></h1>
 <dl class="exception">
 <dt id="stompest.error.StompAlreadyRunningError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompAlreadyRunningError</tt><a class="headerlink" href="#stompest.error.StompAlreadyRunningError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompAlreadyRunningError</code><a class="headerlink" href="#stompest.error.StompAlreadyRunningError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when an in-flight exclusive operation is called more than once.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompCancelledError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompCancelledError</tt><a class="headerlink" href="#stompest.error.StompCancelledError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompCancelledError</code><a class="headerlink" href="#stompest.error.StompCancelledError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when an in-flight exclusive operation was cancelled.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompConnectTimeout">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompConnectTimeout</tt><a class="headerlink" href="#stompest.error.StompConnectTimeout" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompConnectTimeout</code><a class="headerlink" href="#stompest.error.StompConnectTimeout" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised for timeout waiting for connect response from broker.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompConnectionError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompConnectionError</tt><a class="headerlink" href="#stompest.error.StompConnectionError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompConnectionError</code><a class="headerlink" href="#stompest.error.StompConnectionError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised for nonexistent connection.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompError</tt><a class="headerlink" href="#stompest.error.StompError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompError</code><a class="headerlink" href="#stompest.error.StompError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for STOMP errors.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompExclusiveOperationError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompExclusiveOperationError</tt><a class="headerlink" href="#stompest.error.StompExclusiveOperationError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompExclusiveOperationError</code><a class="headerlink" href="#stompest.error.StompExclusiveOperationError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised for in-flight exclusive operation errors.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompFrameError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompFrameError</tt><a class="headerlink" href="#stompest.error.StompFrameError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompFrameError</code><a class="headerlink" href="#stompest.error.StompFrameError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised for error parsing STOMP frames.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompNotRunningError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompNotRunningError</tt><a class="headerlink" href="#stompest.error.StompNotRunningError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompNotRunningError</code><a class="headerlink" href="#stompest.error.StompNotRunningError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised when a non-running exclusive operation is accessed.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="stompest.error.StompProtocolError">
-<em class="property">exception </em><tt class="descclassname">stompest.error.</tt><tt class="descname">StompProtocolError</tt><a class="headerlink" href="#stompest.error.StompProtocolError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">stompest.error.</code><code class="descname">StompProtocolError</code><a class="headerlink" href="#stompest.error.StompProtocolError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raised for STOMP protocol errors.</p>
 </dd></dl>
 
@@ -137,7 +139,7 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -149,12 +151,12 @@
         <li class="right" >
           <a href="config.html" title="Configuration"
              >previous</a> |</li>
-        <li><a href="index.html">stompest documentation - v2.1.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.0</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
-        &copy; Copyright 2013, Jan Müller.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Jan Müller.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>
