@@ -29,13 +29,14 @@ API
 import logging
 
 from twisted.internet import defer, task
+from twisted.python import failure
 
 from stompest.error import StompConnectionError, StompFrameError
 from stompest.protocol import StompSession, StompSpec
 from stompest.util import checkattr
 
-from . import util, listener
-from .protocol import StompProtocolCreator
+from stompest.async import util, listener
+from stompest.async.protocol import StompProtocolCreator
 
 LOG_CATEGORY = __name__
 
@@ -79,14 +80,12 @@ class Stomp(object):
         """Add a listener to this client. For the interface definition, cf. :class:`~.async.listener.Listener`. 
         """
         if listener not in self._listeners:
-            # self.log.debug('Adding listener: %s' % listener)
             self._listeners.append(listener)
             listener.onAdd(self)
 
     def remove(self, listener):
         """Remove a listener from this client. 
         """
-        # self.log.debug('Removing listener: %s' % listener)
         self._listeners.remove(listener)
 
     @property
@@ -97,7 +96,6 @@ class Stomp(object):
 
     @disconnected.setter
     def disconnected(self, value):
-        # self.log.debug('Setting disconnected: %s' % value)
         self._disconnected = value
 
     @property
@@ -157,30 +155,35 @@ class Stomp(object):
 
         try:
             self._protocol = yield self._protocolCreator.connect(connectTimeout, self._onFrame, self._onConnectionLost)
+        except:
+            self._onConnectionLost(failure.Failure())
+            yield self.disconnected
+
+        try:
             frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host, heartBeats)
             self.sendFrame(frame)
             yield self._notify(lambda l: l.onConnect(self, frame, connectedTimeout))
         except Exception as e:
-            self.disconnect(failure=e)
+            self.disconnect(reason=e)
             yield self.disconnected
-        else:
-            yield self._replay()
+
+        yield self._replay()
 
     @connected
     @defer.inlineCallbacks
-    def disconnect(self, receipt=None, failure=None, timeout=None):
-        """disconnect(self, receipt=None, failure=None, timeout=None)
+    def disconnect(self, receipt=None, reason=None, timeout=None):
+        """disconnect(self, receipt=None, reason=None, timeout=None)
         
         Send a **DISCONNECT** frame and terminate the STOMP connection.
 
-        :param failure: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
+        :param reason: A disconnect reason (a :class:`Exception`) to err back. Example: ``versions=['1.0', '1.1']``
         :param timeout: This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If **timeout** is :obj:`None`, we will wait indefinitely.
 
         .. note :: The :attr:`~.async.client.Stomp.session`'s active subscriptions will be cleared if no failure has been passed to this method. This allows you to replay the subscriptions upon reconnect. If you do not wish to do so, you have to clear the subscriptions yourself by calling the :meth:`~.StompSession.close` method of the :attr:`~.async.client.Stomp.session`. The result of any (user-requested or not) disconnect event is available via the :attr:`disconnected` property.
         """
         protocol = self._protocol
         try:
-            yield self._notify(lambda l: l.onDisconnect(self, failure, timeout))
+            yield self._notify(lambda l: l.onDisconnect(self, reason, timeout))
             if self.session.state == self.session.CONNECTED:
                 yield self.sendFrame(self.session.disconnect(receipt))
         finally:
@@ -311,7 +314,7 @@ class Stomp(object):
             yield self._notify(lambda l: l.onMessage(self, frame, context))
         except Exception as e:
             self.log.error('Disconnecting (error in message handler): %s [%s]' % (messageId, frame.info()))
-            self.disconnect(failure=e)
+            self.disconnect(reason=e)
 
     @defer.inlineCallbacks
     def _onReceipt(self, frame):

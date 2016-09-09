@@ -349,7 +349,7 @@ class SubscribeTestCase(AsyncClientBaseTestCase):
         while self.framesHandled != 2:
             yield task.deferLater(reactor, 0.01, lambda: None)
 
-        yield client.disconnect(failure=RuntimeError('Hi'))
+        yield client.disconnect(reason=RuntimeError('Hi'))
         try:
             yield client.disconnected
         except RuntimeError as e:

@@ -2,12 +2,12 @@ import logging
 import time
 
 from twisted.internet import defer, reactor, task
+from twisted.python import failure
 
 from stompest.error import StompConnectionError, StompCancelledError, StompProtocolError
 from stompest.protocol import StompSpec
 
-from .util import sendToErrorDestination
-from stompest.async.util import WaitingDeferred, InFlightOperations
+from stompest.async.util import InFlightOperations, WaitingDeferred, sendToErrorDestination
 
 LOG_CATEGORY = __name__
 
@@ -30,7 +30,7 @@ class Listener(object):
     def onConnectionLost(self, connection, reason):
         pass
 
-    def onDisconnect(self, connection, failure, timeout):
+    def onDisconnect(self, connection, reason, timeout):
         pass
 
     def onError(self, connection, frame):
@@ -75,12 +75,12 @@ class ConnectListener(Listener):
             self._waiting.errback(reason)
 
     def onError(self, connection, frame):
-        self.onConnectionLost(connection, StompProtocolError('While trying to connect, received %s' % frame.info()))
+        self.onConnectionLost(connection, failure.Failure(StompProtocolError('While trying to connect, received %s' % frame.info())))
 
 class ErrorListener(Listener):
     """Handles **ERROR** frames."""
     def onError(self, connection, frame):
-        connection.disconnect(failure=StompProtocolError('Received %s' % frame.info()))
+        connection.disconnect(reason=StompProtocolError('Received %s' % frame.info()))
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
         connection.remove(self)
@@ -112,18 +112,17 @@ class DisconnectListener(Listener):
                 self.log.debug('Calling disconnected callback')
             connection.disconnected.callback(None)
 
-    def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
-        self._disconnectReason = failure
+    def onDisconnect(self, connection, reason, timeout): # @UnusedVariable
+        self._disconnectReason = reason
         if self._disconnecting:
             return
         self._disconnecting = True
-        self.log.info('Disconnecting ...%s' % ((' [reason=%s]' % failure) if failure else ''))
+        self.log.info('Disconnecting ...%s' % ((' [reason=%s]' % reason) if reason else ''))
 
     def onMessage(self, connection, frame, context): # @UnusedVariable
         if not self._disconnecting:
             return
         self.log.info('Ignoring message (disconnecting): %s [%s]' % (frame.headers[StompSpec.MESSAGE_ID_HEADER], frame.info()))
-        connection.nack(frame).addBoth(lambda _: None)
 
     @property
     def _disconnectReason(self):
@@ -194,7 +193,8 @@ class SubscriptionListener(Listener):
         self.log = logging.getLogger(LOG_CATEGORY)
 
     @defer.inlineCallbacks
-    def onDisconnect(self, connection, failure, timeout): # @UnusedVariable
+    def onDisconnect(self, connection, reason, timeout): # @UnusedVariable
+        connection.remove(self)
         if not self._messages:
             defer.returnValue(None)
         self.log.info('Waiting for outstanding message handlers to finish ... [timeout=%s]' % timeout)
@@ -215,7 +215,7 @@ class SubscriptionListener(Listener):
                 yield self._onMessageFailed(connection, e, frame, self._errorDestination)
             finally:
                 if self._ack and (self._headers[StompSpec.ACK_HEADER] in StompSpec.CLIENT_ACK_MODES):
-                    connection.ack(frame)
+                    yield connection.ack(frame)
                 if not waiting.called:
                     waiting.callback(None)
 
@@ -235,8 +235,8 @@ class SubscriptionListener(Listener):
         Forget everything about this listener's subscription and unregister from the **connection**."""
         if context is not self:
             return
-        yield self._waitForMessages(None)
         connection.remove(self)
+        yield self._waitForMessages(None)
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
         """onConnectionLost(connection, reason)
@@ -291,7 +291,7 @@ class HeartBeatListener(Listener):
                 connection.sendFrame(connection.session.beat())
                 remaining = self._beatRemaining(connection.session, which)
             else:
-                connection.disconnect(failure=StompConnectionError('Server heart-beat timeout'))
+                connection.disconnect(reason=StompConnectionError('Server heart-beat timeout'))
                 return
         self._heartBeats[which] = reactor.callLater(remaining, self._beat, connection, which) # @UndefinedVariable
 

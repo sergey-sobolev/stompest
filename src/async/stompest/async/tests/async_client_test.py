@@ -45,7 +45,7 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
         config = StompConfig(uri='tcp://localhost:%d' % port)
         client = Stomp(config)
         try:
-            yield client.connect(connectTimeout=1e-12, connectedTimeout=self.TIMEOUT)
+            yield client.connect(connectTimeout=1e-5)
         except StompConnectionError:
             pass
         else:
@@ -57,23 +57,23 @@ class AsyncClientConnectTimeoutTestCase(AsyncClientBaseTestCase):
         config = StompConfig(uri='tcp://localhost:%d' % port)
         client = Stomp(config)
         try:
-            yield client.connect(connectTimeout=self.TIMEOUT, connectedTimeout=self.TIMEOUT)
+            yield client.connect(connectedTimeout=self.TIMEOUT)
         except StompCancelledError:
             pass
         else:
             raise Exception('Expected connected timeout, but connection was established.')
 
     @defer.inlineCallbacks
-    def test_connection_timeout_after_failover(self): # TODO: fix
+    def test_connected_timeout_after_failover(self):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='failover:(tcp://nosuchhost:65535,tcp://localhost:%d)?startupMaxReconnectAttempts=2,initialReconnectDelay=0,randomize=false' % port)
         client = Stomp(config)
         try:
-            yield client.connect(connectTimeout=self.TIMEOUT, connectedTimeout=self.TIMEOUT)
+            yield client.connect(connectedTimeout=self.TIMEOUT)
         except StompCancelledError:
             pass
         else:
-            raise Exception('Expected connection timeout, but connection was established.')
+            raise Exception('Expected connected timeout, but connection was established.')
 
     @defer.inlineCallbacks
     def test_not_connected(self):
@@ -226,7 +226,7 @@ class AsyncClientDisconnectTimeoutTestCase(AsyncClientBaseTestCase):
     protocols = [RemoteControlViaFrameStompServer]
 
     @defer.inlineCallbacks
-    def test_disconnect_timeout(self): # TODO: fix
+    def test_disconnect_timeout(self):
         port = self.connections[0].getHost().port
         config = StompConfig(uri='tcp://localhost:%d' % port, version='1.1')
         client = Stomp(config)
