@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Asynchronous Client &mdash; stompest documentation - v2.2.0</title>
+    <title>Asynchronous Client &mdash; stompest documentation - v2.2.1</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.2.0',
+        VERSION:     '2.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.2.0" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.2.1" href="index.html" />
     <link rel="next" title="Protocol Layer" href="protocol.html" />
     <link rel="prev" title="Synchronous Client" href="sync.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.0</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.1</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -110,7 +110,7 @@
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">defer</span><span class="p">,</span> <span class="n">reactor</span>
+<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">defer</span><span class="p">,</span> <span class="n">task</span>
 
 <span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
 
@@ -126,20 +126,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
 
     <span class="nd">@defer.inlineCallbacks</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
         <span class="k">yield</span> <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="n">client</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ReceiptListener</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-            <span class="k">yield</span> <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">}</span><span class="o">.</span><span class="n">encode</span><span class="p">()),</span> <span class="n">receipt</span><span class="o">=</span><span class="s1">&#39;message-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="n">j</span><span class="p">})</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="n">receipt</span><span class="o">=</span><span class="s1">&#39;message-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
         <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s1">&#39;bye&#39;</span><span class="p">)</span>
         <span class="k">yield</span> <span class="n">client</span><span class="o">.</span><span class="n">disconnected</span> <span class="c1"># graceful disconnect: waits until all receipts have arrived</span>
-        <span class="n">reactor</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-    <span class="n">Producer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-    <span class="n">reactor</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">task</span><span class="o">.</span><span class="n">react</span><span class="p">(</span><span class="n">Producer</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -150,10 +148,11 @@
 
 <span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">reactor</span><span class="p">,</span> <span class="n">defer</span>
 
-<span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
-<span class="kn">from</span> <span class="nn">stompest.async.listener</span> <span class="kn">import</span> <span class="n">SubscriptionListener</span>
 <span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
 <span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
+
+<span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
+<span class="kn">from</span> <span class="nn">stompest.async.listener</span> <span class="kn">import</span> <span class="n">SubscriptionListener</span>
 
 <span class="k">class</span> <span class="nc">IncrementTransformer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="n">IN_QUEUE</span> <span class="o">=</span> <span class="s1">&#39;/queue/testIn&#39;</span>
@@ -182,7 +181,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        NOTE: you can return a Deferred here</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
         <span class="n">data</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OUT_QUEUE</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
 
@@ -198,12 +197,13 @@
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">reactor</span><span class="p">,</span> <span class="n">defer</span>
+<span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">defer</span><span class="p">,</span> <span class="n">reactor</span>
+
+<span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
+<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
 
 <span class="kn">from</span> <span class="nn">stompest.async</span> <span class="kn">import</span> <span class="n">Stomp</span>
 <span class="kn">from</span> <span class="nn">stompest.async.listener</span> <span class="kn">import</span> <span class="n">SubscriptionListener</span>
-<span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
 
 
 <span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -233,7 +233,7 @@
 <span class="sd">        NOTE: you can return a Deferred here</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-        <span class="k">print</span> <span class="s1">&#39;Received frame with count </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Received frame with count </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">])</span>
 
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
@@ -317,10 +317,6 @@
 </tr>
 </tbody>
 </table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Only one connect attempt may be pending at a time. Any other attempt will result in a <a class="reference internal" href="error.html#stompest.error.StompAlreadyRunningError" title="stompest.error.StompAlreadyRunningError"><code class="xref py py-class docutils literal"><span class="pre">StompAlreadyRunningError</span></code></a>.</p>
-</div>
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The <a class="reference internal" href="protocol.html#module-stompest.protocol.failover" title="stompest.protocol.failover"><code class="xref py py-mod docutils literal"><span class="pre">protocol.failover</span></code></a> and <a class="reference internal" href="protocol.html#module-stompest.protocol.session" title="stompest.protocol.session"><code class="xref py py-mod docutils literal"><span class="pre">session</span></code></a> modules for the details of subscription replay and failover transport.</p>
@@ -329,14 +325,14 @@
 
 <dl class="method">
 <dt id="stompest.async.client.Stomp.disconnect">
-<code class="descname">disconnect</code><span class="sig-paren">(</span><em>self</em>, <em>receipt=None</em>, <em>failure=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.async.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>self</em>, <em>receipt=None</em>, <em>reason=None</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.async.client.Stomp.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send a <strong>DISCONNECT</strong> frame and terminate the STOMP connection.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>failure</strong> &#8211; A disconnect reason (a <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code>) to err back. Example: <code class="docutils literal"><span class="pre">versions=['1.0',</span> <span class="pre">'1.1']</span></code></li>
+<li><strong>reason</strong> &#8211; A disconnect reason (a <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code>) to err back. Example: <code class="docutils literal"><span class="pre">versions=['1.0',</span> <span class="pre">'1.1']</span></code></li>
 <li><strong>timeout</strong> &#8211; This is the time (in seconds) to wait for a graceful disconnect, that is, for pending message handlers to complete. If <strong>timeout</strong> is <code class="xref py py-obj docutils literal"><span class="pre">None</span></code>, we will wait indefinitely.</li>
 </ul>
 </td>
@@ -546,7 +542,7 @@
         <li class="right" >
           <a href="sync.html" title="Synchronous Client"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.0</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.1</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
