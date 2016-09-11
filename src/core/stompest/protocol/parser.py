@@ -1,8 +1,6 @@
 import collections
+import re
 
-from io import BytesIO as IO
-
-from stompest._backwards import characterType, makeBytesFromString
 from stompest.error import StompFrameError
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
@@ -39,14 +37,10 @@ class StompParser(object):
     """
     SENTINEL = None
 
+    _REGEX_LINE_DELIMITER = re.compile(StompSpec.LINE_DELIMITER.encode())
+
     def __init__(self, version=None):
         self.version = version
-        self._parsers = {
-            'heart-beat': self._parseHeartBeat,
-            'command': self._parseCommand,
-            'headers': self._parseHeader,
-            'body': self._parseBody
-        }
         self.reset()
 
     def canRead(self):
@@ -66,88 +60,78 @@ class StompParser(object):
         
         :param data: A byte-stream, i.e., a :class:`str`-like (Python 2) or :class:`bytes`-like (Python 3) object.
         """
-        for byte in data:
-            self.parse(characterType(byte))
+        self._data += data
+        while self._parse():
+            pass
 
     def reset(self):
         """Reset internal state, including all fully or partially parsed frames.
         """
         self._frames = collections.deque()
+        self._flush()
         self._next()
 
     def _flush(self):
-        self._buffer = IO()
+        self._data = b''
 
     def _next(self):
         self._frame = None
         self._length = -1
-        self._read = 0
-        self._transition('heart-beat')
 
     def _append(self):
-        if self._frame is not None:
-            self._frame.version = self.version
-            self._frames.append(self._frame)
+        self._frame.version = self.version
+        self._frames.append(self._frame)
         self._next()
 
-    def _transition(self, state):
-        self._flush()
-        self.parse = self._parsers[state]
-
-    def _parseHeartBeat(self, character):
-        if character != StompSpec.LINE_DELIMITER:
-            self._transition('command')
-            self.parse(character)
+    def _parse(self):
+        if not self._data:
             return
 
-        if self.version != StompSpec.VERSION_1_0:
-            self._frame = StompHeartBeat()
-            self._append()
+        if self._data[:1] == StompSpec.LINE_DELIMITER.encode():
+            self._data = self._data[1:]
+            if self.version != StompSpec.VERSION_1_0:
+                self._frame = StompHeartBeat()
+                self._append()
+            return bool(self._data)
 
-    def _parseCommand(self, character):
-        if character != StompSpec.LINE_DELIMITER:
-            self._write(character)
+        eof = self._data.find(StompSpec.FRAME_DELIMITER.encode())
+        if eof == -1:
             return
-        command = self._decode(self._buffer.getvalue())
-        if command not in StompSpec.COMMANDS[self.version]:
-            self._raise('Invalid command: %s' % repr(command))
-        self._frame = StompFrame(command=command, rawHeaders=[], version=self.version)
-        self._transition('headers')
 
-    def _parseHeader(self, character):
-        if character != StompSpec.LINE_DELIMITER:
-            self._write(character)
-            return
-        header = self._decode(self._buffer.getvalue())
-        if header:
-            try:
-                name, value = header.split(StompSpec.HEADER_SEPARATOR, 1)
-            except ValueError:
-                self._raise('No separator in header line: %s' % header)
-            header = tuple(map(self._unescape, (name, value)))
-            self._frame.rawHeaders.append(header)
-            self._transition('headers')
-        else:
-            self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
-            self._transition('body')
+        start = 0
+        if self._frame is None:
+            for match in self._REGEX_LINE_DELIMITER.finditer(self._data):
+                line = self._decode(self._data[start:match.start()])
+                start = match.end()
+                if self._frame is None:
+                    if line not in StompSpec.COMMANDS[self.version]:
+                        self._raise('Invalid command: %s' % repr(line))
+                    self._frame = StompFrame(command=line, rawHeaders=[], version=self.version)
+                elif line:
+                    try:
+                        name, value = line.split(StompSpec.HEADER_SEPARATOR, 1)
+                    except ValueError:
+                        self._raise('No separator in header line: %s' % line)
+                    self._frame.rawHeaders.append(tuple(self._unescape(self._frame.command, text) for text in (name, value)))
+                else:
+                    self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, -1))
+                    if self._length == -1:
+                        self._length = eof - start
+                    break
 
-    def _parseBody(self, character):
-        self._read += 1
-        if (self._read <= self._length) or (character != StompSpec.FRAME_DELIMITER):
-            self._write(character)
+        self._data = self._data[start:]
+        if len(self._data) < self._length:
             return
-        self._frame.body = self._buffer.getvalue()
-        command = self._frame.command
-        if self._frame.body and (command not in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [command])):
-            self._raise('No body allowed for this command: %s' % command)
+
+        self._frame.body, self._data = self._data[:self._length], self._data[self._length + len(StompSpec.FRAME_DELIMITER):]
+        if self._frame.body and (self._frame.command not in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [self._frame.command])): # @UndefinedVariable
+            self._raise('No body allowed for this command: %s' % self._frame.command)
         self._append()
+        return bool(self._data)
 
     def _raise(self, message):
         self._flush()
         raise StompFrameError(message)
-
-    def _write(self, character):
-        self._buffer.write(makeBytesFromString(character))
 
     def _decode(self, data):
         text = StompSpec.codec(self.version).decode(data)[0]
@@ -156,9 +140,9 @@ class StompParser(object):
             return text[:-1]
         return text
 
-    def _unescape(self, text):
+    def _unescape(self, command, text):
         try:
-            return unescape(self.version)(self._frame.command, text)
+            return unescape(self.version)(command, text)
         except KeyError as e:
             raise StompFrameError('No escape sequence defined for this character: %s [text=%s]' % (e, repr(text)))
 

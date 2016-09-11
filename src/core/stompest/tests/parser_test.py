@@ -9,10 +9,6 @@ from stompest.protocol import commands, StompFrame, StompParser, StompSpec
 from stompest.protocol.frame import StompHeartBeat
 
 class StompParserTest(unittest.TestCase):
-    def _generate_bytes(self, stream):
-        for byte in stream:
-            yield byte
-
     def test_frame_parse_succeeds(self):
         frame = StompFrame(
             StompSpec.SEND,
@@ -100,7 +96,7 @@ class StompParserTest(unittest.TestCase):
     def test_add_throws_FrameError_on_invalid_command(self):
         parser = StompParser()
 
-        self.assertRaises(StompFrameError, parser.add, b'HELLO\n')
+        self.assertRaises(StompFrameError, parser.add, b'HELLO\n\x00')
         self.assertFalse(parser.canRead())
         parser.add(('%s\n\n\x00' % StompSpec.DISCONNECT).encode())
         self.assertEqual(StompFrame(StompSpec.DISCONNECT), parser.get())
@@ -109,7 +105,7 @@ class StompParserTest(unittest.TestCase):
     def test_add_throws_FrameError_on_header_line_missing_separator(self):
         parser = StompParser()
         parser.add(('%s\n' % StompSpec.SEND).encode('utf-8'))
-        self.assertRaises(StompFrameError, parser.add, b'no separator\n')
+        self.assertRaises(StompFrameError, parser.add, b'no separator\n\n\x00')
 
     def test_colon_in_header_value(self):
         parser = StompParser()
@@ -122,7 +118,7 @@ class StompParserTest(unittest.TestCase):
         frameBytes = StompFrame(StompSpec.MESSAGE, headers, body).__str__()
         self.assertTrue(frameBytes.endswith(b'\x00'))
         parser = StompParser()
-        parser.add(self._generate_bytes(frameBytes))
+        parser.add(frameBytes)
         frame = parser.get()
         self.assertEqual(StompSpec.MESSAGE, frame.command)
         self.assertEqual(headers, frame.headers)
