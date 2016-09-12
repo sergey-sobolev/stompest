@@ -15,4 +15,5 @@
 * 2.1.6 - Bugfix thanks to [Cory Stegelmeier](https://github.com/rtkcstegel). Retry system calls when EINTR is received.
 * 2.2.0 - Support for Python 3.3-3.5 thanks to [Petr Rašek](https://github.com/hydratk). Dropped support for Python 2.6.
 * 2.2.1 - Minor bugfixes. API break: async client.disconnect() parameter changed from "failure" to "reason".
-* 2.2.2 - Optimized STOMP parser adapted from David Wilson's [tinystompest](https://github.com/dw).
+* 2.2.2 - <broken and deleted>
+* 2.2.3 - Optimized STOMP parser adapted from David Wilson's [tinystompest](https://github.com/dw).
