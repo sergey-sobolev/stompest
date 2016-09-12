@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import binascii
 import unittest
 
 from stompest._backwards import binaryType
@@ -126,16 +125,18 @@ class StompParserTest(unittest.TestCase):
         self.assertEqual(parser.get(), None)
 
     def test_binary_body(self):
-        body = binascii.a2b_hex('f0000a09')
+        body = b'\xf0\x00\x0a\x09'
         headers = {'content-length': str(len(body))}
         frameBytes = StompFrame(StompSpec.MESSAGE, headers, body).__str__()
         self.assertTrue(frameBytes.endswith(b'\x00'))
         parser = StompParser()
-        parser.add(frameBytes)
-        frame = parser.get()
-        self.assertEqual(StompSpec.MESSAGE, frame.command)
-        self.assertEqual(headers, frame.headers)
-        self.assertEqual(body, frame.body)
+        for _ in range(2):
+            for (j, _) in enumerate(frameBytes):
+                parser.add(frameBytes[j:j + 1])
+            frame = parser.get()
+            self.assertEqual(StompSpec.MESSAGE, frame.command)
+            self.assertEqual(headers, frame.headers)
+            self.assertEqual(body, frame.body)
 
         self.assertEqual(parser.get(), None)
 

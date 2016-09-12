@@ -4,6 +4,7 @@ __pycache__
 *.pyo
 *.egg
 *.egg-info
+parserstats
 _trial_temp
 *~
 *.swp

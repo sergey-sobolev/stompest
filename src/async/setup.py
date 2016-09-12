@@ -4,7 +4,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-from stompest.async import FULL_VERSION
+from stompest import FULL_VERSION
 
 def read(filename):
     return open(os.path.join(os.path.dirname(__file__), filename)).read()
