@@ -1,6 +1,7 @@
 import collections
 import re
 
+from stompest._backwards import binaryType
 from stompest.error import StompFrameError
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
@@ -37,7 +38,9 @@ class StompParser(object):
     """
     SENTINEL = None
 
-    _findLineDelimiters = re.compile(StompSpec.LINE_DELIMITER.encode()).finditer
+    _FRAME_DELIMITER = StompSpec.FRAME_DELIMITER.encode()
+    _LINE_DELIMITER = StompSpec.LINE_DELIMITER.encode()
+    _findLineDelimiters = re.compile(_LINE_DELIMITER).finditer
 
     def __init__(self, version=None):
         self.version = version
@@ -69,16 +72,11 @@ class StompParser(object):
         """
         self._frames = collections.deque()
         self._flush()
-        self._next()
 
     def _append(self):
-        if self._frame is not None:
-            self._frame.version = self.version
-            self._frames.append(self._frame)
+        self._frame.version = self.version
+        self._frames.append(self._frame)
         self._next()
-
-    def _byte(self, position):
-        return self._data[position:position + 1]
 
     def _decode(self, data):
         text = StompSpec.codec(self.version).decode(data)[0]
@@ -89,40 +87,39 @@ class StompParser(object):
 
     def _flush(self):
         self._data = bytearray()
+        self._next()
 
     def _next(self):
         self._frame = None
+        self._length = None
         self._seek = 0
-        self._length = -1
 
     def _parse(self):
         if len(self._data) <= self._seek:
             return
 
-        if (self._frame is None) and (self._data[:1] == StompSpec.LINE_DELIMITER.encode()):
-            self._data.pop(0)
+        if (self._frame is None) and self._data.startswith(self._LINE_DELIMITER):
+            self._truncate(1)
             if self.version != StompSpec.VERSION_1_0:
                 self._frame = StompHeartBeat()
                 self._append()
-            return bool(self._data)
+            return True
 
-        eof = self._data.find(StompSpec.FRAME_DELIMITER.encode(), self._seek)
+        eof = self._data.find(self._FRAME_DELIMITER, self._seek, None if (self._frame is None) else self._length + 1)
         if eof == -1:
-            if self._length != -1:
-                self._raise('Expected frame delimiter (found %s instead)' % repr(self._byte(self._seek)))
+            if self._frame is not None:
+                self._raise('Expected frame delimiter (found %s instead)' % repr(binaryType(self._data[eof:eof + 1])))
             self._seek = len(self._data)
             return
 
         if self._frame is None:
             self._parseHead(eof)
-            if self._byte(self._length) != StompSpec.FRAME_DELIMITER:
-                self._seek = self._length
-                return True
+            self._seek = self._length
+            return True
 
         self._parseBody()
         self._append()
-
-        return bool(self._data)
+        return True
 
     def _parseBody(self):
         self._frame.body = self._data[:self._length]
@@ -132,7 +129,7 @@ class StompParser(object):
 
     def _parseCommand(self, line):
         if line not in StompSpec.COMMANDS[self.version]:
-            self._raise('Invalid command: %s' % repr(line))
+            self._raise('Invalid command: %s' % line)
         self._frame = StompFrame(command=line, rawHeaders=[], version=self.version)
 
     def _parseHead(self, eof):

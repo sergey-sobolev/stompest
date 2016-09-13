@@ -160,7 +160,21 @@ class StompParserTest(unittest.TestCase):
 
     def test_binary_body_invalid_eof(self):
         parser = StompParser()
-        self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x01')
+        body = b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00'
+        parser.add(body)
+        self.assertEqual(binaryType(parser.get()), body)
+        self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\n\t\xff\x01\n\nCONNECT\n\x00') # \x00 behind invalid EOF
+        parser.add(body)
+        self.assertEqual(binaryType(parser.get()), body)
+        self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\n\t\xff\x01\x00') # \x00 just behind invalid EOF
+        parser.add(body)
+        self.assertEqual(binaryType(parser.get()), body)
+        self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x01') # \x00 before invalid EOF
+        parser.add(body)
+        self.assertEqual(binaryType(parser.get()), body)
+        self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\n\t\x00\x01') # \x00 just before invalid EOF
+        parser.add(body)
+        self.assertEqual(binaryType(parser.get()), body)
 
     def test_body_allowed_commands(self):
         head = binaryType(commands.disconnect()).rstrip(StompSpec.FRAME_DELIMITER.encode())
