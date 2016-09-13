@@ -126,7 +126,7 @@ class StompParserTest(unittest.TestCase):
 
     def test_binary_body(self):
         body = b'\xf0\x00\x0a\x09'
-        headers = {'content-length': str(len(body))}
+        headers = {StompSpec.CONTENT_LENGTH_HEADER: str(len(body))}
         frameBytes = StompFrame(StompSpec.MESSAGE, headers, body).__str__()
         self.assertTrue(frameBytes.endswith(b'\x00'))
         parser = StompParser()
@@ -137,8 +137,28 @@ class StompParserTest(unittest.TestCase):
             self.assertEqual(StompSpec.MESSAGE, frame.command)
             self.assertEqual(headers, frame.headers)
             self.assertEqual(body, frame.body)
-
         self.assertEqual(parser.get(), None)
+
+        frames = 2 * frameBytes
+        split = len(frameBytes) - 1
+        chunks = [frames[:split], frames[split:]]
+        parser.add(chunks.pop(0))
+        self.assertEqual(parser.get(), None)
+        parser.add(chunks.pop(0))
+        self.assertEqual(parser.get(), frame)
+        self.assertEqual(parser.get(), frame)
+        self.assertEqual(parser.get(), None)
+
+        split = len(frameBytes) + 1
+        chunks = [frames[:split], frames[split:]]
+        parser.add(chunks.pop(0))
+        self.assertEqual(parser.get(), frame)
+        self.assertEqual(parser.get(), None)
+        parser.add(chunks.pop(0))
+        self.assertEqual(parser.get(), frame)
+        self.assertEqual(parser.get(), None)
+
+        self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x01')
 
     def test_body_allowed_commands(self):
         head = commands.disconnect().__str__().rstrip(StompSpec.FRAME_DELIMITER.encode())

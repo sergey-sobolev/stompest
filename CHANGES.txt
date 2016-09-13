@@ -17,3 +17,4 @@
 * 2.2.1 - Minor bugfixes. API break: async client.disconnect() parameter changed from "failure" to "reason".
 * 2.2.2 - <broken and deleted>
 * 2.2.3 - Optimized STOMP parser adapted from David Wilson's [tinystompest](https://github.com/dw).
+* 2.2.4 - Increased test coverage of STOMP parser and fixed the uncovered bugs.

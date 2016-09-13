@@ -105,15 +105,14 @@ class StompParser(object):
 
         eof = self._data.find(StompSpec.FRAME_DELIMITER.encode(), self._seek)
         if eof == -1:
+            if self._length != -1:
+                self._raise('Expected frame delimiter (found %s instead)' % repr(bytes([self._data[self._seek]])))
             self._seek = len(self._data)
             return
 
         if self._frame is None:
-            self._length = self._parseHead(eof)
-
-        if len(self._data) < self._length:
-            self._seek = self._length
-            return
+            self._seek = self._length = self._parseHead(eof)
+            return True
 
         self._parseBody()
         self._append()
