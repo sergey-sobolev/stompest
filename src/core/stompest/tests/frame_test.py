@@ -49,12 +49,12 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(frame, otherFrame)
 
         frame.version = StompSpec.VERSION_1_0
-        self.assertRaises(UnicodeEncodeError, frame.__str__)
+        self.assertRaises(UnicodeEncodeError, binaryType, frame)
 
     def test_binary_body(self):
         body = b'\xf0\x00\x0a\x09'
         headers = {'content-length': str(len(body))}
-        frame = StompFrame('MESSAGE', headers, body)
+        frame = StompFrame(StompSpec.MESSAGE, headers, body)
         self.assertEqual(frame.body, body)
         self.assertEqual(binaryType(frame), b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x00')
 
@@ -62,7 +62,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         rawHeaders = (('foo', 'bar1'), ('foo', 'bar2'))
         headers = dict(reversed(rawHeaders))
         message = {
-            'command': 'SEND',
+            'command': StompSpec.SEND,
             'body': b'some stuff\nand more',
             'rawHeaders': rawHeaders
         }
@@ -137,6 +137,10 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         for version in StompSpec.VERSIONS:
             frame.version = version
             self.assertEqual(frame.__unicode__(), frameString)
+
+    def test_frame_info(self):
+        frame = StompFrame(StompSpec.MESSAGE, headers={'a': 'c'}, body=b'More text than fits a short info.', version=StompSpec.VERSION_1_1)
+        self.assertEqual(frame.info().replace("b'", "'").replace("u'", "'"), "MESSAGE frame [headers={'a': 'c'}, body='More text than fits ...', version=1.1]")
 
 if __name__ == '__main__':
     unittest.main()

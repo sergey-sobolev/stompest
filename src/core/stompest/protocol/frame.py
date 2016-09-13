@@ -74,7 +74,7 @@ class StompFrame(object):
         for (keyword, field, default) in self._KEYWORDS_AND_FIELDS:
             value = getattr(self, field)
             if value != default:
-                yield (keyword, getattr(self, field))
+                yield (keyword, value)
 
     def __repr__(self):
         return '%s(%s)' % (self.__class__.__name__, ', '.join(
@@ -98,8 +98,8 @@ class StompFrame(object):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters)."""
         headers = self.headers and 'headers=%s' % self.headers
         body = self.body[:self.INFO_LENGTH]
-        if body not in self.body:
-            body = '%s...' % body
+        if len(body) < len(self.body):
+            body += b'...'
         body = body and ('body=%s' % repr(body))
         version = 'version=%s' % self.version
         info = ', '.join(i for i in (headers, body, version) if i)

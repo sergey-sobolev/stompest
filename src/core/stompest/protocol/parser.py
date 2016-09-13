@@ -37,7 +37,7 @@ class StompParser(object):
     """
     SENTINEL = None
 
-    _REGEX_LINE_DELIMITER = re.compile(StompSpec.LINE_DELIMITER.encode())
+    _findLineDelimiters = re.compile(StompSpec.LINE_DELIMITER.encode()).finditer
 
     def __init__(self, version=None):
         self.version = version
@@ -77,6 +77,9 @@ class StompParser(object):
             self._frames.append(self._frame)
         self._next()
 
+    def _byte(self, position):
+        return self._data[position:position + 1]
+
     def _decode(self, data):
         text = StompSpec.codec(self.version).decode(data)[0]
         stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
@@ -106,13 +109,15 @@ class StompParser(object):
         eof = self._data.find(StompSpec.FRAME_DELIMITER.encode(), self._seek)
         if eof == -1:
             if self._length != -1:
-                self._raise('Expected frame delimiter (found %s instead)' % repr(bytes([self._data[self._seek]])))
+                self._raise('Expected frame delimiter (found %s instead)' % repr(self._byte(self._seek)))
             self._seek = len(self._data)
             return
 
         if self._frame is None:
-            self._seek = self._length = self._parseHead(eof)
-            return True
+            self._parseHead(eof)
+            if self._byte(self._length) != StompSpec.FRAME_DELIMITER:
+                self._seek = self._length
+                return True
 
         self._parseBody()
         self._append()
@@ -132,7 +137,7 @@ class StompParser(object):
 
     def _parseHead(self, eof):
         start = 0
-        for match in self._REGEX_LINE_DELIMITER.finditer(self._data):
+        for match in self._findLineDelimiters(self._data):
             line = self._decode(self._data[start:match.start()])
             start = match.end()
             if self._frame is None:
@@ -142,7 +147,7 @@ class StompParser(object):
             else:
                 break
         self._truncate(start)
-        return int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, eof - start))
+        self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, eof - start))
 
     def _parseHeader(self, line):
         try:

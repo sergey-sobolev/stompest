@@ -104,7 +104,7 @@ class StompFrameTransportTest(unittest.TestCase):
         body1 = b'boo'
         body2 = b'hoo'
         headers = {'x': 'y'}
-        frameBytes = StompFrame(StompSpec.MESSAGE, headers, body1).__str__() + StompFrame(StompSpec.MESSAGE, headers, body2).__str__()
+        frameBytes = binaryType(StompFrame(StompSpec.MESSAGE, headers, body1)) + binaryType(StompFrame(StompSpec.MESSAGE, headers, body2))
 
         transport = self._get_receive_mock(frameBytes)
 

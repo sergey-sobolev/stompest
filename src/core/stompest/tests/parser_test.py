@@ -62,7 +62,7 @@ class StompParserTest(unittest.TestCase):
 
     def test_frame_without_header_or_body_succeeds(self):
         parser = StompParser()
-        parser.add(commands.disconnect().__str__())
+        parser.add(binaryType(commands.disconnect()))
         self.assertEqual(parser.get(), commands.disconnect())
 
     def test_frames_with_optional_newlines_succeeds(self):
@@ -114,7 +114,7 @@ class StompParserTest(unittest.TestCase):
     def test_no_newline(self):
         headers = {'x': 'y'}
         body = b'testing 1 2 3'
-        frameBytes = StompFrame(StompSpec.MESSAGE, headers, body).__str__()
+        frameBytes = binaryType(StompFrame(StompSpec.MESSAGE, headers, body))
         self.assertTrue(frameBytes.endswith(b'\x00'))
         parser = StompParser()
         parser.add(frameBytes)
@@ -127,7 +127,7 @@ class StompParserTest(unittest.TestCase):
     def test_binary_body(self):
         body = b'\xf0\x00\x0a\x09'
         headers = {StompSpec.CONTENT_LENGTH_HEADER: str(len(body))}
-        frameBytes = StompFrame(StompSpec.MESSAGE, headers, body).__str__()
+        frameBytes = binaryType(StompFrame(StompSpec.MESSAGE, headers, body))
         self.assertTrue(frameBytes.endswith(b'\x00'))
         parser = StompParser()
         for _ in range(2):
@@ -158,10 +158,12 @@ class StompParserTest(unittest.TestCase):
         self.assertEqual(parser.get(), frame)
         self.assertEqual(parser.get(), None)
 
+    def test_binary_body_invalid_eof(self):
+        parser = StompParser()
         self.assertRaises(StompFrameError, parser.add, b'MESSAGE\ncontent-length:4\n\n\xf0\x00\n\t\x01')
 
     def test_body_allowed_commands(self):
-        head = commands.disconnect().__str__().rstrip(StompSpec.FRAME_DELIMITER.encode())
+        head = binaryType(commands.disconnect()).rstrip(StompSpec.FRAME_DELIMITER.encode())
         for (version, bodyAllowed) in [
             (StompSpec.VERSION_1_0, True),
             (StompSpec.VERSION_1_1, False),
@@ -184,7 +186,7 @@ class StompParserTest(unittest.TestCase):
     def test_strip_line_delimiter(self):
         queue = '/queue/test'
         frame = commands.send(queue)
-        rawFrameReplaced = commands.send(queue).__str__().replace(b'\n', b'\r\n')
+        rawFrameReplaced = binaryType(commands.send(queue)).replace(b'\n', b'\r\n')
         for (version, replace) in [
             (StompSpec.VERSION_1_0, False),
             (StompSpec.VERSION_1_1, False),
@@ -206,7 +208,7 @@ class StompParserTest(unittest.TestCase):
         body1 = b'boo'
         body2 = b'hoo'
         headers = {'x': 'y'}
-        frameBytes = StompFrame(StompSpec.MESSAGE, headers, body1).__str__() + StompFrame(StompSpec.MESSAGE, headers, body2).__str__()
+        frameBytes = binaryType(StompFrame(StompSpec.MESSAGE, headers, body1)) + binaryType(StompFrame(StompSpec.MESSAGE, headers, body2))
         parser = StompParser()
         parser.add(frameBytes)
 
@@ -226,7 +228,7 @@ class StompParserTest(unittest.TestCase):
         key = b'fen\xc3\xaatre'.decode('utf-8')
         value = b'\xc2\xbfqu\xc3\xa9 tal?'.decode('utf-8')
         headers = {key: value}
-        frameBytes = StompFrame(command=StompSpec.DISCONNECT, headers=headers, version=StompSpec.VERSION_1_1).__str__()
+        frameBytes = binaryType(StompFrame(command=StompSpec.DISCONNECT, headers=headers, version=StompSpec.VERSION_1_1))
 
         parser = StompParser(version=StompSpec.VERSION_1_1)
         parser.add(frameBytes)
