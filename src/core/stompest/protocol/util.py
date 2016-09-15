@@ -1,55 +1,58 @@
 import re
+from functools import partial
 
+from stompest.error import StompFrameError
 from stompest.protocol.spec import StompSpec
-
-def escape(version):
-    return _HeadersEscaper.get(version)
-
-def unescape(version):
-    return _HeadersUnescaper.get(version)
 
 class _HeadersTransformer(object):
     _ESCAPE_CHARACTER = StompSpec.ESCAPE_CHARACTER
 
     @classmethod
-    def get(cls, version):
+    def get(cls, *args):
         try:
-            return cls._INSTANCES[version]
+            return cls._INSTANCES[args]
         except KeyError:
-            return cls._INSTANCES.setdefault(version, cls(version))
+            return cls._INSTANCES.setdefault(args, cls(*args))
 
-    def __init__(self, version):
-        self.excludedCommands = StompSpec.COMMANDS_ESCAPE_EXCLUDED[version]
-        self.escapeSequences = self._escapeSequences(version)
-        self.regex = re.compile(self._regex)
+    def __init__(self, version, command):
+        self.version = version
+        if command in StompSpec.COMMANDS_ESCAPE_EXCLUDED[version]:
+            self._sub = lambda text: text
+        else:
+            escapeSequences = self._escapeSequences
+            self._sub = partial(re.compile(self._regex).sub, lambda match: escapeSequences[match.group(1)])
 
-    def __call__(self, command, text):
-        if command in self.excludedCommands:
-            return text
-        return self.regex.sub(self._sub, text)
+    def __call__(self, text):
+        try:
+            return self._sub(text)
+        except Exception as e:
+            raise StompFrameError('No escape sequence defined for this character (version %s): %s [text=%s]' % (self.version, e, repr(text)))
 
-    def _escapedCharacters(self, version):
-        return StompSpec.ESCAPED_CHARACTERS[version]
-
-    def _sub(self, match):
-        return self.escapeSequences[match.group(1)]
+    @property
+    def _escapedCharacters(self):
+        return StompSpec.ESCAPED_CHARACTERS[self.version]
 
 class _HeadersEscaper(_HeadersTransformer):
     _INSTANCES = {} # each class needs its own instance cache
 
-    def _escapeSequences(self, version):
-        return dict((escapeSequence, '%s%s' % (self._ESCAPE_CHARACTER, character)) for (character, escapeSequence) in self._escapedCharacters(version).items())
+    @property
+    def _escapeSequences(self):
+        return dict((escapeSequence, '%s%s' % (self._ESCAPE_CHARACTER, character)) for (character, escapeSequence) in self._escapedCharacters.items())
 
     @property
     def _regex(self):
-        return '(%s)' % '|'.join(map(re.escape, self.escapeSequences))
+        return '(%s)' % '|'.join(map(re.escape, self._escapeSequences))
 
 class _HeadersUnescaper(_HeadersTransformer):
     _INSTANCES = {} # each class needs its own instance cache
 
-    def _escapeSequences(self, version):
-        return self._escapedCharacters(version)
+    @property
+    def _escapeSequences(self):
+        return self._escapedCharacters
 
     @property
     def _regex(self):
         return '%s(.)' % re.escape(self._ESCAPE_CHARACTER)
+
+escape = _HeadersEscaper.get
+unescape = _HeadersUnescaper.get

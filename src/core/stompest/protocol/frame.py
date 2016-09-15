@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from stompest._backwards import binaryType, textType
+from stompest._backwards import textType
 
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape
@@ -57,15 +57,17 @@ class StompFrame(object):
 
     def __init__(self, command, headers=None, body=b'', rawHeaders=None, version=None):
         self.version = version
-
         self.command = command
-        self.headers = headers
+        self.headers = {} if headers is None else headers
         self.body = body
         self.rawHeaders = rawHeaders
 
+    def __bytes__(self):
+        return b''.join([self._encode(StompSpec.LINE_DELIMITER.join(self._headlines)), self.body, self._encode(StompSpec.FRAME_DELIMITER)])
+
     def __eq__(self, other):
         """Two frames are considered equal if, and only if, they render the same wire-level frame, that is, if their string representation is identical."""
-        return self.__str__() == other.__str__()
+        return self.__bytes__() == other.__bytes__()
 
     __hash__ = None
 
@@ -82,17 +84,9 @@ class StompFrame(object):
             for (keyword, value) in self
         ))
 
-    def __bytes__(self):
-        return self.__str__()
-
     def __str__(self):
         """Render the wire-level representation of a STOMP frame."""
-        headers = sorted(self.headers.items()) if self.rawHeaders is None else self.rawHeaders
-        headers = ''.join('%s:%s%s' % (self._escape(textType(key)), self._escape(textType(value)), StompSpec.LINE_DELIMITER) for (key, value) in headers)
-        return self._encode(StompSpec.LINE_DELIMITER).join([self._encode(self.command), self._encode(headers), b''.join([self.body, self._encode(StompSpec.FRAME_DELIMITER)])])
-
-    def __unicode__(self):
-        return self._decode(self.__str__())
+        return self.__bytes__()
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters)."""
@@ -106,36 +100,22 @@ class StompFrame(object):
         return '%s frame [%s]' % (self.command, info)
 
     @property
-    def version(self):
-        return self._version
-
-    @version.setter
-    def version(self, value):
-        self._version = StompSpec.version(value)
-
-    @property
-    def command(self):
-        return self._command
-
-    @command.setter
-    def command(self, value):
-        self._command = textType(value)
-
-    @property
     def headers(self):
         return self._headers if (self.rawHeaders is None) else dict(reversed(self.rawHeaders))
 
     @headers.setter
     def headers(self, value):
-        self._headers = dict(value or {})
+        self._headers = value
 
     @property
-    def body(self):
-        return self._body
+    def version(self):
+        return self._version
 
-    @body.setter
-    def body(self, value):
-        self._body = binaryType(value)
+    @version.setter
+    def version(self, value):
+        self._version = version = StompSpec.version(value)
+        codec = StompSpec.codec(version).name
+        self._encode = lambda text: text.encode(codec)
 
     def unraw(self):
         """If the frame has raw headers, copy their deduplicated version to the :attr:`headers` attribute, and remove the raw headers afterwards."""
@@ -145,17 +125,17 @@ class StompFrame(object):
         self.rawHeaders = None
 
     @property
-    def _codec(self):
-        return StompSpec.codec(self.version)
+    def _escape(self):
+        return escape(self.version, self.command)
 
-    def _decode(self, bytestring):
-        return self._codec.decode(bytestring)[0]
-
-    def _encode(self, text):
-        return self._codec.encode(text)[0]
-
-    def _escape(self, text):
-        return escape(self.version)(self.command, text)
+    @property
+    def _headlines(self):
+        yield self.command
+        escape = self._escape
+        for header in (sorted(self.headers.items()) if self.rawHeaders is None else self.rawHeaders):
+            yield ':'.join(escape(textType(field)) for field in header)
+        yield ''
+        yield ''
 
 class StompHeartBeat(object):
     """This object represents a STOMP heart-beat. Its string representation (via :meth:`__str__`) renders the wire-level STOMP heart-beat."""
@@ -169,20 +149,17 @@ class StompHeartBeat(object):
     def __bool__(self):
         return False
 
+    def __bytes__(self):
+        return StompSpec.LINE_DELIMITER.encode()
+
     def __nonzero__(self):
         return self.__bool__()
 
     def __repr__(self):
         return '%s()' % self.__class__.__name__
 
-    def __bytes__(self):
-        return self.__str__()
-
     def __str__(self):
-        return StompSpec.LINE_DELIMITER.encode()
-
-    def __unicode__(self):
-        return self.__str__().decode()
+        return self.__str__()
 
     def info(self):
         return 'heart-beat'

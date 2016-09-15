@@ -11,12 +11,12 @@ class StompFrameTest(unittest.TestCase):
         frame = StompFrame(**message)
         self.assertEqual(message['headers'], frame.headers)
         self.assertEqual(dict(frame), message)
-        self.assertEqual(frame.__unicode__(), """\
+        self.assertEqual(binaryType(frame), ("""\
 %s
 %s:/queue/world
 
 two
-lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
+lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER)).encode())
         self.assertEqual(eval(repr(frame)), frame)
 
     def test_frame_without_headers_and_body(self):
@@ -24,10 +24,10 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         frame = StompFrame(**message)
         self.assertEqual(frame.headers, {})
         self.assertEqual(dict(frame), message)
-        self.assertEqual(frame.__unicode__(), """\
+        self.assertEqual(binaryType(frame), ("""\
 %s
 
-\x00""" % StompSpec.DISCONNECT)
+\x00""" % StompSpec.DISCONNECT).encode())
         self.assertEqual(eval(repr(frame)), frame)
 
     def test_encoding(self):
@@ -42,8 +42,8 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         self.assertEqual(eval(repr(frame)), frame)
         frame.version = StompSpec.VERSION_1_1
         self.assertEqual(eval(repr(frame)), frame)
-        expectedResult = command + '\n' + key + ':' + value + '\n\n\x00'
-        self.assertEqual(frame.__unicode__(), expectedResult)
+        expectedResult = (command + '\n' + key + ':' + value + '\n\n\x00').encode()
+        self.assertEqual(binaryType(frame), expectedResult)
 
         otherFrame = StompFrame(**message)
         self.assertEqual(frame, otherFrame)
@@ -78,65 +78,65 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER))
         rawFrame = b'SEND\nfoo:bar1\n\nsome stuff\nand more\x00'
         self.assertEqual(binaryType(frame), rawFrame)
 
-    def test_non_string_arguments(self):
-        message = {'command': 0, 'headers': {123: 456}}
+    def test_non_string_headers(self):
+        message = {'command': 'MESSAGE', 'headers': {123: 456}}
         frame = StompFrame(**message)
-        self.assertEqual(frame.command, '0')
+        self.assertEqual(frame.command, 'MESSAGE')
         self.assertEqual(frame.headers, {123: 456})
-        self.assertEqual(dict(frame), {'command': '0', 'headers': {123: 456}})
-        self.assertEqual(binaryType(frame), b'0\n123:456\n\n\x00')
+        self.assertEqual(dict(frame), {'command': 'MESSAGE', 'headers': {123: 456}})
+        self.assertEqual(binaryType(frame), b'MESSAGE\n123:456\n\n\x00')
 
-        message = {'command': 'bla', 'headers': {123: 456}}
+        message = {'command': 'MESSAGE', 'headers': {123: 456}}
         frame = StompFrame(**message)
-        self.assertEqual(binaryType(frame), b'bla\n123:456\n\n\x00')
+        self.assertEqual(binaryType(frame), b'MESSAGE\n123:456\n\n\x00')
         self.assertEqual(eval(repr(frame)), frame)
 
     def test_unescape(self):
-        frameString = """%s
+        frameBytes = ("""%s
 \\n\\\\:\\c\t\\n
 
-\x00""" % StompSpec.DISCONNECT
+\x00""" % StompSpec.DISCONNECT).encode()
 
         frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\n'}, version=StompSpec.VERSION_1_1)
-        self.assertEqual(frame.__unicode__(), frameString)
+        self.assertEqual(binaryType(frame), frameBytes)
 
-        frameString = """%s
+        frameBytes = ("""%s
 \\n\\\\:\\c\t\\r
 
-\x00""" % StompSpec.DISCONNECT
+\x00""" % StompSpec.DISCONNECT).encode()
 
         frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\r'}, version=StompSpec.VERSION_1_2)
-        self.assertEqual(frame.__unicode__(), frameString)
+        self.assertEqual(binaryType(frame), frameBytes)
 
-        frameString = """%s
+        frameBytes = ("""%s
 \\n\\\\:\\c\t\r
 
-\x00""" % StompSpec.DISCONNECT
+\x00""" % StompSpec.DISCONNECT).encode()
 
         frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\r'}, version=StompSpec.VERSION_1_1)
-        self.assertEqual(frame.__unicode__(), frameString)
+        self.assertEqual(binaryType(frame), frameBytes)
 
-        frameString = """%s
+        frameBytes = ("""%s
 
 \\::\t\r
 
 
-\x00""" % StompSpec.DISCONNECT
+\x00""" % StompSpec.DISCONNECT).encode()
 
         frame = StompFrame(command=StompSpec.DISCONNECT, headers={'\n\\': ':\t\r\n'}, version=StompSpec.VERSION_1_0)
-        self.assertEqual(frame.__unicode__(), frameString)
+        self.assertEqual(binaryType(frame), frameBytes)
 
-        frameString = """%s
+        frameBytes = ("""%s
 
 \\::\t\r
 
 
-\x00""" % StompSpec.CONNECT
+\x00""" % StompSpec.CONNECT).encode()
 
         frame = StompFrame(command=StompSpec.CONNECT, headers={'\n\\': ':\t\r\n'})
         for version in StompSpec.VERSIONS:
             frame.version = version
-            self.assertEqual(frame.__unicode__(), frameString)
+            self.assertEqual(binaryType(frame), frameBytes)
 
     def test_frame_info(self):
         frame = StompFrame(StompSpec.MESSAGE, headers={'a': 'c'}, body=b'More text than fits a short info.', version=StompSpec.VERSION_1_1)

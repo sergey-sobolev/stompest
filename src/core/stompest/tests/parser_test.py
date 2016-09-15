@@ -36,15 +36,15 @@ class StompParserTest(unittest.TestCase):
 
     def test_invalid_command(self):
         messages = [b'RECEIPT\nreceipt-id:message-12345\n\n\x00', b'NACK\nsubscription:0\nmessage-id:007\n\n\x00']
-        parser = StompParser('1.0')
+        parser = StompParser(StompSpec.VERSION_1_0)
         parser.add(messages[0])
         self.assertRaises(StompFrameError, parser.add, messages[1])
         self.assertEqual(parser.get(), StompFrame(StompSpec.RECEIPT, rawHeaders=(('receipt-id', 'message-12345'),)))
         self.assertFalse(parser.canRead())
         self.assertEqual(parser.get(), None)
-        parser = StompParser('1.1')
+        parser = StompParser(StompSpec.VERSION_1_1)
         parser.add(messages[1])
-        self.assertEqual(parser.get(), StompFrame(command='NACK', rawHeaders=(('subscription', '0'), ('message-id', '007'))))
+        self.assertEqual(parser.get(), StompFrame(command='NACK', rawHeaders=(('subscription', '0'), ('message-id', '007')), version=StompSpec.VERSION_1_1))
 
     def test_reset_succeeds(self):
         frame = StompFrame(
@@ -266,8 +266,7 @@ class StompParserTest(unittest.TestCase):
 
         parser = StompParser(version=StompSpec.VERSION_1_0)
         parser.add(frameBytes)
-        frame = parser.get()
-        self.assertEqual(frame.headers, {'\\n\\\\': '\\c\t\\n'})
+        self.assertEqual(parser.get(), StompFrame(command='DISCONNECT', rawHeaders=[('\\n\\\\', '\\c\t\\n')]))
 
         frameBytes = ("""%s
 \\n\\\\:\\c\\t
@@ -279,8 +278,7 @@ class StompParserTest(unittest.TestCase):
 
         parser = StompParser(version=StompSpec.VERSION_1_0)
         parser.add(frameBytes)
-        frame = parser.get()
-        self.assertEqual(frame.headers, {'\\n\\\\': '\\c\\t'})
+        self.assertEqual(parser.get(), StompFrame(command='DISCONNECT', rawHeaders=[('\\n\\\\', '\\c\\t')]))
 
         frameBytes = ("""%s
 \\n\\\\:\\c\t\\r

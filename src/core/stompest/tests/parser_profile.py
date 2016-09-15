@@ -8,11 +8,11 @@ from stompest._backwards import binaryType
 from stompest.protocol import StompFrame, StompParser, StompSpec
 from stompest.protocol.frame import StompHeartBeat
 
-N = 1
+N = 10000
 BLOCK_LENGTH = 1000
-BODY_BLOCKS = 100000
-HEADER_LENGTH = 100
-SLICE = 100
+BODY_BLOCKS = 1
+HEADER_LENGTH = 10
+SLICE = 4096
 
 def createRange(n):
     j = 0
@@ -40,7 +40,7 @@ def testText():
 
 def main():
     parser = StompParser(version=StompSpec.VERSION_1_1)
-    frame = binaryType(binaryFrame)
+    frame = binaryType(binaryFrame) + binaryType(textFrame) + binaryType(heartBeatFrame)
     for _ in createRange(N):
         for j in itertools.count():
             packet = frame[j * SLICE:(j + 1) * SLICE]

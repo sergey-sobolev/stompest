@@ -71,7 +71,7 @@ class StompSpec(object):
 
     ESCAPE_CHARACTER = '\\'
     ESCAPED_CHARACTERS = {
-        VERSION_1_0: {'\\': '\\', 'c': ':', 'n': '\n'},
+        VERSION_1_0: {},
         VERSION_1_1: {'\\': '\\', 'c': ':', 'n': '\n'},
         VERSION_1_2: {'\\': '\\', 'c': ':', 'n': '\n', 'r': '\r'}
     }

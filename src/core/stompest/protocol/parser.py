@@ -74,14 +74,12 @@ class StompParser(object):
         self._flush()
 
     def _append(self):
-        self._frame.version = self.version
         self._frames.append(self._frame)
         self._next()
 
     def _decode(self, data):
-        text = StompSpec.codec(self.version).decode(data)[0]
-        stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(self.version, '')
-        if stripLineDelimiter and text.endswith(stripLineDelimiter):
+        text = data.decode(self._codec)
+        if self._stripLineDelimiter and text.endswith(self._stripLineDelimiter):
             return text[:-1]
         return text
 
@@ -102,6 +100,7 @@ class StompParser(object):
             self._truncate(1)
             if self.version != StompSpec.VERSION_1_0:
                 self._frame = StompHeartBeat()
+                self._frame.version = self.version
                 self._append()
             return True
 
@@ -124,34 +123,32 @@ class StompParser(object):
     def _parseBody(self):
         self._frame.body = self._data[:self._length]
         self._truncate(self._length + 1)
-        if self._frame.body and (self._frame.command not in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [self._frame.command])): # @UndefinedVariable
-            self._raise('No body allowed for this command: %s' % self._frame.command)
-
-    def _parseCommand(self, line):
-        if line not in StompSpec.COMMANDS[self.version]:
-            self._raise('Invalid command: %s' % line)
-        self._frame = StompFrame(command=line, rawHeaders=[], version=self.version)
+        if self._frame.body and not self._allowsBody:
+            self._raise('No body allowed for this command (version %s): %s' % (self.version, self._frame.command))
 
     def _parseHead(self, eof):
         start = 0
+        command = None
         for match in self._findLineDelimiters(self._data):
             line = self._decode(self._data[start:match.start()])
             start = match.end()
-            if self._frame is None:
-                self._parseCommand(line)
+            if command is None:
+                if line not in self._commands:
+                    self._raise('Invalid command (version %s): %s' % (self.version, line))
+                rawHeaders = []
+                command = line
+                _unescape = unescape(self.version, line)
             elif line:
-                self._parseHeader(line)
+                try:
+                    name, value = line.split(StompSpec.HEADER_SEPARATOR, 1)
+                except ValueError:
+                    self._raise('No separator in header line: %s' % line)
+                rawHeaders.append(tuple(_unescape(text) for text in (name, value)))
             else:
                 break
         self._truncate(start)
+        self._frame = StompFrame(command=command, rawHeaders=rawHeaders, version=self.version)
         self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, eof - start))
-
-    def _parseHeader(self, line):
-        try:
-            name, value = line.split(StompSpec.HEADER_SEPARATOR, 1)
-        except ValueError:
-            self._raise('No separator in header line: %s' % line)
-        self._frame.rawHeaders.append(tuple(self._unescape(text) for text in (name, value)))
 
     def _raise(self, message):
         self._flush()
@@ -160,16 +157,17 @@ class StompParser(object):
     def _truncate(self, position):
         self._data[:position] = b''
 
-    def _unescape(self, text):
-        try:
-            return unescape(self.version)(self._frame.command, text)
-        except KeyError as e:
-            self._raise('No escape sequence defined for this character: %s [text=%s]' % (e, repr(text)))
-
     @property
     def version(self):
         return self._version
 
     @version.setter
     def version(self, value):
-        self._version = StompSpec.version(value)
+        self._version = version = StompSpec.version(value)
+        self._commands = StompSpec.COMMANDS[version]
+        self._codec = StompSpec.codec(version).name
+        self._stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(version, '')
+
+    @property
+    def _allowsBody(self):
+        return self._frame.command in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [self._frame.command]) # @UndefinedVariable
