@@ -39,7 +39,7 @@ def testText():
     pass
 
 def main():
-    parser = StompParser(version=StompSpec.VERSION_1_1)
+    parser = StompParser(version=StompSpec.VERSION_1_2)
     frame = binaryType(binaryFrame) + binaryType(textFrame) + binaryType(heartBeatFrame)
     for _ in createRange(N):
         for j in itertools.count():

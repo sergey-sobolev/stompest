@@ -67,7 +67,10 @@ class StompFrame(object):
 
     def __eq__(self, other):
         """Two frames are considered equal if, and only if, they render the same wire-level frame, that is, if their string representation is identical."""
-        return self.__bytes__() == other.__bytes__()
+        try:
+            return other.__bytes__() == self.__bytes__()
+        except AttributeError:
+            return False
 
     __hash__ = None
 
@@ -83,10 +86,6 @@ class StompFrame(object):
             ('%s=%s' % (keyword, repr(value)))
             for (keyword, value) in self
         ))
-
-    def __str__(self):
-        """Render the wire-level representation of a STOMP frame."""
-        return self.__bytes__()
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters)."""

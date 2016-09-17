@@ -18,7 +18,7 @@ class StompParserTest(unittest.TestCase):
         parser = StompParser()
         parser.add(binaryType(frame))
         self.assertEqual(parser.get(), frame)
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
 
     def test_duplicate_headers(self):
         command = StompSpec.SEND
@@ -27,7 +27,7 @@ class StompParserTest(unittest.TestCase):
         parser = StompParser()
         parser.add(rawFrame.encode())
         parsedFrame = parser.get()
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
 
         self.assertEqual(parsedFrame.command, command)
         self.assertEqual(parsedFrame.headers, {'foo': 'bar1'})
@@ -41,7 +41,7 @@ class StompParserTest(unittest.TestCase):
         self.assertRaises(StompFrameError, parser.add, messages[1])
         self.assertEqual(parser.get(), StompFrame(StompSpec.RECEIPT, rawHeaders=(('receipt-id', 'message-12345'),)))
         self.assertFalse(parser.canRead())
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
         parser = StompParser(StompSpec.VERSION_1_1)
         parser.add(messages[1])
         self.assertEqual(parser.get(), StompFrame(command='NACK', rawHeaders=(('subscription', '0'), ('message-id', '007')), version=StompSpec.VERSION_1_1))
@@ -56,9 +56,9 @@ class StompParserTest(unittest.TestCase):
 
         parser.add(binaryType(frame))
         parser.reset()
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
         parser.add(binaryType(frame)[:20])
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
 
     def test_frame_without_header_or_body_succeeds(self):
         parser = StompParser()
@@ -72,7 +72,7 @@ class StompParserTest(unittest.TestCase):
         parser.add(2 * frame)
         for _ in range(2):
             self.assertEqual(parser.get(), disconnect)
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
 
     def test_frames_with_heart_beats_succeeds(self):
         parser = StompParser(version=StompSpec.VERSION_1_1)
@@ -83,8 +83,7 @@ class StompParserTest(unittest.TestCase):
         while parser.canRead():
             frames.append(parser.get())
         self.assertEqual(frames, [StompHeartBeat(), disconnect, StompHeartBeat(), StompHeartBeat(), disconnect, StompHeartBeat()])
-
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
 
     def test_get_returns_None_if_not_done(self):
         parser = StompParser()
@@ -95,7 +94,7 @@ class StompParserTest(unittest.TestCase):
     def test_add_throws_FrameError_on_invalid_command(self):
         parser = StompParser()
 
-        self.assertRaises(StompFrameError, parser.add, b'HELLO\n\x00')
+        self.assertRaises(StompFrameError, parser.add, b'HELLO\n\n\x00')
         self.assertFalse(parser.canRead())
         parser.add(('%s\n\n\x00' % StompSpec.DISCONNECT).encode())
         self.assertEqual(StompFrame(StompSpec.DISCONNECT), parser.get())
@@ -200,23 +199,20 @@ class StompParserTest(unittest.TestCase):
     def test_strip_line_delimiter(self):
         queue = '/queue/test'
         frame = commands.send(queue)
-        rawFrameReplaced = binaryType(commands.send(queue)).replace(b'\n', b'\r\n')
-        for (version, replace) in [
+        frameWithStripLineDelimiter = commands.send(queue + '\r')
+        for (version, stripLineDelimiter) in [
             (StompSpec.VERSION_1_0, False),
             (StompSpec.VERSION_1_1, False),
             (StompSpec.VERSION_1_2, True)
         ]:
-            if replace:
-                parser = StompParser(version)
-                parser.add(rawFrameReplaced)
-                self.assertEqual(parser.get(), frame)
-            else:
-                self.assertRaises(StompFrameError, StompParser(version).add, rawFrameReplaced)
-        textWithCarriageReturn = 'there\rfolks'
-        frame = commands.send(queue, headers={'hi': textWithCarriageReturn})
+            parser = StompParser(version)
+            parser.add(binaryType(frameWithStripLineDelimiter))
+            self.assertEqual(parser.get(), frame if stripLineDelimiter else frameWithStripLineDelimiter)
+
+        frameWithCarriageReturn = commands.send(queue + '\r', version=StompSpec.VERSION_1_2)
         parser = StompParser(StompSpec.VERSION_1_2)
-        parser.add(binaryType(frame))
-        self.assertEqual(parser.get().headers['hi'], textWithCarriageReturn)
+        parser.add(binaryType(frameWithCarriageReturn))
+        self.assertEqual(parser.get().headers[StompSpec.DESTINATION_HEADER], queue + '\r')
 
     def test_add_multiple_frames_per_read(self):
         body1 = b'boo'
@@ -236,7 +232,7 @@ class StompParserTest(unittest.TestCase):
         self.assertEqual(headers, frame.headers)
         self.assertEqual(body2, frame.body)
 
-        self.assertEqual(parser.get(), None)
+        self.assertIsNone(parser.get())
 
     def test_decode(self):
         key = b'fen\xc3\xaatre'.decode('utf-8')
@@ -289,6 +285,15 @@ class StompParserTest(unittest.TestCase):
         parser.add(frameBytes)
         frame = parser.get()
         self.assertEqual(frame.headers, {'\n\\': ':\t\r'})
+
+    def test_dont_unescape_bad_characters(self):
+        parser = StompParser(StompSpec.VERSION_1_2)
+        frame = commands.send('*queue')
+        parser.add(binaryType(frame))
+        self.assertEqual(parser.get(), frame)
+        for badCharacter in (b'\r', b'\n', b'\c', b'\\', b':', b'\\h'):
+            self.assertRaises(StompFrameError, parser.add, binaryType(frame).replace(b'*', badCharacter))
+        self.assertIsNone(parser.get())
 
     def test_keep_first_of_repeated_headers(self):
         parser = StompParser()

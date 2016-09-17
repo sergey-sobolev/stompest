@@ -46,9 +46,9 @@ class StompSpec(object):
     RECEIPT = 'RECEIPT'
 
     SERVER_COMMANDS = {
-        VERSION_1_0: {CONNECTED, ERROR, MESSAGE, RECEIPT},
-        VERSION_1_1: {CONNECTED, ERROR, MESSAGE, RECEIPT},
-        VERSION_1_2: {CONNECTED, ERROR, MESSAGE, RECEIPT}
+        VERSION_1_0: {CONNECTED, ERROR, MESSAGE, RECEIPT}
+        , VERSION_1_1: {CONNECTED, ERROR, MESSAGE, RECEIPT}
+        , VERSION_1_2: {CONNECTED, ERROR, MESSAGE, RECEIPT}
     }
 
     COMMANDS = dict(CLIENT_COMMANDS)
@@ -56,8 +56,9 @@ class StompSpec(object):
         COMMANDS.setdefault(version, set()).update(commands)
 
     COMMANDS_BODY_ALLOWED = {
-        VERSION_1_1: {SEND, MESSAGE, ERROR},
-        VERSION_1_2: {SEND, MESSAGE, ERROR}
+        VERSION_1_0: COMMANDS[VERSION_1_0]
+        , VERSION_1_1: {SEND, MESSAGE, ERROR}
+        , VERSION_1_2: {SEND, MESSAGE, ERROR}
     }
 
     CODECS = {}
@@ -71,14 +72,14 @@ class StompSpec(object):
 
     ESCAPE_CHARACTER = '\\'
     ESCAPED_CHARACTERS = {
-        VERSION_1_0: {},
-        VERSION_1_1: {'\\': '\\', 'c': ':', 'n': '\n'},
-        VERSION_1_2: {'\\': '\\', 'c': ':', 'n': '\n', 'r': '\r'}
+        VERSION_1_0: {}
+        , VERSION_1_1: {'\\': '\\', 'c': ':', 'n': '\n'}
+        , VERSION_1_2: {'\\': '\\', 'c': ':', 'n': '\n', 'r': '\r'}
     }
     COMMANDS_ESCAPE_EXCLUDED = {
-        VERSION_1_0: COMMANDS[VERSION_1_0],
-        VERSION_1_1: {CONNECT, CONNECTED},
-        VERSION_1_2: {CONNECT, CONNECTED}
+        VERSION_1_0: COMMANDS[VERSION_1_0]
+        , VERSION_1_1: {CONNECT, CONNECTED}
+        , VERSION_1_2: {CONNECT, CONNECTED}
     }
 
     FRAME_DELIMITER = '\x00'

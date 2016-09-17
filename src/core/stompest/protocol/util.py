@@ -48,11 +48,11 @@ class _HeadersUnescaper(_HeadersTransformer):
 
     @property
     def _escapeSequences(self):
-        return self._escapedCharacters
+        return dict(('%s%s' % (self._ESCAPE_CHARACTER, character), escapeSequence) for (character, escapeSequence) in self._escapedCharacters.items())
 
     @property
     def _regex(self):
-        return '%s(.)' % re.escape(self._ESCAPE_CHARACTER)
+        return '(%s)' % '|'.join(['%s.' % re.escape(self._ESCAPE_CHARACTER)] + [re.escape(c) for c in self._escapedCharacters.values() if c != self._ESCAPE_CHARACTER])
 
 escape = _HeadersEscaper.get
 unescape = _HeadersUnescaper.get

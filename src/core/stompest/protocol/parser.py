@@ -38,9 +38,8 @@ class StompParser(object):
     """
     SENTINEL = None
 
-    _FRAME_DELIMITER = StompSpec.FRAME_DELIMITER.encode()
     _LINE_DELIMITER = StompSpec.LINE_DELIMITER.encode()
-    _findLineDelimiters = re.compile(_LINE_DELIMITER).finditer
+    _FRAME_DELIMITER = StompSpec.FRAME_DELIMITER.encode()
 
     def __init__(self, version=None):
         self.version = version
@@ -77,12 +76,6 @@ class StompParser(object):
         self._frames.append(self._frame)
         self._next()
 
-    def _decode(self, data):
-        text = data.decode(self._codec)
-        if self._stripLineDelimiter and text.endswith(self._stripLineDelimiter):
-            return text[:-1]
-        return text
-
     def _flush(self):
         self._data = bytearray()
         self._next()
@@ -96,59 +89,70 @@ class StompParser(object):
         if len(self._data) <= self._seek:
             return
 
-        if (self._frame is None) and self._data.startswith(self._LINE_DELIMITER):
-            self._truncate(1)
-            if self.version != StompSpec.VERSION_1_0:
-                self._frame = StompHeartBeat()
-                self._frame.version = self.version
-                self._append()
-            return True
-
-        eof = self._data.find(self._FRAME_DELIMITER, self._seek, None if (self._frame is None) else self._length + 1)
-        if eof == -1:
-            if self._frame is not None:
-                self._raise('Expected frame delimiter (found %s instead)' % repr(binaryType(self._data[eof:eof + 1])))
-            self._seek = len(self._data)
-            return
-
         if self._frame is None:
-            self._parseHead(eof)
-            self._seek = self._length
-            return True
+            return self._parseHeartBeat() or self._parseHead()
 
-        self._parseBody()
+        return self._parseEndOfFrame() and self._parseBody()
+
+    def _parseBody(self):
+        self._frame.body = binaryType(memoryview(self._data)[:self._length])
+        self._truncate(self._length + 1)
+        if self._frame.body and self._frame.command not in self._commandsBodyAllowed: # @UndefinedVariable
+            self._raise('No body allowed for this command (version %s): %s' % (self.version, self._frame.command))
         self._append()
         return True
 
-    def _parseBody(self):
-        self._frame.body = self._data[:self._length]
-        self._truncate(self._length + 1)
-        if self._frame.body and not self._allowsBody:
-            self._raise('No body allowed for this command (version %s): %s' % (self.version, self._frame.command))
+    def _parseEndOfFrame(self):
+        if self._length is None:
+            eof = self._data.find(self._FRAME_DELIMITER, self._seek)
+            if eof == -1:
+                self._seek = len(self._data)
+                return
+            self._length = eof
+        eof = binaryType(self._data[self._length:self._length + 1])
+        if eof != self._FRAME_DELIMITER:
+            self._raise('Expected frame delimiter (found %r instead)' % eof)
+        return True
 
-    def _parseHead(self, eof):
-        start = 0
-        command = None
-        for match in self._findLineDelimiters(self._data):
-            line = self._decode(self._data[start:match.start()])
-            start = match.end()
+    def _parseHead(self):
+        try:
+            end = self._findHead(self._data).end()
+        except AttributeError:
+            return
+        command, rawHeaders = None, []
+        for line in self._data[:end].decode(self._codec).split(StompSpec.LINE_DELIMITER):
+            if self._stripLineDelimiter and line.endswith(self._stripLineDelimiter):
+                line = line[:-1]
             if command is None:
-                if line not in self._commands:
-                    self._raise('Invalid command (version %s): %s' % (self.version, line))
-                rawHeaders = []
                 command = line
-                _unescape = unescape(self.version, line)
-            elif line:
-                try:
-                    name, value = line.split(StompSpec.HEADER_SEPARATOR, 1)
-                except ValueError:
-                    self._raise('No separator in header line: %s' % line)
-                rawHeaders.append(tuple(_unescape(text) for text in (name, value)))
-            else:
+                if command not in self._commands:
+                    self._raise('Invalid command (version %s): %s' % (self.version, command))
+                _unescape = unescape(self.version, command)
+                continue
+            if not line:
                 break
-        self._truncate(start)
+            try:
+                name, value = line.split(StompSpec.HEADER_SEPARATOR, 1)
+            except ValueError:
+                self._raise('No separator in header line: %s' % line)
+            rawHeaders.append((_unescape(name), _unescape(value)))
+        self._truncate(end)
         self._frame = StompFrame(command=command, rawHeaders=rawHeaders, version=self.version)
-        self._length = int(self._frame.headers.get(StompSpec.CONTENT_LENGTH_HEADER, eof - start))
+        try:
+            self._length = self._seek = int(self._frame.headers[StompSpec.CONTENT_LENGTH_HEADER])
+        except KeyError:
+            pass
+        return True
+
+    def _parseHeartBeat(self):
+        if not self._data.startswith(self._LINE_DELIMITER):
+            return
+        self._truncate(1)
+        if self.version != StompSpec.VERSION_1_0:
+            self._frame = StompHeartBeat()
+            self._frame.version = self.version
+            self._append()
+        return True
 
     def _raise(self, message):
         self._flush()
@@ -165,9 +169,7 @@ class StompParser(object):
     def version(self, value):
         self._version = version = StompSpec.version(value)
         self._commands = StompSpec.COMMANDS[version]
+        self._commandsBodyAllowed = StompSpec.COMMANDS_BODY_ALLOWED[self.version]
         self._codec = StompSpec.codec(version).name
         self._stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(version, '')
-
-    @property
-    def _allowsBody(self):
-        return self._frame.command in StompSpec.COMMANDS_BODY_ALLOWED.get(self.version, [self._frame.command]) # @UndefinedVariable
+        self._findHead = re.compile(2 * ('%s?%s' % (self._stripLineDelimiter, StompSpec.LINE_DELIMITER) if self._stripLineDelimiter else StompSpec.LINE_DELIMITER).encode()).search
