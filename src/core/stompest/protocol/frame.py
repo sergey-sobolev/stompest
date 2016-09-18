@@ -101,6 +101,13 @@ class StompFrame(object):
         info = ', '.join(i for i in (headers, body, version) if i)
         return '%s frame [%s]' % (self.command, info)
 
+    def setContentLength(self):
+        item = (StompSpec.CONTENT_LENGTH_HEADER, textType(len(self.body)))
+        if self.rawHeaders is None:
+            self.headers.update([item])
+        else:
+            self.rawHeaders.insert(0, item)
+
     @property
     def headers(self):
         return self._headers if (self.rawHeaders is None) else dict(reversed(self.rawHeaders))

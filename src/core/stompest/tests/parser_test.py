@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-from stompest._backwards import binaryType
+from stompest._backwards import binaryType, textType
 from stompest.error import StompFrameError
 from stompest.protocol import commands, StompFrame, StompParser, StompSpec
 from stompest.protocol.frame import StompHeartBeat
@@ -125,8 +125,10 @@ class StompParserTest(unittest.TestCase):
 
     def test_binary_body(self):
         body = b'\xf0\x00\x0a\x09'
-        headers = {StompSpec.CONTENT_LENGTH_HEADER: str(len(body))}
-        frameBytes = binaryType(StompFrame(StompSpec.MESSAGE, headers, body))
+        headers = {StompSpec.CONTENT_LENGTH_HEADER: textType(len(body))}
+        frame = StompFrame(StompSpec.MESSAGE, body=body)
+        frame.setContentLength()
+        frameBytes = binaryType(frame)
         self.assertTrue(frameBytes.endswith(b'\x00'))
         parser = StompParser()
         for _ in range(2):
