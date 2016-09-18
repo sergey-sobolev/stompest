@@ -19,3 +19,4 @@
 * 2.2.3 - Optimized STOMP parser adapted from David Wilson's [tinystompest](https://github.com/dw).
 * 2.2.4 - Increased test coverage of STOMP parser and fixed the uncovered bugs.
 * 2.2.5 - Increased test coverage of STOMP parser even more and fixed the uncovered bugs. Cleaned up the parser implementation.
+* 2.2.6 - Increased test coverage of STOMP parser even more and fixed the uncovered bugs. Cleaned up everything and tuned it significantly.
