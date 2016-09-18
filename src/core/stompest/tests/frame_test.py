@@ -42,7 +42,7 @@ lines\x00""" % (StompSpec.SEND, StompSpec.DESTINATION_HEADER)).encode())
         self.assertEqual(eval(repr(frame)), frame)
         frame.version = StompSpec.VERSION_1_1
         self.assertEqual(eval(repr(frame)), frame)
-        expectedResult = (command + '\n' + key + ':' + value + '\n\n\x00').encode()
+        expectedResult = (command + '\n' + key + ':' + value + '\n\n\x00').encode('utf-8')
         self.assertEqual(binaryType(frame), expectedResult)
 
         otherFrame = StompFrame(**message)

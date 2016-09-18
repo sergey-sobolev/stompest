@@ -95,7 +95,7 @@ class StompParser(object):
         return self._parseEndOfFrame() and self._parseBody()
 
     def _parseBody(self):
-        self._frame.body = binaryType(memoryview(self._data)[:self._length])
+        self._frame.body = binaryType(self._data[:self._length])
         self._truncate(self._length + 1)
         if self._frame.body and self._frame.command not in self._commandsBodyAllowed: # @UndefinedVariable
             self._raise('No body allowed for this command (version %s): %s' % (self.version, self._frame.command))

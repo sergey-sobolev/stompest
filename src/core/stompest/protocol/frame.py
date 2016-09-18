@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from stompest._backwards import textType
+from stompest._backwards import binaryType, textType
 
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape
@@ -68,8 +68,8 @@ class StompFrame(object):
     def __eq__(self, other):
         """Two frames are considered equal if, and only if, they render the same wire-level frame, that is, if their string representation is identical."""
         try:
-            return other.__bytes__() == self.__bytes__()
-        except AttributeError:
+            return binaryType(other) == binaryType(self)
+        except:
             return False
 
     __hash__ = None
@@ -86,6 +86,9 @@ class StompFrame(object):
             ('%s=%s' % (keyword, repr(value)))
             for (keyword, value) in self
         ))
+
+    def __str__(self):
+        return self.__bytes__()
 
     def info(self):
         """Produce a log-friendly representation of the frame (show only non-trivial content, and truncate the message to INFO_LENGTH characters)."""
@@ -158,7 +161,7 @@ class StompHeartBeat(object):
         return '%s()' % self.__class__.__name__
 
     def __str__(self):
-        return self.__str__()
+        return self.__bytes__()
 
     def info(self):
         return 'heart-beat'
