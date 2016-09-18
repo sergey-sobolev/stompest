@@ -302,7 +302,7 @@ def _ackHeaders(frame, transactions):
     else:
         if transaction in set(transactions or []):
             keys[StompSpec.TRANSACTION_HEADER] = StompSpec.TRANSACTION_HEADER
-    return dict((keys[key], value) for (key, value) in frame.headers.items() if key in keys)
+    return {keys[key]: value for (key, value) in frame.headers.items() if key in keys}
 
 def _addReceiptHeader(frame, receipt):
     if not receipt:

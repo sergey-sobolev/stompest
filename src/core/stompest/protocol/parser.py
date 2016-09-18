@@ -1,7 +1,6 @@
 import collections
 import re
 
-from stompest._backwards import binaryType
 from stompest.error import StompFrameError
 
 from stompest.protocol.frame import StompFrame, StompHeartBeat
@@ -38,11 +37,12 @@ class StompParser(object):
     """
     SENTINEL = None
 
-    _LINE_DELIMITER = StompSpec.LINE_DELIMITER.encode()
+    _LINE_DELIMITER = ord(StompSpec.LINE_DELIMITER.encode())
     _FRAME_DELIMITER = StompSpec.FRAME_DELIMITER.encode()
 
     def __init__(self, version=None):
         self.version = version
+        self._data = bytearray()
         self.reset()
 
     def add(self, data):
@@ -77,13 +77,11 @@ class StompParser(object):
         self._next()
 
     def _flush(self):
-        self._data = bytearray()
+        self._truncate(len(self._data))
         self._next()
 
     def _next(self):
-        self._frame = None
-        self._length = None
-        self._seek = 0
+        self._frame = self._eof = None
 
     def _parse(self):
         if len(self._data) <= self._seek:
@@ -95,38 +93,38 @@ class StompParser(object):
         return self._parseEndOfFrame() and self._parseBody()
 
     def _parseBody(self):
-        self._frame.body = binaryType(self._data[:self._length])
-        self._truncate(self._length + 1)
-        if self._frame.body and self._frame.command not in self._commandsBodyAllowed: # @UndefinedVariable
-            self._raise('No body allowed for this command (version %s): %s' % (self.version, self._frame.command))
+        self._frame.body = memoryview(self._data)[self._start:self._eof].tobytes()
+        if self._frame.body and (self._frame.command not in self._commandsBodyAllowed):
+            self._raise('No body allowed for this command (version %s): %r' % (self.version, self._frame.command))
+        self._truncate(self._eof + 1)
         self._append()
         return True
 
     def _parseEndOfFrame(self):
-        if self._length is None:
+        if self._eof is None:
             eof = self._data.find(self._FRAME_DELIMITER, self._seek)
             if eof == -1:
                 self._seek = len(self._data)
                 return
-            self._length = eof
-        eof = binaryType(self._data[self._length:self._length + 1])
+            self._eof = eof
+        eof = self._data[self._eof:self._eof + 1]
         if eof != self._FRAME_DELIMITER:
             self._raise('Expected frame delimiter (found %r instead)' % eof)
         return True
 
     def _parseHead(self):
         try:
-            end = self._findHead(self._data).end()
+            endOfHead = self._findHead(self._data, self._start).end()
         except AttributeError:
             return
         command, rawHeaders = None, []
-        for line in self._data[:end].decode(self._codec).split(StompSpec.LINE_DELIMITER):
-            if self._stripLineDelimiter and line.endswith(self._stripLineDelimiter):
+        for line in self._data[self._start:endOfHead].decode(self._codec).split(StompSpec.LINE_DELIMITER):
+            if line[-1:] == self._stripLineDelimiter:
                 line = line[:-1]
             if command is None:
                 command = line
                 if command not in self._commands:
-                    self._raise('Invalid command (version %s): %s' % (self.version, command))
+                    self._raise('Invalid command (version %s): %r' % (self.version, command))
                 _unescape = unescape(self.version, command)
                 continue
             if not line:
@@ -134,23 +132,22 @@ class StompParser(object):
             try:
                 name, value = line.split(StompSpec.HEADER_SEPARATOR, 1)
             except ValueError:
-                self._raise('No separator in header line: %s' % line)
+                self._raise('No separator in header line: %r' % line)
             rawHeaders.append((_unescape(name), _unescape(value)))
-        self._truncate(end)
         self._frame = StompFrame(command=command, rawHeaders=rawHeaders, version=self.version)
+        self._start = endOfHead
         try:
-            self._length = self._seek = int(self._frame.headers[StompSpec.CONTENT_LENGTH_HEADER])
+            self._eof = self._seek = self._start + int(self._frame.headers[StompSpec.CONTENT_LENGTH_HEADER])
         except KeyError:
             pass
         return True
 
     def _parseHeartBeat(self):
-        if not self._data.startswith(self._LINE_DELIMITER):
+        if self._data[self._start] != self._LINE_DELIMITER:
             return
-        self._truncate(1)
-        if self.version != StompSpec.VERSION_1_0:
-            self._frame = StompHeartBeat()
-            self._frame.version = self.version
+        self._seek = self._start = self._start + 1
+        if self._heartbeat is not None:
+            self._frame = self._heartbeat
             self._append()
         return True
 
@@ -160,6 +157,7 @@ class StompParser(object):
 
     def _truncate(self, position):
         self._data[:position] = b''
+        self._seek = self._start = 0
 
     @property
     def version(self):
@@ -168,8 +166,9 @@ class StompParser(object):
     @version.setter
     def version(self, value):
         self._version = version = StompSpec.version(value)
+        self._heartbeat = None if self._version == StompSpec.VERSION_1_0 else StompHeartBeat()
         self._commands = StompSpec.COMMANDS[version]
         self._commandsBodyAllowed = StompSpec.COMMANDS_BODY_ALLOWED[self.version]
-        self._codec = StompSpec.codec(version).name
+        self._codec = StompSpec.codec(version)
         self._stripLineDelimiter = StompSpec.STRIP_LINE_DELIMITER.get(version, '')
         self._findHead = re.compile(2 * ('%s?%s' % (self._stripLineDelimiter, StompSpec.LINE_DELIMITER) if self._stripLineDelimiter else StompSpec.LINE_DELIMITER).encode()).search

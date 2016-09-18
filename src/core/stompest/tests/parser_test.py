@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import unittest
 
 from stompest._backwards import binaryType, textType
@@ -295,6 +293,7 @@ class StompParserTest(unittest.TestCase):
         self.assertEqual(parser.get(), frame)
         for badCharacter in (b'\r', b'\n', b'\c', b'\\', b':', b'\\h'):
             self.assertRaises(StompFrameError, parser.add, binaryType(frame).replace(b'*', badCharacter))
+        self.assertRaises(StompFrameError, parser.add, binaryType(commands.send('queue\\')))
         self.assertIsNone(parser.get())
 
     def test_keep_first_of_repeated_headers(self):

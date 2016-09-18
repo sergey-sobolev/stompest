@@ -11,8 +11,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-from __future__ import unicode_literals
-
 import os, sys
 for path in ('async', 'core'):
     sys.path.insert(0, os.path.join('../../src', path))
@@ -55,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'stompest'
-copyright = '2016, Jan Müller'
+copyright = u'2016, Jan Müller'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

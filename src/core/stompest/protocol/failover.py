@@ -152,11 +152,11 @@ class StompFailoverUri(object):
         , 'reconnectDelayJitter': _configurationOption(int, 0)
         , 'randomize': _configurationOption(_bool, True)
         , 'priorityBackup': _configurationOption(_bool, False)
-        #, 'backup': _configurationOption(_bool, False), # initialize and hold a second transport connection - to enable fast failover
-        #, 'timeout': _configurationOption(int, -1), # enables timeout on send operations (in miliseconds) without interruption of reconnection process
-        #, 'trackMessages': _configurationOption(_bool, False), # keep a cache of in-flight messages that will flushed to a broker on reconnect
-        #, 'maxCacheSize': _configurationOption(int, 131072), # size in bytes for the cache, if trackMessages is enabled
-        #, 'updateURIsSupported': _configurationOption(_bool, True), # determines whether the client should accept updates to its list of known URIs from the connected broker
+        # , 'backup': _configurationOption(_bool, False), # initialize and hold a second transport connection - to enable fast failover
+        # , 'timeout': _configurationOption(int, -1), # enables timeout on send operations (in miliseconds) without interruption of reconnection process
+        # , 'trackMessages': _configurationOption(_bool, False), # keep a cache of in-flight messages that will flushed to a broker on reconnect
+        # , 'maxCacheSize': _configurationOption(int, 131072), # size in bytes for the cache, if trackMessages is enabled
+        # , 'updateURIsSupported': _configurationOption(_bool, True), # determines whether the client should accept updates to its list of known URIs from the connected broker
     }
 
     def __init__(self, uri):
@@ -197,7 +197,7 @@ class StompFailoverUri(object):
         self.brokers = brokers
 
     def _setOptions(self, options=None):
-        _options = dict((k, o.default) for (k, o) in self._SUPPORTED_OPTIONS.items())
+        _options = {k: o.default for (k, o) in self._SUPPORTED_OPTIONS.items()}
         if options:
             _options.update((k, self._SUPPORTED_OPTIONS[k].parser(v)) for (k, _, v) in (o.partition('=') for o in options.split(',')))
         self.options = _options

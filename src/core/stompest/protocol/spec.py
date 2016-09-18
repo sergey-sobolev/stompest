@@ -1,7 +1,3 @@
-from __future__ import unicode_literals
-
-import codecs
-
 from stompest.error import StompProtocolError
 
 class StompSpec(object):
@@ -60,10 +56,6 @@ class StompSpec(object):
         , VERSION_1_1: {SEND, MESSAGE, ERROR}
         , VERSION_1_2: {SEND, MESSAGE, ERROR}
     }
-
-    CODECS = {}
-    for version in VERSIONS:
-        CODECS[version] = codecs.lookup('ascii' if version == VERSION_1_0 else 'utf-8')
 
     LINE_DELIMITER = '\n'
     STRIP_LINE_DELIMITER = {
@@ -136,4 +128,4 @@ class StompSpec(object):
 
     @classmethod
     def codec(cls, version):
-        return cls.CODECS[version]
+        return 'ascii' if version == cls.VERSION_1_0 else 'utf-8'

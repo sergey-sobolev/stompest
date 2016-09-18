@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import itertools
 from random import choice, randrange
 from string import printable
@@ -27,7 +25,7 @@ textFrame = StompFrame(
     , body=BODY_BLOCKS * TEXT_BLOCK
     , version=StompSpec.VERSION_1_1
 )
-BINARY_BLOCK = bytearray(randrange(256) for _ in createRange(BLOCK_LENGTH))
+BINARY_BLOCK = memoryview(bytearray(randrange(256) for _ in createRange(BLOCK_LENGTH))).tobytes()
 binaryFrame = StompFrame(
     command='MESSAGE'
     , headers={StompSpec.CONTENT_LENGTH_HEADER: (BODY_BLOCKS * BLOCK_LENGTH)}

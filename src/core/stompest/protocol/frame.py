@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from stompest._backwards import binaryType, textType
 
 from stompest.protocol.spec import StompSpec
 from stompest.protocol.util import escape
 
 class StompFrame(object):
-    """This object represents a STOMP frame.
+    u"""This object represents a STOMP frame.
     
     :param command: A valid STOMP command.
     :param headers: The STOMP headers (represented as a :class:`dict`), or :obj:`None` (no headers).
@@ -40,14 +38,14 @@ class StompFrame(object):
     >>> frame.headers = {'foo': 'bar4'}
     >>> frame.headers
     {'foo': 'bar4'}
-    >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', b'fen\xc3\xaatre'.decode('utf-8'))], version=StompSpec.VERSION_1_0)
+    >>> frame = StompFrame(StompSpec.SEND, rawHeaders=[('some french', b'fen\\xc3\\xaatre'.decode('utf-8'))], version=StompSpec.VERSION_1_0)
     >>> bytes(frame)
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     UnicodeEncodeError: 'ascii' codec can't encode character '\xea' in position 15: ordinal not in range(128)
     >>> frame.version = StompSpec.VERSION_1_1
     >>> bytes(frame)
-    b'SEND\nsome french:fen\xc3\xaatre\n\n\x00'
+    b'SEND\\nsome french:fen\\xc3\\xaatre\\n\\n\\x00'
     >>> frame.headers
     {'some french': 'fenêtre'}
     
@@ -123,7 +121,7 @@ class StompFrame(object):
     @version.setter
     def version(self, value):
         self._version = version = StompSpec.version(value)
-        codec = StompSpec.codec(version).name
+        codec = StompSpec.codec(version)
         self._encode = lambda text: text.encode(codec)
 
     def unraw(self):
@@ -148,7 +146,7 @@ class StompFrame(object):
 
 class StompHeartBeat(object):
     """This object represents a STOMP heart-beat. Its string representation (via :meth:`__str__`) renders the wire-level STOMP heart-beat."""
-    __slots__ = ('version',)
+    __slots__ = ()
 
     def __eq__(self, other):
         return isinstance(other, StompHeartBeat)
