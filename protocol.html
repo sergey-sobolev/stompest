@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocol Layer &mdash; stompest documentation - v2.2.5</title>
+    <title>Protocol Layer &mdash; stompest documentation - v2.2.6</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.2.5',
+        VERSION:     '2.2.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.2.5" href="index.html" />
+    <link rel="top" title="stompest documentation - v2.2.6" href="index.html" />
     <link rel="next" title="Configuration" href="config.html" />
     <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
@@ -43,7 +43,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.5</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -543,21 +543,18 @@
 <dt id="stompest.protocol.frame.StompFrame">
 <em class="property">class </em><code class="descclassname">stompest.protocol.frame.</code><code class="descname">StompFrame</code><span class="sig-paren">(</span><em>command</em>, <em>headers=None</em>, <em>body=''</em>, <em>rawHeaders=None</em>, <em>version=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.protocol.frame.StompFrame" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object represents a STOMP frame.</p>
-<blockquote>
-<div><table class="docutils field-list" frame="void" rules="none">
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">param command:</th><td class="field-body">A valid STOMP command.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">param headers:</th><td class="field-body">The STOMP headers (represented as a <code class="xref py py-class docutils literal"><span class="pre">dict</span></code>), or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (no headers).</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">param body:</th><td class="field-body">The frame body. The body will be cast as a binary string <code class="xref py py-class docutils literal"><span class="pre">str</span></code> (Python 2) or <code class="xref py py-class docutils literal"><span class="pre">bytes</span></code> (Python 3).</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">param rawHeaders:</th></tr>
-<tr class="field-even field"><td>&nbsp;</td><td class="field-body">The raw STOMP headers (represented as a collection of (header, value) pairs), or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (no raw headers).</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">param version:</th><td class="field-body">A valid STOMP protocol version, or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (equivalent to the <code class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></code> attribute of the <a class="reference internal" href="#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><code class="xref py py-class docutils literal"><span class="pre">StompSpec</span></code></a> class).</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>command</strong> &#8211; A valid STOMP command.</li>
+<li><strong>headers</strong> &#8211; The STOMP headers (represented as a <code class="xref py py-class docutils literal"><span class="pre">dict</span></code>), or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (no headers).</li>
+<li><strong>body</strong> &#8211; The frame body. The body will be cast as a binary string <code class="xref py py-class docutils literal"><span class="pre">str</span></code> (Python 2) or <code class="xref py py-class docutils literal"><span class="pre">bytes</span></code> (Python 3).</li>
+<li><strong>rawHeaders</strong> &#8211; The raw STOMP headers (represented as a collection of (header, value) pairs), or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (no raw headers).</li>
+<li><strong>version</strong> &#8211; A valid STOMP protocol version, or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (equivalent to the <code class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></code> attribute of the <a class="reference internal" href="#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><code class="xref py py-class docutils literal"><span class="pre">StompSpec</span></code></a> class).</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -587,26 +584,18 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar4&#39;</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
 <span class="go">{&#39;foo&#39;: &#39;bar4&#39;}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;some french&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;fenÃªtre&#39;</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))],</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;some french&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;fen</span><span class="se">\xc3\xaa</span><span class="s1">tre&#39;</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))],</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">bytes</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
 <span class="gr">UnicodeEncodeError</span>: <span class="n">&#39;ascii&#39; codec can&#39;t encode character &#39;ê&#39; in position 15: ordinal not in range(128)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">bytes</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
-<span class="go">b&#39;SEND</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>some french:fenÃªtre</p>
-<dl class="docutils">
-<dt>&#8216;</dt>
-<dd><div class="first last highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
+<span class="go">b&#39;SEND\nsome french:fen\xc3\xaatre\n\n\x00&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
 <span class="go">{&#39;some french&#39;: &#39;fenêtre&#39;}</span>
 </pre></div>
 </div>
-</dd>
-</dl>
 <dl class="method">
 <dt id="stompest.protocol.frame.StompFrame.info">
 <code class="descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stompest.protocol.frame.StompFrame.info" title="Permalink to this definition">¶</a></dt>
@@ -1042,7 +1031,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.5</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
