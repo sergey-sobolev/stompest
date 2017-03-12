@@ -1,3 +1,4 @@
+import ssl
 import logging
 
 from twisted.internet import reactor, defer, task
@@ -13,7 +14,7 @@ from stompest.protocol import StompSpec, commands
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from stompest.tests import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER, VERSION
+from stompest.tests import HOST, PORT, PORT_SSL, LOGIN, PASSCODE, VIRTUALHOST, BROKER, VERSION
 
 class StompestTestError(Exception):
     pass
@@ -23,11 +24,19 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     errorQueue = None
     log = logging.getLogger(LOG_CATEGORY)
     headers = {StompSpec.ID_HEADER: '4711'}
+    protocol = 'tcp'
+    port = PORT
+    ssl_context = None
 
     TIMEOUT = 0.2
 
     def getConfig(self, version, port=None):
-        return StompConfig('tcp://%s:%s' % (HOST, port or PORT), login=LOGIN, passcode=PASSCODE, version=version)
+        assert self.protocol in {'tcp', 'ssl'}, 'Protocol must be tcp or ssl'
+        return StompConfig(
+            '%s://%s:%s' % (self.protocol, HOST, port or self.port),
+            login=LOGIN, passcode=PASSCODE, version=version,
+            ssl_context=self.ssl_context,
+        )
 
     def cleanQueues(self):
         self.cleanQueue(self.queue)
@@ -463,7 +472,7 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
 
     @defer.inlineCallbacks
     def test_heart_beat(self):
-        config = self.getConfig(StompSpec.VERSION_1_1, PORT)
+        config = self.getConfig(StompSpec.VERSION_1_1, self.port or PORT)
         client = async.Stomp(config)
         yield client.connect(host=VIRTUALHOST, heartBeats=(250, 250))
         disconnected = client.disconnected
@@ -476,6 +485,43 @@ class HeartBeatTestCase(AsyncClientBaseTestCase):
             pass
         else:
             raise
+
+
+class SSLSettingsMixin(object):
+    protocol = 'ssl'
+    port = PORT_SSL
+
+    ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ssl_context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
+    # Disable host name and cert checking for the tests.
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
+
+class HandlerExceptionWithErrorQueueIntegrationTestCaseSSL(
+        SSLSettingsMixin, HandlerExceptionWithErrorQueueIntegrationTestCase):
+    pass
+
+
+class GracefulDisconnectTestCaseSSL(SSLSettingsMixin, GracefulDisconnectTestCase):
+    pass
+
+
+class SubscribeTestCaseSSL(SSLSettingsMixin, SubscribeTestCase):
+    pass
+
+
+class TransactionTestCaseSSL(SSLSettingsMixin, TransactionTestCase):
+    pass
+
+
+class NackTestCaseSSL(SSLSettingsMixin, NackTestCase):
+    pass
+
+
+class HeartBeatTestCaseSSL(SSLSettingsMixin, HeartBeatTestCase):
+    pass
+
 
 if __name__ == '__main__':
     import sys

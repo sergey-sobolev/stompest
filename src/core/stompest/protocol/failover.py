@@ -140,7 +140,7 @@ class StompFailoverUri(object):
     _bool = {'true': True, 'false': False}.__getitem__
 
     _FAILOVER_PREFIX = 'failover:'
-    _REGEX_URI = re.compile('^(?P<protocol>tcp)://(?P<host>[^:]+):(?P<port>\d+)$')
+    _REGEX_URI = re.compile('^(?P<protocol>(tcp|ssl))://(?P<host>[^:]+):(?P<port>\d+)$')
     _REGEX_BRACKETS = re.compile('^\((?P<uri>.+)\)$')
     _SUPPORTED_OPTIONS = {
         'initialReconnectDelay': _configurationOption(int, 10)

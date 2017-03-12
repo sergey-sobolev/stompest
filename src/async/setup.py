@@ -30,6 +30,8 @@ setup(
     install_requires=[
         'stompest==%s' % FULL_VERSION
         , 'twisted>=16.4.0'
+        , 'pyopenssl'
+        , 'service_identity'
     ],
     tests_require=['mock'] if sys.version_info[0] == 2 else [],
     test_suite='stompest.async.tests',

@@ -83,7 +83,9 @@ class Stomp(object):
 
         try:
             for (broker, connectDelay) in self._failover:
-                transport = self._transportFactory(broker['host'], broker['port'])
+                transport = self._transportFactory(
+                    broker['host'], broker['port'], ssl_context=self._config.ssl_context,
+                )
                 if connectDelay:
                     self.log.debug('Delaying connect attempt for %d ms' % int(connectDelay * 1000))
                     time.sleep(connectDelay)
