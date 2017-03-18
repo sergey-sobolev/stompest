@@ -492,7 +492,8 @@ class SSLSettingsMixin(object):
     port = PORT_SSL
 
     sslContext = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-    sslContext.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
+    # It's good practice to disable insecure protocols by default
+    sslContext.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_SSLv3
     # Disable host name and cert checking for the tests.
     sslContext.check_hostname = False
     sslContext.verify_mode = ssl.CERT_NONE
