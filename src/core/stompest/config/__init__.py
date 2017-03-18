@@ -6,17 +6,17 @@ class StompConfig(object):
     :param passcode: The passcode for the STOMP brokers. The default is :obj:`None`, which means that no **passcode** header will be sent.
     :param version: A valid STOMP protocol version, or :obj:`None` (equivalent to the :attr:`DEFAULT_VERSION` attribute of the :class:`~.StompSpec` class).
     :param check: Decides whether the :class:`~.StompSession` object which is used to represent the STOMP sesion should be strict about the session's state: (e.g., whether to allow calling the session's :meth:`~.StompSession.send` when disconnected).
-    :param ssl_context: An SSL context to wrap around a TCP socket connection.
-    :type ssl_context: ssl.SSLContext
+    :param sslContext: An SSL context to wrap around a TCP socket connection.
+    :type sslContext: ssl.SSLContext
 
     .. note :: Login and passcode have to be the same for all brokers because they are not part of the failover URI scheme.
 
     .. seealso :: The :class:`~.StompFailoverTransport` class which tells you which broker to use and how long you should wait to connect to it, the :class:`~.StompFailoverUri` which parses failover transport URIs.
     """
-    def __init__(self, uri, login=None, passcode=None, version=None, check=True, ssl_context=None):
+    def __init__(self, uri, login=None, passcode=None, version=None, check=True, sslContext=None):
         self.uri = uri
         self.login = login
         self.passcode = passcode
         self.version = version
         self.check = check
-        self.ssl_context = ssl_context
+        self.sslContext = sslContext

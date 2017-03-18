@@ -14,10 +14,10 @@ class StompFrameTransport(object):
 
     READ_SIZE = 4096
 
-    def __init__(self, host, port, ssl_context=None):
+    def __init__(self, host, port, sslContext=None):
         self.host = host
         self.port = port
-        self.ssl_context = ssl_context
+        self.sslContext = sslContext
 
         self._socket = None
         self._parser = self.factory()
@@ -49,8 +49,8 @@ class StompFrameTransport(object):
         try:
             self._socket = socket.socket()
             self._socket.settimeout(timeout)
-            if self.ssl_context:
-                self._socket = self.ssl_context.wrap_socket(self._socket, server_hostname=self.host)
+            if self.sslContext:
+                self._socket = self.sslContext.wrap_socket(self._socket, server_hostname=self.host)
             self._socket.connect((self.host, self.port))
         except IOError as e:
             raise StompConnectionError('Could not establish connection [%s]' % e)

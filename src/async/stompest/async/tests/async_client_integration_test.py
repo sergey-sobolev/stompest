@@ -26,7 +26,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
     headers = {StompSpec.ID_HEADER: '4711'}
     protocol = 'tcp'
     port = PORT
-    ssl_context = None
+    sslContext = None
 
     TIMEOUT = 0.2
 
@@ -35,7 +35,7 @@ class AsyncClientBaseTestCase(unittest.TestCase):
         return StompConfig(
             '%s://%s:%s' % (self.protocol, HOST, port or self.port),
             login=LOGIN, passcode=PASSCODE, version=version,
-            ssl_context=self.ssl_context,
+            sslContext=self.sslContext,
         )
 
     def cleanQueues(self):
@@ -491,11 +491,11 @@ class SSLSettingsMixin(object):
     protocol = 'ssl'
     port = PORT_SSL
 
-    ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-    ssl_context.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
+    sslContext = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    sslContext.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
     # Disable host name and cert checking for the tests.
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
+    sslContext.check_hostname = False
+    sslContext.verify_mode = ssl.CERT_NONE
 
 
 class HandlerExceptionWithErrorQueueIntegrationTestCaseSSL(
