@@ -1,4 +1,5 @@
 import logging
+import ssl
 import time
 import unittest
 
@@ -10,7 +11,7 @@ from stompest.sync import Stomp
 logging.basicConfig(level=logging.DEBUG)
 LOG_CATEGORY = __name__
 
-from stompest.tests import HOST, PORT, LOGIN, PASSCODE, VIRTUALHOST, BROKER
+from stompest.tests import HOST, PORT, PORT_SSL, LOGIN, PASSCODE, VIRTUALHOST, BROKER
 
 class SimpleStompIntegrationTest(unittest.TestCase):
     DESTINATION = '/queue/stompUnitTest'
@@ -171,7 +172,7 @@ class SimpleStompIntegrationTest(unittest.TestCase):
     def test_5_integration_stomp_1_1_heartbeat(self):
         version = StompSpec.VERSION_1_1
 
-        client = Stomp(self.getConfig(StompSpec.VERSION_1_1, PORT))
+        client = Stomp(self.getConfig(StompSpec.VERSION_1_1))
         self.assertEqual(client.lastReceived, None)
         self.assertEqual(client.lastSent, None)
 
@@ -242,6 +243,25 @@ class SimpleStompIntegrationTest(unittest.TestCase):
         self.assertFalse(client.canRead(self.TIMEOUT))
         client.unsubscribe(token)
         client.disconnect(receipt='4712')
+
+
+class SimpleStompIntegrationTestSSL(SimpleStompIntegrationTest):
+    def getConfig(self, version, port=PORT_SSL):
+        sslContext = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+        # It's good practice to disable insecure protocols by default
+        sslContext.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1 | ssl.OP_NO_SSLv3
+        # Disable host name and cert checking for the tests.
+        sslContext.check_hostname = False
+        sslContext.verify_mode = ssl.CERT_NONE
+
+        return StompConfig(
+            'ssl://%s:%s' % (HOST, port),
+            login=LOGIN,
+            passcode=PASSCODE,
+            version=version,
+            sslContext=sslContext
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
