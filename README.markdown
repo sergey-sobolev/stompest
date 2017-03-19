@@ -26,7 +26,26 @@ Installation
 
 Documentation & Code Examples
 =============================
+
 The stompest API is fully documented [here](http://nikipore.github.com/stompest/).
+
+Building
+--------
+
+To *build* the documentation, you'll need a source checkout, and then first install the documentation dependencies into your virtual environment:
+
+```
+(env) $ pip install -e .[doc]
+```
+
+Then you can build the documentation in the `doc/` directory:
+
+```
+(env) $ cd doc/
+(env) $ make html
+```
+
+The HTML documentation will be in the directory `doc/stompest-doc`.
 
 Questions or Suggestions?
 =========================

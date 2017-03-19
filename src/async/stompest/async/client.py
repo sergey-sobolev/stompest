@@ -1,6 +1,9 @@
 """The asynchronous client is based on `Twisted <http://twistedmatrix.com/>`_, a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default "poison pill" error handling), concurrent message processing, graceful shutdown, and connect and disconnect timeouts.
 
-.. seealso:: `STOMP protocol specification <http://stomp.github.com/>`_, `Twisted API documentation <http://twistedmatrix.com/documents/current/api/>`_, `Apache ActiveMQ - Stomp <http://activemq.apache.org/stomp.html>`_
+TLS/SSL support may be configured on the :class:`~.StompConfig` object
+in exactly the same way as demonstrated in the sync client.
+
+.. seealso:: `STOMP protocol specification <http://stomp.github.com/>`_, `Twisted API documentation <http://twistedmatrix.com/documents/current/api/>`_, `Apache ActiveMQ - Stomp <http://activemq.apache.org/stomp.html>`_, `Apache ActiveMQ - SSL <http://activemq.apache.org/how-do-i-use-ssl.html>`_
 
 Examples
 --------
