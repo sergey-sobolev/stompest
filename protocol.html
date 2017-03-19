@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Protocol Layer &mdash; stompest documentation - v2.2.6</title>
+    <title>Protocol Layer &#8212; stompest documentation - v2.3.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,16 +14,18 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.2.6',
+        VERSION:     '2.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.2.6" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Configuration" href="config.html" />
     <link rel="prev" title="Asynchronous Client" href="async.html" /> 
   </head>
@@ -43,7 +45,7 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.3.0</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -70,21 +72,18 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/protocol.txt"
+      <li><a href="_sources/protocol.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -117,14 +116,14 @@
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFailoverTransport</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.error</span> <span class="kn">import</span> <span class="n">StompConnectTimeout</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompFailoverTransport</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.error</span> <span class="k">import</span> <span class="n">StompConnectTimeout</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">failover</span> <span class="o">=</span> <span class="n">StompFailoverTransport</span><span class="p">(</span><span class="s1">&#39;failover:(tcp://remote1:61615,tcp://localhost:61616)?randomize=false,startupMaxReconnectAttempts=3,initialReconnectDelay=7,maxReconnectDelay=8,maxReconnectAttempts=0&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span> <span class="ow">in</span> <span class="n">failover</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="k">print</span> <span class="s1">&#39;broker: </span><span class="si">%s</span><span class="s1">, delay: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>                                                                       
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s1">&#39;broker: </span><span class="si">%s</span><span class="s1">, delay: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>                                                                       
 <span class="gp">... </span><span class="k">except</span> <span class="n">StompConnectTimeout</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="k">print</span> <span class="s1">&#39;timeout: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span>
+<span class="gp">... </span>    <span class="nb">print</span> <span class="s1">&#39;timeout: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span>
 <span class="gp">... </span>
 <span class="go">broker: {&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, delay: 0.000000</span>
 <span class="go">broker: {&#39;host&#39;: &#39;localhost&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61616}, delay: 0.007000</span>
@@ -133,9 +132,9 @@
 <span class="go">timeout: Reconnect timeout: 3 attempts</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span> <span class="ow">in</span> <span class="n">failover</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="k">print</span> <span class="s1">&#39;broker: </span><span class="si">%s</span><span class="s1">, delay: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s1">&#39;broker: </span><span class="si">%s</span><span class="s1">, delay: </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">delay</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">except</span> <span class="n">StompConnectTimeout</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="k">print</span> <span class="s1">&#39;timeout: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span>
+<span class="gp">... </span>    <span class="nb">print</span> <span class="s1">&#39;timeout: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span>
 <span class="gp">... </span>
 <span class="go">broker: {&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, delay: 0.000000</span>
 <span class="go">timeout: Reconnect timeout: 0 attempts</span>
@@ -156,11 +155,11 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> &#8211; <p>A failover URI. Its basic form is:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="s1">&#39;failover:(uri1,...,uriN)?transportOptions&#39;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;failover:(uri1,...,uriN)?transportOptions&#39;</span>
 </pre></div>
 </div>
 <p>or:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="s1">&#39;failover:uri1,...,uriN&#39;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;failover:uri1,...,uriN&#39;</span>
 </pre></div>
 </div>
 </td>
@@ -168,11 +167,11 @@
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFailoverUri</span>    
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompFailoverUri</span>    
 <span class="gp">&gt;&gt;&gt; </span><span class="n">uri</span> <span class="o">=</span> <span class="n">StompFailoverUri</span><span class="p">(</span><span class="s1">&#39;failover:(tcp://remote1:61615,tcp://localhost:61616)?randomize=false,startupMaxReconnectAttempts=3,initialReconnectDelay=7,maxReconnectDelay=8,maxReconnectAttempts=0&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">uri</span><span class="o">.</span><span class="n">brokers</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">uri</span><span class="o">.</span><span class="n">brokers</span>
 <span class="go">[{&#39;host&#39;: &#39;remote1&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61615}, {&#39;host&#39;: &#39;localhost&#39;, &#39;protocol&#39;: &#39;tcp&#39;, &#39;port&#39;: 61616}]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">uri</span><span class="o">.</span><span class="n">options</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">uri</span><span class="o">.</span><span class="n">options</span>
 <span class="go">{&#39;initialReconnectDelay&#39;: 7, &#39;maxReconnectDelay&#39;: 8, &#39;backOffMultiplier&#39;: 2.0, &#39;startupMaxReconnectAttempts&#39;: 3, &#39;priorityBackup&#39;: False, &#39;maxReconnectAttempts&#39;: 0, &#39;reconnectDelayJitter&#39;: 0, &#39;useExponentialBackOff&#39;: True, &#39;randomize&#39;: False}</span>
 </pre></div>
 </div>
@@ -260,21 +259,21 @@
 <p class="last">The stateless API in the module <a class="reference internal" href="#module-stompest.protocol.commands" title="stompest.protocol.commands"><code class="xref py py-mod docutils literal"><span class="pre">protocol.commands</span></code></a> for all API command parameters which are not documented here.</p>
 </div>
 <p><strong>Example</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSession</span><span class="p">,</span> <span class="n">StompSpec</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSession</span><span class="p">,</span> <span class="n">StompSpec</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">StompSession</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">login</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">passcode</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 <span class="go">StompFrame(command=&#39;CONNECT&#39;, headers={&#39;passcode&#39;: &#39;&#39;, &#39;login&#39;: &#39;&#39;, &#39;host&#39;: &#39;&#39;, &#39;accept-version&#39;: &#39;1.0,1.1&#39;})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 <span class="go">1.1 connecting</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">connected</span><span class="p">(</span><span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">CONNECTED</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SESSION_HEADER</span><span class="p">:</span> <span class="s1">&#39;tete-a-tete&#39;</span><span class="p">}))</span> <span class="c1"># The broker only understands STOMP 1.0.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 <span class="go">1.0 connected</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 <span class="go">StompFrame(command=&#39;DISCONNECT&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 <span class="go">1.0 disconnecting</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="n">session</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
 <span class="go">1.1 disconnected</span>
 </pre></div>
 </div>
@@ -563,7 +562,7 @@
 <p class="last">The frame&#8217;s attributes are internally stored as arbitrary Python objects. The frame&#8217;s <code class="xref py py-attr docutils literal"><span class="pre">version</span></code> attribute controls the wire-level encoding of its <code class="xref py py-attr docutils literal"><span class="pre">command</span></code> and <code class="xref py py-attr docutils literal"><span class="pre">headers</span></code> (depending on STOMP protocol version, this may be ASCII or UTF-8), while its <code class="xref py py-attr docutils literal"><span class="pre">body</span></code> is not encoded at all (it&#8217;s just cast as a <code class="xref py py-class docutils literal"><span class="pre">str</span></code>).</p>
 </div>
 <p><strong>Example</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar2&#39;</span><span class="p">)])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span>
 <span class="go">StompFrame(command=&#39;SEND&#39;, rawHeaders=[(&#39;foo&#39;, &#39;bar1&#39;), (&#39;foo&#39;, &#39;bar2&#39;)])</span>
@@ -584,7 +583,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;foo&#39;</span><span class="p">:</span> <span class="s1">&#39;bar4&#39;</span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="o">.</span><span class="n">headers</span>
 <span class="go">{&#39;foo&#39;: &#39;bar4&#39;}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;some french&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;fen</span><span class="se">\xc3\xaa</span><span class="s1">tre&#39;</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))],</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">SEND</span><span class="p">,</span> <span class="n">rawHeaders</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;some french&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;fen</span><span class="se">\xc3\xaa</span><span class="s1">tre&#39;</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))],</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">bytes</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
@@ -625,14 +624,14 @@
 <p class="last">Whenever you have to pass a <strong>version</strong> parameter to a command, this is because the behavior of that command depends on the STOMP protocol version of your current session. The default version is the value of <code class="xref py py-attr docutils literal"><span class="pre">StompSpec.DEFAULT_VERSION</span></code>, which is currently <code class="xref py py-obj docutils literal"><span class="pre">'1.0'</span></code> but may change in upcoming versions of stompest (or you might override it yourself). Any command which does not conform to the STOMP protocol version in question will result in a <a class="reference internal" href="error.html#stompest.error.StompProtocolError" title="stompest.error.StompProtocolError"><code class="xref py py-class docutils literal"><span class="pre">StompProtocolError</span></code></a>. The <strong>version</strong> parameter will always be the last argument in the signature; since command signatures may vary with a new STOMP protocol version, you are advised to always specify it as a keyword (as opposed to a positional) argument.</p>
 </div>
 <p>Examples:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">commands</span><span class="p">,</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">commands</span><span class="p">,</span> <span class="n">StompFrame</span><span class="p">,</span> <span class="n">StompSpec</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">versions</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">versions</span>
 <span class="go">[&#39;1.0&#39;, &#39;1.1&#39;]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">versions</span><span class="o">=</span><span class="n">versions</span><span class="p">)</span>
 <span class="go">StompFrame(command=&#39;CONNECT&#39;, headers={&#39;host&#39;: &#39;&#39;, &#39;accept-version&#39;: &#39;1.0,1.1&#39;})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span><span class="p">,</span> <span class="n">token</span> <span class="o">=</span> <span class="n">commands</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="s1">&#39;client-individual&#39;</span><span class="p">,</span> <span class="s1">&#39;activemq.prefetchSize&#39;</span><span class="p">:</span> <span class="s1">&#39;100&#39;</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">DESTINATION_HEADER</span><span class="p">:</span> <span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">MESSAGE_ID_HEADER</span><span class="p">:</span> <span class="s1">&#39;007&#39;</span><span class="p">},</span> <span class="n">b</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span> <span class="o">=</span> <span class="n">StompFrame</span><span class="p">(</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">MESSAGE</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">DESTINATION_HEADER</span><span class="p">:</span> <span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">MESSAGE_ID_HEADER</span><span class="p">:</span> <span class="s1">&#39;007&#39;</span><span class="p">},</span> <span class="sa">b</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">frame</span>
 <span class="go">StompFrame(command=&#39;MESSAGE&#39;, headers={&#39;destination&#39;: &#39;/queue/test&#39;, &#39;message-id&#39;: &#39;007&#39;}, body=b&#39;hello&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">commands</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">==</span> <span class="n">token</span> <span class="c1"># This message matches your subscription.</span>
@@ -952,9 +951,9 @@
 </tbody>
 </table>
 <p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompParser</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompParser</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">StompParser</span><span class="p">(</span><span class="s1">&#39;1.0&#39;</span><span class="p">)</span> <span class="c1"># STOMP 1.0 does not support the NACK command.</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span><span class="s1">&#39;RECEIPT</span><span class="se">\n</span><span class="s1">receipt-id:message-12345</span><span class="se">\n\n\x00</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;NACK</span><span class="se">\n</span><span class="s1">subscription:0</span><span class="se">\n</span><span class="s1">message-id:007</span><span class="se">\n\n\x00</span><span class="s1">&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;RECEIPT</span><span class="se">\n</span><span class="s1">receipt-id:message-12345</span><span class="se">\n\n\x00</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;NACK</span><span class="se">\n</span><span class="s1">subscription:0</span><span class="se">\n</span><span class="s1">message-id:007</span><span class="se">\n\n\x00</span><span class="s1">&#39;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">parser</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 <span class="gp">... </span>
@@ -1031,12 +1030,12 @@
         <li class="right" >
           <a href="async.html" title="Asynchronous Client"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.3.0</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Jan Müller.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2016, Jan Müller.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
     </div>
   </body>
 </html>

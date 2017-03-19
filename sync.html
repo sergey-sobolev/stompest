@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Synchronous Client &mdash; stompest documentation - v2.2.6</title>
+    <title>Synchronous Client &#8212; stompest documentation - v2.3.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,16 +14,18 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.2.6',
+        VERSION:     '2.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.2.6" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Asynchronous Client" href="async.html" />
     <link rel="prev" title="Contents" href="index.html" /> 
   </head>
@@ -43,7 +45,7 @@
         <li class="right" >
           <a href="index.html" title="Contents"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.3.0</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -54,6 +56,7 @@
 <li><a class="reference internal" href="#module-stompest.sync.examples">Examples</a><ul>
 <li><a class="reference internal" href="#producer">Producer</a></li>
 <li><a class="reference internal" href="#consumer">Consumer</a></li>
+<li><a class="reference internal" href="#tls-ssl-consumer">TLS/SSL Consumer</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#api">API</a></li>
@@ -70,21 +73,18 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/sync.txt"
+      <li><a href="_sources/sync.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -106,20 +106,20 @@
 </pre></div>
 </div>
 <p>For debugging purposes, it is highly recommended to turn on the logger on level <code class="xref py py-attr docutils literal"><span class="pre">DEBUG</span></code>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
 <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="section" id="producer">
 <h3>Producer<a class="headerlink" href="#producer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="k">import</span> <span class="n">StompConfig</span>
+<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="k">import</span> <span class="n">Stomp</span>
 
 <span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
 <span class="n">QUEUE</span> <span class="o">=</span> <span class="s1">&#39;/queue/test&#39;</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
     <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="s1">&#39;test message 1&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
@@ -130,24 +130,71 @@
 </div>
 <div class="section" id="consumer">
 <h3>Consumer<a class="headerlink" href="#consumer" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="kn">import</span> <span class="n">StompConfig</span>
-<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="kn">import</span> <span class="n">StompSpec</span>
-<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="kn">import</span> <span class="n">Stomp</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">stompest.config</span> <span class="k">import</span> <span class="n">StompConfig</span>
+<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompSpec</span>
+<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="k">import</span> <span class="n">Stomp</span>
 
 <span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">)</span>
 <span class="n">QUEUE</span> <span class="o">=</span> <span class="s1">&#39;/queue/test&#39;</span>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
     <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_CLIENT_INDIVIDUAL</span><span class="p">})</span>
-    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">frame</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
-        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
         <span class="n">client</span><span class="o">.</span><span class="n">ack</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="tls-ssl-consumer">
+<h3>TLS/SSL Consumer<a class="headerlink" href="#tls-ssl-consumer" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ssl</span>
+<span class="kn">from</span> <span class="nn">stompest.config</span> <span class="k">import</span> <span class="n">StompConfig</span>
+<span class="kn">from</span> <span class="nn">stompest.protocol</span> <span class="k">import</span> <span class="n">StompSpec</span>
+<span class="kn">from</span> <span class="nn">stompest.sync</span> <span class="k">import</span> <span class="n">Stomp</span>
+
+<span class="n">context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">()</span>
+<span class="c1"># Disable cert validation for demo only</span>
+<span class="n">context</span><span class="o">.</span><span class="n">check_hostname</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">context</span><span class="o">.</span><span class="n">verify_mode</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span>
+
+<span class="n">CONFIG</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;ssl://localhost:61612&#39;</span><span class="p">,</span> <span class="n">sslContext</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+<span class="n">QUEUE</span> <span class="o">=</span> <span class="s1">&#39;/queue/test&#39;</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">CONFIG</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="n">QUEUE</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_HEADER</span><span class="p">:</span> <span class="n">StompSpec</span><span class="o">.</span><span class="n">ACK_CLIENT_INDIVIDUAL</span><span class="p">})</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">receiveFrame</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Got </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">frame</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">ack</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An SSL producer would be configured in the same way. The configuration
+of an SSL-enabled ActiveMQ server is somewhat complicated. The config
+file for ActiveMQ, <code class="docutils literal"><span class="pre">activemq.xml</span></code>, must have the following additions:</p>
+<div class="highlight-xml"><div class="highlight"><pre><span></span><span class="c">&lt;!-- add this to the config file &quot;activemq.xml&quot; --&gt;</span>
+<span class="nt">&lt;sslContext&gt;</span>
+    <span class="nt">&lt;sslContext</span>
+        <span class="na">keyStore=</span><span class="s">&quot;broker.ks&quot;</span> <span class="na">keyStorePassword=</span><span class="s">&quot;password&quot;</span>
+        <span class="na">trustStore=</span><span class="s">&quot;client.ts&quot;</span> <span class="na">trustStorePassword=</span><span class="s">&quot;password&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/sslContext&gt;</span>
+<span class="nt">&lt;transportConnectors&gt;</span>
+    <span class="nt">&lt;transportConnector</span> <span class="na">name=</span><span class="s">&quot;stomp+ssl&quot;</span> <span class="na">uri=</span><span class="s">&quot;stomp+ssl://0.0.0.0:61612&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;transportConnector</span> <span class="na">name=</span><span class="s">&quot;stomp&quot;</span> <span class="na">uri=</span><span class="s">&quot;stomp://0.0.0.0:61613&quot;</span><span class="nt">/&gt;</span>
+<span class="nt">&lt;/transportConnectors&gt;</span>
+</pre></div>
+</div>
+<p>The SSL transport configuration (on port 61612) is shown alongside the standard
+STOMP configuration (on port 61613) for contrast. More about the required ActiveMQ setup,
+as well as instructions to generate the files <code class="docutils literal"><span class="pre">broker.ks</span></code> and <code class="docutils literal"><span class="pre">client.ts</span></code> may
+be found in the ActiveMQ documentation under
+<a class="reference external" href="http://activemq.apache.org/how-do-i-use-ssl.html">How do I use SSL</a>.</p>
 </div>
 </div>
 <div class="section" id="api">
@@ -185,19 +232,19 @@
 <code class="descname">beat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.beat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a STOMP heart-beat.</p>
 <p><strong>Example</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># you might want to enable logging to trace the wire-level traffic</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># you might want to enable logging to trace the wire-level traffic</span>
 <span class="gp">... </span><span class="kn">import</span> <span class="nn">time</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">heartBeats</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">elapsed</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="o">=</span> <span class="bp">None</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">start</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elapsed</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">t</span> <span class="o">=</span> <span class="kc">None</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">start</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;elapsed: </span><span class="si">%.2f</span><span class="s1">, last received: </span><span class="si">%.2f</span><span class="s1">, last sent: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
 <span class="gp">... </span>    <span class="n">elapsed</span><span class="p">(),</span> <span class="n">elapsed</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">lastReceived</span><span class="p">),</span> <span class="n">elapsed</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">lastSent</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="n">elapsed</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">clientHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">client</span><span class="o">.</span><span class="n">serverHeartBeat</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">)</span> <span class="c1"># poll server heart-beats</span>
 <span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">beat</span><span class="p">()</span> <span class="c1"># send client heart-beat</span>
-<span class="gp">... </span>    <span class="k">print</span> <span class="n">times</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="nb">print</span> <span class="n">times</span><span class="p">()</span>
 <span class="gp">... </span>
 <span class="go">False</span>
 <span class="go">elapsed: 0.08, last received: 0.00, last sent: 0.08</span>
@@ -209,7 +256,7 @@
 <span class="gt">Traceback (most recent call last):</span>
   File <span class="nb">&quot;&lt;stdin&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
 <span class="gr">stompest.error.StompConnectionError</span>: <span class="n">Connection closed [No more data]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">times</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">times</span><span class="p">()</span>
 <span class="go">elapsed: 0.50, last received: 0.50, last sent: 0.25</span>
 </pre></div>
 </div>
@@ -287,7 +334,7 @@
 </tbody>
 </table>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">VERSION_1_1</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">version</span>
 <span class="go">&#39;1.1&#39;</span>
@@ -427,15 +474,15 @@
 <code class="descname">transaction</code><span class="sig-paren">(</span><em>transaction=None</em>, <em>receipt=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.sync.client.Stomp.transaction" title="Permalink to this definition">¶</a></dt>
 <dd><p>A context manager for STOMP transactions. Upon entering the <code class="xref py py-obj docutils literal"><span class="pre">with</span></code> block, a transaction will be begun and upon exiting, that transaction will be committed or (if an error occurred) aborted.</p>
 <p><strong>Example:</strong></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">))</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">Stomp</span><span class="p">(</span><span class="n">StompConfig</span><span class="p">(</span><span class="s1">&#39;tcp://localhost:61613&#39;</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;ack&#39;</span><span class="p">:</span> <span class="s1">&#39;client-individual&#39;</span><span class="p">})</span>
 <span class="go">(&#39;destination&#39;, &#39;/queue/test&#39;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">canRead</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># Check that queue is empty.</span>
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">client</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">receipt</span><span class="o">=</span><span class="s1">&#39;important&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">transaction</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;message with transaction header&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">TRANSACTION_HEADER</span><span class="p">:</span> <span class="n">transaction</span><span class="p">})</span>
-<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s1">&#39;message without transaction header&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;message with transaction header&#39;</span><span class="p">,</span> <span class="p">{</span><span class="n">StompSpec</span><span class="o">.</span><span class="n">TRANSACTION_HEADER</span><span class="p">:</span> <span class="n">transaction</span><span class="p">})</span>
+<span class="gp">... </span>    <span class="n">client</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;/queue/test&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;message without transaction header&#39;</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;poof&#39;</span><span class="p">)</span>
 <span class="gp">... </span>
 <span class="gt">Traceback (most recent call last):</span>
@@ -488,12 +535,12 @@
         <li class="right" >
           <a href="index.html" title="Contents"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.3.0</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Jan Müller.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2016, Jan Müller.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
     </div>
   </body>
 </html>

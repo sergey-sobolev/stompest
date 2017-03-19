@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Configuration &mdash; stompest documentation - v2.2.6</title>
+    <title>Configuration &#8212; stompest documentation - v2.3.0</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,16 +14,18 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '2.2.6',
+        VERSION:     '2.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="stompest documentation - v2.2.6" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Error Codes" href="error.html" />
     <link rel="prev" title="Protocol Layer" href="protocol.html" /> 
   </head>
@@ -43,7 +45,7 @@
         <li class="right" >
           <a href="protocol.html" title="Protocol Layer"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.3.0</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -57,21 +59,18 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/config.txt"
+      <li><a href="_sources/config.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -86,7 +85,7 @@
 <span id="configuration"></span><span id="config"></span><h1>Configuration<a class="headerlink" href="#module-stompest.config" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="stompest.config.StompConfig">
-<em class="property">class </em><code class="descclassname">stompest.config.</code><code class="descname">StompConfig</code><span class="sig-paren">(</span><em>uri</em>, <em>login=None</em>, <em>passcode=None</em>, <em>version=None</em>, <em>check=True</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.config.StompConfig" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">stompest.config.</code><code class="descname">StompConfig</code><span class="sig-paren">(</span><em>uri</em>, <em>login=None</em>, <em>passcode=None</em>, <em>version=None</em>, <em>check=True</em>, <em>sslContext=None</em><span class="sig-paren">)</span><a class="headerlink" href="#stompest.config.StompConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is a container for those configuration options which are common to both clients (sync and async) and are needed to establish a STOMP connection. All parameters are available as attributes with the same name of this object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -98,6 +97,7 @@
 <li><strong>passcode</strong> &#8211; The passcode for the STOMP brokers. The default is <code class="xref py py-obj docutils literal"><span class="pre">None</span></code>, which means that no <strong>passcode</strong> header will be sent.</li>
 <li><strong>version</strong> &#8211; A valid STOMP protocol version, or <code class="xref py py-obj docutils literal"><span class="pre">None</span></code> (equivalent to the <code class="xref py py-attr docutils literal"><span class="pre">DEFAULT_VERSION</span></code> attribute of the <a class="reference internal" href="protocol.html#stompest.protocol.spec.StompSpec" title="stompest.protocol.spec.StompSpec"><code class="xref py py-class docutils literal"><span class="pre">StompSpec</span></code></a> class).</li>
 <li><strong>check</strong> &#8211; Decides whether the <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession" title="stompest.protocol.session.StompSession"><code class="xref py py-class docutils literal"><span class="pre">StompSession</span></code></a> object which is used to represent the STOMP sesion should be strict about the session&#8217;s state: (e.g., whether to allow calling the session&#8217;s <a class="reference internal" href="protocol.html#stompest.protocol.session.StompSession.send" title="stompest.protocol.session.StompSession.send"><code class="xref py py-meth docutils literal"><span class="pre">send()</span></code></a> when disconnected).</li>
+<li><strong>sslContext</strong> (<em>ssl.SSLContext</em>) &#8211; An SSL context to wrap around a TCP socket connection. This object is defined in the Python standard library: <a class="reference external" href="https://docs.python.org/3/library/ssl.html#ssl.SSLContext">ssl.SSLContext</a></li>
 </ul>
 </td>
 </tr>
@@ -110,6 +110,28 @@
 <div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">The <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompFailoverTransport" title="stompest.protocol.failover.StompFailoverTransport"><code class="xref py py-class docutils literal"><span class="pre">StompFailoverTransport</span></code></a> class which tells you which broker to use and how long you should wait to connect to it, the <a class="reference internal" href="protocol.html#stompest.protocol.failover.StompFailoverUri" title="stompest.protocol.failover.StompFailoverUri"><code class="xref py py-class docutils literal"><span class="pre">StompFailoverUri</span></code></a> which parses failover transport URIs.</p>
+</div>
+<p><em>SSL Example</em></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ssl</span>
+<span class="n">sslContext</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">(</span><span class="n">ssl</span><span class="o">.</span><span class="n">Purpose</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">)</span>
+<span class="c1"># It&#39;s good practice to disable insecure protocols by default. Note that</span>
+<span class="c1"># since Python 3.6, SSLv3 is disabled by default.</span>
+<span class="n">sslContext</span><span class="o">.</span><span class="n">options</span> <span class="o">|=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">OP_NO_TLSv1</span> <span class="o">|</span> <span class="n">ssl</span><span class="o">.</span><span class="n">OP_NO_TLSv1_1</span> <span class="o">|</span> <span class="n">ssl</span><span class="o">.</span><span class="n">OP_NO_SSLv3</span>
+
+<span class="c1"># For testing and development, it is often useful to disable host cert</span>
+<span class="c1"># validation, which requires *both* of the following settings.</span>
+<span class="n">sslContext</span><span class="o">.</span><span class="n">check_hostname</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">sslContext</span><span class="o">.</span><span class="n">verify_mode</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">CERT_NONE</span>
+
+<span class="c1"># Create the StompConfig as usual. Remember that for TLS/SSL, the URI should</span>
+<span class="c1"># begin with &quot;ssl&quot;</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">StompConfig</span><span class="p">(</span>
+    <span class="s1">&#39;ssl://host.com&#39;</span><span class="p">,</span>
+    <span class="n">login</span><span class="o">=</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+    <span class="n">passcode</span><span class="o">=</span><span class="s1">&#39;admin&#39;</span><span class="p">,</span>
+    <span class="n">sslContext</span><span class="o">=</span><span class="n">sslContext</span>
+<span class="p">)</span>
+</pre></div>
 </div>
 </dd></dl>
 
@@ -136,12 +158,12 @@
         <li class="right" >
           <a href="protocol.html" title="Protocol Layer"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.2.6</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">stompest documentation - v2.3.0</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Jan Müller.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
+        &#169; Copyright 2016, Jan Müller.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
     </div>
   </body>
 </html>
