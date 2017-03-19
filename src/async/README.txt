@@ -6,12 +6,12 @@ This package provides the asynchronous STOMP client based upon the `stompest <ht
 - destination-specific message and error handlers (with default "poison pill" error handling)
 - concurrent message processing
 - graceful shutdown, and connect, receipt, and disconnect timeouts
-- optional TLS/SSL support
+- optional TLS/SSL support (TLS support in Twisted must be activated via ``pip install 'twisted[tls]'``)
 
 Installation
 ============
 
-You may install this package in any of the following ways: ``easy_install stompest.async``, ``pip install stompest.async``, or ``python setup.py install``.
+You may install this package via ``pip install stompest.async`` or manually via ``python setup.py install``.
 
 Questions or Suggestions?
 =========================

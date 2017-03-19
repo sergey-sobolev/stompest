@@ -23,7 +23,7 @@ The asynchronous client is based on `Twisted <http://twistedmatrix.com/>`_, a ve
 Installation
 ============
 
-You may install this package in any of the following ways: ``easy_install stompest``, ``pip install stompest``, or ``python setup.py install``.
+You may install this package via ``pip install stompest`` or manually via ``python setup.py install``.
 
 Questions or Suggestions?
 =========================

@@ -21,17 +21,17 @@ TLS/SSL Consumer
 
 .. literalinclude:: ../../src/core/stompest/sync/examples/ssl_consumer.py
 
-An SSL producer would be configured in the same way.  The configuration
+An SSL producer would be configured in the same way. The configuration
 of an SSL-enabled ActiveMQ server is somewhat complicated. The config
-file for ActiveMQ, `activemq.xml`, must have the following additions:
+file for ActiveMQ, ``activemq.xml``, must have the following additions:
 
 .. code-block:: xml
 
     <!-- add this to the config file "activemq.xml" -->
     <sslContext>
         <sslContext
-            keyStore="file:/broker.ks" keyStorePassword="broker"
-            trustStore="file:/client.ts" trustStorePassword="broker"/>
+            keyStore="broker.ks" keyStorePassword="password"
+            trustStore="client.ts" trustStorePassword="password"/>
     </sslContext>
     <transportConnectors>
         <transportConnector name="stomp+ssl" uri="stomp+ssl://0.0.0.0:61612"/>
@@ -40,7 +40,7 @@ file for ActiveMQ, `activemq.xml`, must have the following additions:
 
 The SSL transport configuration (on port 61612) is shown alongside the standard
 STOMP configuration (on port 61613) for contrast. More about the required ActiveMQ setup,
-as well as instructions to generate the files `broker.ks` and `client.ts` may
+as well as instructions to generate the files ``broker.ks`` and ``client.ts`` may
 be found in the ActiveMQ documentation under
 `How do I use SSL <http://activemq.apache.org/how-do-i-use-ssl.html>`_.
 
