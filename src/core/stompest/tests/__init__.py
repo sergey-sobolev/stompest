@@ -1,5 +1,6 @@
 HOST = 'localhost'
 PORT = 61613
+PORT_SSL = 61612
 VERSION = '1.2'
 
 BROKER = 'activemq'

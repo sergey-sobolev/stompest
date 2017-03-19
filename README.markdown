@@ -6,7 +6,7 @@ stompest is a full-featured [STOMP](http://stomp.github.com/) [1.0](http://stomp
 * The `sync.Stomp` client is dead simple. It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want.
 * The `async.Stomp` client is based on [Twisted](http://twistedmatrix.com/), a very mature and powerful asynchronous programming framework. It supports destination specific message and error handlers (with default "poison pill" error handling), concurrent message processing, graceful shutdown, and connect and disconnect timeouts.
 
-Both clients make use of a generic set of components in the `protocol` module each of which can be used independently to roll your own STOMP client:
+Both clients support [TLS/SSL](https://en.wikipedia.org/wiki/Transport_Layer_Security) for secure connections to ActiveMQ, and both clients make use of a generic set of components in the `protocol` module, each of which can be used independently to roll your own STOMP client:
 
 * a wire-level STOMP frame parser `protocol.StompParser` and compiler `protocol.StompFrame`,
 
@@ -26,7 +26,26 @@ Installation
 
 Documentation & Code Examples
 =============================
+
 The stompest API is fully documented [here](http://nikipore.github.com/stompest/).
+
+Building
+--------
+
+To *build* the documentation, you'll need a source checkout, and then first install the documentation dependencies into your virtual environment:
+
+```
+(env) $ pip install -e .[doc]
+```
+
+Then you can build the documentation in the `doc/` directory:
+
+```
+(env) $ cd doc/
+(env) $ make html
+```
+
+The HTML documentation will be in the directory `doc/stompest-doc`.
 
 Questions or Suggestions?
 =========================

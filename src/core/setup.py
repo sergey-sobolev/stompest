@@ -29,6 +29,7 @@ setup(
     zip_safe=True,
     install_requires=[],
     tests_require=['mock'] if sys.version_info[0] == 2 else [],
+    extras_require={'doc': 'sphinx'},
     test_suite='stompest.tests',
     classifiers=[
         'Development Status :: 5 - Production/Stable',

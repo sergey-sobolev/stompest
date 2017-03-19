@@ -1,7 +1,7 @@
 stomp, stomper, stompest!
 =========================
 
-`stompest <https://github.com/nikipore/stompest/>`_ is a full-featured `STOMP <http://stomp.github.com/>`_ `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_, `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, and `1.2 <http://stomp.github.com//stomp-specification-1.2.html>`_ implementation for Python 2.7 and Python 3 (versions 3.3 and higher).
+`stompest <https://github.com/nikipore/stompest/>`_ is a full-featured `STOMP <http://stomp.github.com/>`_ `1.0 <http://stomp.github.com//stomp-specification-1.0.html>`_, `1.1 <http://stomp.github.com//stomp-specification-1.1.html>`_, and `1.2 <http://stomp.github.com//stomp-specification-1.2.html>`_ implementation for Python 2.7 and Python 3 (versions 3.3 and higher), with optional TLS/SSL support.
 
 The STOMP client in this package is dead simple: It does not assume anything about your concurrency model (thread vs process) or force you to use it any particular way. It gets out of your way and lets you do what you want. The package also consists of a generic set of components each of which you may use independently to roll your own STOMP client:
 
@@ -31,7 +31,7 @@ Feel free to `open an issue <https://github.com/nikipore/stompest/issues/>`_ or 
 
 Acknowledgements
 ================
-* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog/>`_ at `Mozes <http://www.mozes.com/>`_ and deployed in their production environment.
+* Version 1.x of stompest was written by `Roger Hoover <http://github.com/theduderog/>`_ at Mozes_ and deployed in their production environment.
 * Kudos to `Oisin Mulvihill <https://github.com/oisinmulvihill/>`_, the developer of `stomper <http://code.google.com/p/stomper/>`_! The idea of an abstract representation of the STOMP protocol lives on in stompest.
 
 Documentation & Code Examples

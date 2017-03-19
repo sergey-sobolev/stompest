@@ -35,7 +35,7 @@ class StompFailoverUriTest(unittest.TestCase):
 
     def test_configuration_invalid_uris(self):
         for uri in [
-            'ssl://localhost:61613', 'tcp://:61613', 'tcp://61613', 'tcp:localhost:61613', 'tcp:/localhost',
+            'tcp://:61613', 'tcp://61613', 'tcp:localhost:61613', 'tcp:/localhost',
             'tcp://localhost:', 'tcp://localhost:a', 'tcp://localhost:61613?randomize=1', 'tcp://localhost:61613?randomize=True',
             'tcp://localhost:61613??=False', 'tcp://localhost:61613?a=False', 'tcp://localhost:61613?maxReconnectDelay=False'
             'failover:(tcp://primary:61616, tcp://secondary:61616)', 'failover:tcp://primary:61616, tcp://secondary:61616',
