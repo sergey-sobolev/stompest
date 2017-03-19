@@ -1,7 +1,12 @@
 stomp, stomper, stompest!
 =========================
 
-This package provides the asynchronous STOMP client based upon the `stompest <https://pypi.python.org/pypi/stompest/>`_ library. It leverages the power of `Twisted <http://twistedmatrix.com/>`_, a very mature and powerful asynchronous programming framework. The client supports destination specific message and error handlers (with default "poison pill" error handling), concurrent message processing, graceful shutdown, and connect, receipt, and disconnect timeouts.
+This package provides the asynchronous STOMP client based upon the `stompest <https://pypi.python.org/pypi/stompest/>`_ library. It leverages the power of `Twisted <http://twistedmatrix.com/>`_, a very mature and powerful asynchronous programming framework. The client supports
+
+- destination-specific message and error handlers (with default "poison pill" error handling)
+- concurrent message processing
+- graceful shutdown, and connect, receipt, and disconnect timeouts
+- optional TLS/SSL support
 
 Installation
 ============
