@@ -29,12 +29,9 @@ setup(
     zip_safe=True,
     install_requires=[
         'stompest==%s' % FULL_VERSION
-        , 'twisted>=16.4.0'
+        , 'twisted[tls] >= 16.4.0'
     ],
-    tests_require=(['mock'] if sys.version_info[0] == 2 else []) + [
-        'pyopenssl'
-        , 'service_identity'
-    ],
+    tests_require=['mock'] if sys.version_info[0] == 2 else [],
     test_suite='stompest.async.tests',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
