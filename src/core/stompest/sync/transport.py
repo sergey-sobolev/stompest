@@ -5,6 +5,7 @@ import select # @UnresolvedImport
 import socket
 import time
 
+import sys
 from stompest._backwards import binaryType
 from stompest.error import StompConnectionError
 from stompest.protocol import StompParser
@@ -26,6 +27,12 @@ class StompFrameTransport(object):
         return '%s:%d' % (self.host, self.port)
 
     def canRead(self, timeout=None):
+        def retry():
+            if timeout is None:
+                return self.canRead()
+
+            return self.canRead(max(0, timeout - (time.time() - startTime)))
+
         self._check()
         if self._parser.canRead():
             return True
@@ -36,13 +43,21 @@ class StompFrameTransport(object):
                 files, _, _ = select.select([self._socket], [], [])
             else:
                 files, _, _ = select.select([self._socket], [], [], timeout)
-        except select.error as code:
-            if code == errno.EINTR:
-                if timeout is None:
-                    return self.canRead()
-                else:
-                    return self.canRead(max(0, timeout - (time.time() - startTime)))
+        except OSError as e:
+            # In Python 3.5+, select itself handles retries on EINTR so this
+            # error should never be raised spuriously. We hence don't want to
+            # mask it for those versions, only for older versions.
+            if e.errno == errno.EINTR and sys.version_info[:2] <= (3, 4):
+                return retry()
             raise
+        except select.error as e:
+            # In Python 3 select.error is just a alias for OSError so this clause
+            # should only apply to Python 2.
+            code, _ = e
+            if code == errno.EINTR:
+                return retry()
+            raise
+
         return bool(files)
 
     def connect(self, timeout=None):
