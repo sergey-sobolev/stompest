@@ -4,6 +4,7 @@ import logging
 import select # @UnresolvedImport
 import unittest
 
+import sys
 from stompest._backwards import binaryType, makeBytesFromSequence
 from stompest.error import StompConnectionError
 from stompest.protocol import StompFrame, StompSpec
@@ -15,6 +16,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 HOST = 'fakeHost'
 PORT = 61613
+PY_VERSION = sys.version_info[:2]
+
 
 class StompFrameTransportTest(unittest.TestCase):
     def _generate_bytes(self, stream):
@@ -123,17 +126,49 @@ class StompFrameTransportTest(unittest.TestCase):
         self.assertRaises(StompConnectionError, transport.receive)
         self.assertEqual(transport._socket, None)
 
-    @mock.patch('select.select')
-    def _test_can_connect_eintr_retries_connection(self, select_call):
-        select_call.return_value = (mock.Mock(), mock.Mock(), mock.Mock())
-        transport = self._get_receive_mock(b'test')
-        def raise_eintr_once(*args): # @UnusedVariable
-            select_call.side_effect = None
-            raise select.error(4, 'Interrupted system call')
-        select_call.side_effect = raise_eintr_once
+    def test_retry_eintr_once_on_python2(self):
+        if PY_VERSION[0] == 2:
+            def raise_eintr():
+                raise select.error(4, 'Interrupted system call')
 
-        transport.canRead()
-        self.assertEqual(2, select_call.call_count)
+            self.check_eintr_behaviour(raise_eintr, 1)
+
+    def test_retry_eintr_once_on_python33_and_python34(self):
+        if (3, 3) <= PY_VERSION < (3, 5):
+            expected_retries = 0
+            if sys.version_info[:2] <= (3, 4):
+                expected_retries = 1
+
+            self.check_eintr_behaviour(raise_os_error, expected_retries)
+
+    def test_dont_retry_eintr_on_python_35_plus(self):
+        if PY_VERSION >= (3, 5):
+            raised = False
+            try:
+                self.check_eintr_behaviour(raise_os_error, 0)
+            except Exception as e:
+                raised = True
+
+            self.assertTrue(raised)
+
+    def check_eintr_behaviour(self, raise_fn, expected_retry_count):
+        with mock.patch('select.select') as select_call:
+            def side_effect(*_):
+                select_call.side_effect = None
+                raise_fn()
+
+            select_call.return_value = (mock.Mock(), mock.Mock(), mock.Mock())
+            select_call.side_effect = side_effect
+            transport = self._get_receive_mock(b'test')
+            transport.canRead()
+            self.assertEqual(1 + expected_retry_count, select_call.call_count)
+
+
+def raise_os_error():
+    e = OSError()
+    e.errno = 4
+    raise e
+
 
 if __name__ == '__main__':
     unittest.main()
