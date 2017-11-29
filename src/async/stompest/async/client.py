@@ -94,6 +94,8 @@ class Stomp(object):
     @property
     def disconnected(self):
         """This :class:`twisted.internet.defer.Deferred` calls back when the connection to the broker was lost. It will err back when the connection loss was unexpected or caused by another error.
+
+        For example, if the client receives an **ERROR** frame, this :class:`twisted.internet.defer.Deferred` will errback with a :class:`~.stompest.error.StompProtocolError` describing the **ERROR** frame. (In that case, you can access the entire :class:`~.StompFrame` with the :attr:`frame` attribute of the error, to access the full headers and body from the server.)
         """
         return self._disconnected
 

@@ -9,7 +9,7 @@ from stompest.async import Stomp
 from stompest.async.listener import SubscriptionListener
 from stompest.config import StompConfig
 from stompest.error import StompCancelledError, StompConnectionError, StompProtocolError
-from stompest.protocol import StompSpec
+from stompest.protocol import StompSpec, StompFrame
 
 from .broker_simulator import BlackHoleStompServer, ErrorOnConnectStompServer, ErrorOnSendStompServer, RemoteControlViaFrameStompServer
 
@@ -113,8 +113,8 @@ class AsyncClientErrorAfterConnectedTestCase(AsyncClientBaseTestCase):
         client.send('/queue/fake', b'fake message')
         try:
             yield client.disconnected
-        except StompProtocolError:
-            pass
+        except StompProtocolError as e:
+            self.assertTrue(isinstance(e.frame, StompFrame))
         else:
             raise Exception('Expected a StompProtocolError, but nothing was raised.')
 

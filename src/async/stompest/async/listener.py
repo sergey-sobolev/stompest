@@ -80,7 +80,9 @@ class ConnectListener(Listener):
 class ErrorListener(Listener):
     """Handles **ERROR** frames."""
     def onError(self, connection, frame):
-        connection.disconnect(reason=StompProtocolError('Received %s' % frame.info()))
+        reason = StompProtocolError('Received %s' % frame.info())
+        reason.frame = frame
+        connection.disconnect(reason=reason)
 
     def onConnectionLost(self, connection, reason): # @UnusedVariable
         connection.remove(self)
