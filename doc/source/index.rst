@@ -9,6 +9,7 @@ Contents
     protocol
     config
     error
+    developing
 
 .. include:: readme.txt
 
