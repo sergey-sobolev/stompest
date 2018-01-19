@@ -101,6 +101,19 @@ Acknowledgements
 * Version 1.x of stompest was written by [Roger Hoover (@theduderog)](http://github.com/theduderog) at [Mozes](http://www.mozes.com/) and deployed in their production environment.
 * Kudos to [Oisin Mulvihill](https://github.com/oisinmulvihill), the developer of [stomper] (https://github.com/oisinmulvihill/stomper)! His idea of an abstract representation of the STOMP protocol lives on in stompest.
 
+Anyone willing to take over this project?
+=========================================
+I am no longer using stompest actively, because I have moved on inside my enterprise —
+ which still uses stompest in production but has no-one with both the skill and time to maintain it — to a non-coding strategic/leadership position. Therefore, it is more of a hobby, and I have to rebuild my coding, testing and building environment from scratch every few months which rather sucks.
+
+A few random thoughts:
+
+0. I still do accept (and test) pull requests and bugfixes (if they come with complete and working unit and integration tests), but the Python 3 port was my last big effort for stompest.
+1. I believe that fully implementing the (half-complete) SSL/TLS capability is the most urgent enhancement because apart of that I consider stompest pretty much feature complete and very stable up to Python 3.6; the rate of newly discovered bugs is very low indeed.
+2. For Python 3.7, the `stompest.async` package must be renamed; I believe `stompest.twisted` would be appropriate. If someone creates a pull request, I'll test it and rename the PyPI package accordingly.
+3. A port of the Twisted client to `asyncio` would make a lot of sense. If someone creates a pull request, I'll test it and create a new PyPI package.
+4. If someone would like to take over the project, please let me know. I would actively consult as an *éminence grise*.
+
 To Do
 =====
 * see [proposed enhancements](https://github.com/nikipore/stompest/issues?labels=enhancement&state=open)
