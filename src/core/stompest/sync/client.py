@@ -136,11 +136,7 @@ class Stomp(object):
         frame = self.session.connect(self._config.login, self._config.passcode, headers, versions, host, heartBeats)
         self.sendFrame(frame)
         if not self.canRead(timeout):
-            try:
-                self.session.disconnect()
-            except:
-                # Ignore disconnect attempt errors, since we may be in a bad state
-                pass
+            self.session.close()
             raise StompProtocolError('STOMP session connect failed [timeout=%s]' % timeout)
         frame = self.receiveFrame()
         self.session.connected(frame)
