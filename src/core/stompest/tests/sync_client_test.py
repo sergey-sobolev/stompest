@@ -3,7 +3,7 @@ import unittest
 
 from stompest.config import StompConfig
 from stompest.error import StompConnectionError, StompProtocolError
-from stompest.protocol import commands, StompFrame, StompSpec
+from stompest.protocol import commands, StompFrame, StompSpec, StompSession
 from stompest.sync import Stomp
 
 from stompest.tests import mock
@@ -33,6 +33,15 @@ class SimpleStompTest(unittest.TestCase):
             transport.receive.return_value = receive
         return stomp
 
+    def _get_timeouting_connect_mock(self):
+        stomp = Stomp(CONFIG)
+        stomp._transportFactory = mock.Mock()
+        transport = stomp._transportFactory.return_value = mock.Mock()
+        transport.host = 'mock'
+        transport.port = 0
+        transport.canRead.return_value = False
+        return stomp
+
     def test_receiveFrame(self):
         frame_ = StompFrame(StompSpec.MESSAGE, {'x': 'y'}, b'testing 1 2 3')
         stomp = self._get_transport_mock(frame_)
@@ -55,6 +64,17 @@ class SimpleStompTest(unittest.TestCase):
     def test_disconnect_raises_exception_before_connect(self):
         stomp = Stomp(CONFIG)
         self.assertRaises(Exception, stomp.disconnect)
+
+    def test_connect_raises_exception_for_bad_host(self):
+        stomp = Stomp(StompConfig('tcp://nosuchhost:2345'))
+        self.assertRaises(Exception, stomp.connect)
+
+    def test_closes_session_on_read_timeout_during_connect(self):
+        stomp = self._get_timeouting_connect_mock()
+        with mock.patch.object(StompSession, "close") as close_mock:
+            self.assertRaises(Exception, stomp.connect)
+        close_mock.assert_called_once()
+
 
     def test_connect_raises_exception_for_bad_host(self):
         stomp = Stomp(StompConfig('tcp://nosuchhost:2345'))
