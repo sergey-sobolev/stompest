@@ -38,12 +38,40 @@ are enabled::
             <transportConnector name="stomp+ssl" uri="stomp+ssl://0.0.0.0:61612"/>
         <transportConnectors>
 
+There should also be configured keystore for ssl context:
+<broker>
+...
+    <sslContext>
+        <sslContext keyStore="file:${activemq.base}/conf/broker.ks"
+                    keyStorePassword="none123"/>
+    </sslContext>
+...
+</broker>
+
+And the test user access (otherwise tests will fail being unable to connect or create topics):
+<broker>
+...
+        <plugins>
+                <simpleAuthenticationPlugin anonymousAccessAllowed="true" anonymousUser="test" anonymousGroup="test">
+                        <users>
+                                <authenticationUser username="system" password="manager" groups="users,admins"/>
+                                <authenticationUser username="user" password="password" groups="users"/>
+                                <authenticationUser username="guest" password="password" groups="guests"/>
+                                <authenticationUser username="test" password="test" groups="users"/>
+                         </users>
+                 </simpleAuthenticationPlugin>
+         </plugins>
+...
+</broker>
+
+
 Start the activemq service::
 
   sudo /opt/apache-activemq-5.15.2/bin/activemq start
 
 You should see the activemq service listening on the two ports (61612 for SSL
 and 61613 for plaintext).
+
 
 Getting Stompest from Git
 -------------------------
