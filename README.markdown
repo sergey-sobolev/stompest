@@ -85,7 +85,7 @@ Clients
 * Built on top of the abstract layers, the synchronous client adds a TCP connection and a synchronous API.
 * The concurrency scheme (synchronous, threaded, ...) is free to choose by the user.
 
-`async`
+`twisted`
 -------
 * Based on the Twisted asynchronous framework.
 * Fully unit-tested including a simulated STOMP broker.
