@@ -85,7 +85,7 @@ tests to reflect this. You can run your single test while you develop.
 
 ::
 
-  python -m unittest stompest.async.tests.async_client_test.AsyncClientConnectErrorTestCase
+  python -m unittest stompest.twisted.tests.twisted_client_test.twistedClientConnectErrorTestCase
 
 This allows you to test only the specific code you may be editing.
 

@@ -3,9 +3,9 @@
 Asynchronous Client
 ===================
 
-.. automodule:: stompest.async.client
+.. automodule:: stompest.twisted.client
 	:members:
 
-.. automodule:: stompest.async.listener
+.. automodule:: stompest.twisted.listener
 	:members:
 	

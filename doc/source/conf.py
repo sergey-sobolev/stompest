@@ -18,9 +18,9 @@ for path in ('async', 'core'):
 import stompest
 import stompest.sync
 import stompest.sync.examples
-import stompest.async
-import stompest.async.examples
-import stompest.async.listener
+import stompest.twisted
+import stompest.twisted.examples
+import stompest.twisted.listener
 import stompest.config
 import stompest.protocol
 import stompest.error
